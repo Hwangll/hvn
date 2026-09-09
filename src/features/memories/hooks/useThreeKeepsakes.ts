@@ -2,12 +2,43 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import type { KeepsakeId } from "../model/keepsakes";
 
+export type KeepsakeTheme = "blush" | "night";
+
 interface UseThreeKeepsakesOptions {
   reducedMotion: boolean;
   selectedId: KeepsakeId;
   unlockedIds: KeepsakeId[];
   onSelect: (id: KeepsakeId) => void;
+  /** Part I opens a blush keepsake box; Part II shows the same box under a blue-hour light. */
+  theme?: KeepsakeTheme;
 }
+
+interface ScenePalette {
+  background: number;
+  sky: number;
+  ground: number;
+  key: number;
+  accentLight: number;
+  floor: number;
+  wall: number;
+  arch: number;
+  petal: number;
+  petalCenter: number;
+  sparkles: number[];
+}
+
+const scenePalettes: Record<KeepsakeTheme, ScenePalette> = {
+  blush: {
+    background: 0xffedf5, sky: 0xffffff, ground: 0xff9fbd, key: 0xffffff, accentLight: 0xff7dab,
+    floor: 0xffd5e3, wall: 0xffe9f2, arch: 0xff9fbd, petal: 0xffa8c7, petalCenter: 0xffd84f,
+    sparkles: [0xff4f93, 0xffa8c7, 0xffd84f, 0xffffff],
+  },
+  night: {
+    background: 0x0b1e38, sky: 0xdfe9ff, ground: 0x143458, key: 0xeaf2ff, accentLight: 0x8bcbd8,
+    floor: 0x0f2846, wall: 0x0d2540, arch: 0x8bcbd8, petal: 0x9fd3ea, petalCenter: 0xfff4cc,
+    sparkles: [0xa8ddeb, 0xdcecf7, 0xfff4cc, 0xffffff],
+  },
+};
 
 interface KeepsakeObject extends THREE.Group {
   userData: {
@@ -33,7 +64,7 @@ const keepsakeColors = {
   shadow: 0xd36b96,
 };
 
-export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSelect }: UseThreeKeepsakesOptions) {
+export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSelect, theme = "blush" }: UseThreeKeepsakesOptions) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const selectedRef = useRef(selectedId);
   const unlockedIdsRef = useRef(unlockedIds);
@@ -64,8 +95,9 @@ export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSe
 
     let unsupportedTimer = 0;
 
+    const palette = scenePalettes[theme];
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xffedf5);
+    scene.background = new THREE.Color(palette.background);
 
     const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
     camera.position.set(0, 2.55, 6.25);
@@ -86,31 +118,31 @@ export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSe
     renderer.shadowMap.type = THREE.PCFShadowMap;
     container.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.HemisphereLight(0xffffff, 0xff9fbd, 3.4);
-    const keyLight = new THREE.DirectionalLight(0xffffff, 3.4);
+    const ambientLight = new THREE.HemisphereLight(palette.sky, palette.ground, theme === "night" ? 2.4 : 3.4);
+    const keyLight = new THREE.DirectionalLight(palette.key, theme === "night" ? 3 : 3.4);
     keyLight.position.set(2.8, 5.4, 3.6);
     keyLight.castShadow = true;
-    const blushLight = new THREE.PointLight(0xff7dab, 2.6, 14);
+    const blushLight = new THREE.PointLight(palette.accentLight, theme === "night" ? 3.2 : 2.6, 14);
     blushLight.position.set(-3, 2.2, 2.8);
     scene.add(ambientLight, keyLight, blushLight);
 
-    const backdrop = makeBackdrop();
+    const backdrop = makeBackdrop(palette);
     scene.add(backdrop);
 
     const floor = new THREE.Mesh(
       new THREE.CylinderGeometry(3.25, 3.75, 0.24, 80),
-      new THREE.MeshPhysicalMaterial({ color: keepsakeColors.blush, roughness: 0.72, clearcoat: 0.18, clearcoatRoughness: 0.65 }),
+      new THREE.MeshPhysicalMaterial({ color: palette.floor, roughness: theme === "night" ? 0.42 : 0.72, clearcoat: theme === "night" ? 0.6 : 0.18, clearcoatRoughness: theme === "night" ? 0.3 : 0.65 }),
     );
     floor.position.y = -1.05;
     floor.receiveShadow = true;
     scene.add(floor);
-    scene.add(makeDeskDetails());
+    scene.add(makeDeskDetails(palette));
 
     const keepsakeObjects = createKeepsakes();
     const displayGroup = new THREE.Group();
     displayGroup.scale.setScalar(1.12);
     keepsakeObjects.forEach((object) => displayGroup.add(object));
-    const selectionSparkles = makeSelectionSparkles();
+    const selectionSparkles = makeSelectionSparkles(palette.sparkles);
     displayGroup.add(selectionSparkles);
     scene.add(displayGroup);
 
@@ -236,28 +268,33 @@ export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSe
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [reducedMotion, supported]);
+  }, [reducedMotion, supported, theme]);
 
   return { containerRef, supported: supported && !reducedMotion };
 }
 
 function createKeepsakes(): KeepsakeObject[] {
   return [
-    makeBouquet(-1.55, 0.08, -0.15),
-    makeEnvelope(-0.92, -0.34, 0.7),
-    makeHeart(-0.08, 0.08, -0.55),
-    makeCandle(0.62, -0.38, 0.2),
-    makePolaroid(1.34, -0.12, 0.74),
-    makeStar(2, 0.48, 0.22),
+    makeBouquet(-1.8, 0.18, -0.15),
+    makeEnvelope(-1.15, -0.3, 0.68),
+    makeHeart(-0.42, 0.08, -0.5),
+    makeCandle(0.32, -0.34, 0.22),
+    makePolaroid(1.05, -0.1, 0.7),
+    makeStar(1.82, 0.45, 0.2),
+    makePairFrame(-1.62, 0.2, -1.12),
+    makeDateCard(-0.82, -0.25, -1.05),
+    makeAquariumTicket(0, 0.24, -1.08),
+    makeCafeCup(0.86, -0.26, -1.02),
+    makeSunsetPhoto(1.66, 0.16, -1.08),
   ];
 }
 
-function makeBackdrop(): THREE.Group {
+function makeBackdrop(palette: ScenePalette): THREE.Group {
   const group = new THREE.Group();
   const wall = makeMesh(
     "star",
     new THREE.BoxGeometry(7.5, 4.2, 0.12),
-    new THREE.MeshBasicMaterial({ color: 0xffe9f2 }),
+    new THREE.MeshBasicMaterial({ color: palette.wall }),
     [0, 1.05, -2.15],
   );
   wall.receiveShadow = true;
@@ -266,14 +303,14 @@ function makeBackdrop(): THREE.Group {
   const arch = makeMesh(
     "star",
     new THREE.TorusGeometry(1.9, 0.03, 10, 80, Math.PI),
-    new THREE.MeshBasicMaterial({ color: 0xff9fbd }),
+    new THREE.MeshBasicMaterial({ color: palette.arch }),
     [0.05, 0.65, -2.05],
   );
   arch.rotation.z = Math.PI;
   group.add(arch);
 
   for (let i = 0; i < 12; i += 1) {
-    const flower = makeFlower("star", makePhysical(keepsakeColors.pinkSoft, 0.62), makePhysical(keepsakeColors.butter, 0.5), 0.07);
+    const flower = makeFlower("star", makePhysical(palette.petal, 0.62), makePhysical(palette.petalCenter, 0.5), 0.07);
     const angle = (i / 12) * Math.PI * 2;
     flower.position.set(Math.cos(angle) * 2.6, 1.25 + Math.sin(angle * 1.7) * 0.45, -1.98);
     flower.rotation.z = angle;
@@ -282,7 +319,7 @@ function makeBackdrop(): THREE.Group {
   return group;
 }
 
-function makeDeskDetails(): THREE.Group {
+function makeDeskDetails(palette: ScenePalette): THREE.Group {
   const group = new THREE.Group();
   const paperMaterial = makePhysical(0xfffbf2, 0.78);
   const tapeMaterial = makePhysical(0xffd84f, 0.55);
@@ -305,7 +342,7 @@ function makeDeskDetails(): THREE.Group {
     const petal = makeMesh(
       "star",
       new THREE.SphereGeometry(0.055, 12, 8),
-      makePhysical(i % 2 === 0 ? keepsakeColors.pink : keepsakeColors.pinkSoft, 0.5),
+      makePhysical(i % 2 === 0 ? palette.sparkles[0] : palette.petal, 0.5),
       [-2.2 + i * 0.46, -0.82, -0.78 + Math.sin(i) * 0.12],
     );
     petal.scale.set(1, 0.48, 0.16);
@@ -316,10 +353,9 @@ function makeDeskDetails(): THREE.Group {
   return group;
 }
 
-function makeSelectionSparkles(): THREE.Group {
+function makeSelectionSparkles(sparkleColors: number[]): THREE.Group {
   const group = new THREE.Group();
   group.visible = false;
-  const sparkleColors = [keepsakeColors.pink, keepsakeColors.pinkSoft, keepsakeColors.butter, 0xffffff];
 
   for (let i = 0; i < 22; i += 1) {
     const isPetal = i % 3 !== 0;
@@ -649,6 +685,71 @@ function makeStar(x: number, y: number, z: number): KeepsakeObject {
   const sparkle = makeMesh("star", new THREE.SphereGeometry(0.08, 14, 8), makePhysical(0xffffff, 0.2), [-0.08, 0.1, 0.15]);
   sparkle.scale.set(1, 0.55, 0.25);
   group.add(sparkle);
+  return group;
+}
+
+function makePairFrame(x: number, y: number, z: number): KeepsakeObject {
+  const id: KeepsakeId = "pair-frame";
+  const group = makeGroup(id, [x, y, z], 0.005, 0.72);
+  addSelectionHalo(group, id);
+  const frame = makeRoundedMesh(id, 1.25, 0.86, 0.07, 0.11, makePhysical(0xfff4df, 0.54));
+  const leftPhoto = makeRoundedMesh(id, 0.46, 0.58, 0.04, 0.035, makePhysical(0xffbed4, 0.52), [-0.28, 0.03, 0.1]);
+  const rightPhoto = makeRoundedMesh(id, 0.46, 0.58, 0.04, 0.035, makePhysical(0xafdfff, 0.52), [0.28, 0.03, 0.1]);
+  group.add(frame, leftPhoto, rightPhoto);
+  setRestingRotation(group, [-0.05, 0.18, -0.08]);
+  return group;
+}
+
+function makeDateCard(x: number, y: number, z: number): KeepsakeObject {
+  const id: KeepsakeId = "date-card";
+  const group = makeGroup(id, [x, y, z], 0.004, 0.72);
+  addSelectionHalo(group, id);
+  const card = makeRoundedMesh(id, 0.98, 0.92, 0.07, 0.08, makePhysical(0xfffbef, 0.62));
+  const header = makeRoundedMesh(id, 0.82, 0.2, 0.04, 0.025, makePhysical(0xff9fbd, 0.5), [0, 0.28, 0.08]);
+  group.add(card, header);
+  for (let index = 0; index < 3; index += 1) {
+    const dot = makeMesh(id, new THREE.SphereGeometry(0.055, 12, 8), makePhysical(index === 1 ? 0xff7dab : 0xffd5e3, 0.5), [-0.25 + index * 0.25, -0.06, 0.1]);
+    group.add(dot);
+  }
+  setRestingRotation(group, [-0.02, -0.16, 0.08]);
+  return group;
+}
+
+function makeAquariumTicket(x: number, y: number, z: number): KeepsakeObject {
+  const id: KeepsakeId = "aquarium-ticket";
+  const group = makeGroup(id, [x, y, z], 0.005, 0.68);
+  addSelectionHalo(group, id);
+  const ticket = makeRoundedMesh(id, 1.22, 0.62, 0.08, 0.08, makePhysical(0x8bd4ef, 0.5));
+  const stripe = makeRoundedMesh(id, 0.72, 0.08, 0.025, 0.025, makePhysical(0xfff5ca, 0.48), [0.12, 0.05, 0.08]);
+  const bubble = makeMesh(id, new THREE.TorusGeometry(0.13, 0.025, 10, 28), makePhysical(0xdff7ff, 0.3), [-0.35, 0.02, 0.1]);
+  group.add(ticket, stripe, bubble);
+  setRestingRotation(group, [0.04, 0.16, -0.06]);
+  return group;
+}
+
+function makeCafeCup(x: number, y: number, z: number): KeepsakeObject {
+  const id: KeepsakeId = "cafe-cup";
+  const group = makeGroup(id, [x, y, z], 0.004, 0.72);
+  addSelectionHalo(group, id);
+  const cup = makeMesh(id, new THREE.CylinderGeometry(0.34, 0.28, 0.62, 36), makePhysical(0xfff3df, 0.45));
+  const coffee = makeMesh(id, new THREE.CylinderGeometry(0.27, 0.27, 0.025, 32), makePhysical(0x8b5d45, 0.6), [0, 0.31, 0]);
+  const handle = makeMesh(id, new THREE.TorusGeometry(0.23, 0.055, 10, 28, Math.PI * 1.55), makePhysical(0xfff3df, 0.45), [0.34, 0.03, 0]);
+  handle.rotation.z = Math.PI / 2;
+  const saucer = makeMesh(id, new THREE.CylinderGeometry(0.5, 0.54, 0.055, 40), makePhysical(0xffd9c8, 0.56), [0, -0.34, 0]);
+  group.add(cup, coffee, handle, saucer);
+  return group;
+}
+
+function makeSunsetPhoto(x: number, y: number, z: number): KeepsakeObject {
+  const id: KeepsakeId = "sunset-photo";
+  const group = makeGroup(id, [x, y, z], 0.006, 0.68);
+  addSelectionHalo(group, id);
+  const frame = makeRoundedMesh(id, 0.88, 1.08, 0.055, 0.08, makePhysical(0xfffdf8, 0.5));
+  const sky = makeRoundedMesh(id, 0.7, 0.65, 0.035, 0.035, makePhysical(0xf7a889, 0.48), [0, 0.17, 0.08]);
+  const sun = makeMesh(id, new THREE.SphereGeometry(0.12, 18, 12), new THREE.MeshStandardMaterial({ color: 0xffe09b, emissive: 0xffbd75, emissiveIntensity: 0.6 }), [0.18, 0.22, 0.14]);
+  const horizon = makeRoundedMesh(id, 0.64, 0.1, 0.03, 0.02, makePhysical(0xa978a2, 0.55), [0, -0.02, 0.13]);
+  group.add(frame, sky, sun, horizon);
+  setRestingRotation(group, [-0.03, -0.2, 0.08]);
   return group;
 }
 

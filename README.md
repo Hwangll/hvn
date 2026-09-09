@@ -1,6 +1,11 @@
-# Hát và Nờ
+# Hát Và Nờ
 
-Interactive scrollytelling website kể lại hành trình hai người gặp nhau, mất kết nối, va lại vào nhau và chọn đồng hành ở thời điểm khó nhất.
+Interactive scrollytelling website kể lại hành trình hai người gặp nhau qua màn hình, mất kết nối, va lại vào nhau, rồi bắt đầu có những kỷ niệm cùng nhau ngoài đời.
+
+Website được build thành hai trang riêng:
+
+- `/`: Phần I — Trước khi gặp nhau, gồm intro/phòng ký ức và 5 chương đầu.
+- `/part-2/`: Phần II — Thật sự đứng cạnh nhau, gồm lần gặp trực tiếp, những buổi hẹn và ngày thủy cung → café → hoàng hôn.
 
 ## Tech Stack
 
@@ -32,15 +37,22 @@ npm run build
 
 ## Sửa Nội Dung
 
-Toàn bộ nội dung chính nằm ở `src/features/story/data/story.ts`.
+Toàn bộ nội dung chính nằm ở `src/features/story/data/story.ts`. `storyParts` chia câu chuyện thành hai phần; `partTwoChapters` là nơi thêm dữ liệu cho lần gặp trực tiếp, các buổi hẹn và ngày đi thủy cung — café — ngắm hoàng hôn.
 
-Mỗi chapter có `id`, `year`, `title`, `shortTitle`, `paragraphs`, `quote`, `mood`, `accent`, `image`, `imageAlt`, `alignment`, `optionalSound` và `threadState`. Thay chữ trong file này là UI tự cập nhật.
+Mỗi chapter có `id`, `year`, `title`, `shortTitle`, `paragraphs`, `quote`, `mood`, `accent`, `image`, `imageAlt`, `alignment`, `optionalSound` và `threadState`. Chương có nhiều cảnh dùng thêm `scenes`; mỗi cảnh cũng có `id` ổn định để theo dõi active/visited và mở đúng kỷ vật.
+
+Để bổ sung dữ liệu thật cho Phần II:
+
+- Điền ngày/năm vào `year` khi đã xác nhận.
+- Thêm đường dẫn ảnh vào `image`; thêm ảnh album bằng các phần tử `{ src, alt, caption }` trong `gallery`.
+- Xóa `imageNote` hoặc `placeholderNote` tương ứng khi đã có ảnh thật.
+- Thêm `secretNote` nếu có nội dung bí mật thật; không cần tạo placeholder cho lời thoại chưa có.
 
 ## Thay Ảnh
 
 Ảnh thật đang nằm ở `public/images/story/lover`. Bộ ảnh đã được đặt tên theo mood/khoảnh khắc như `mirror-cardigan.jpg`, `polka-peace.jpg`, `bear-close.png`, `flower-peace.jpg`, `plush-moments.jpg` để dễ gắn vào từng chapter.
 
-Muốn đổi ảnh cho từng chapter thì cập nhật `image` và `imageAlt` trong `src/features/story/data/story.ts`.
+Muốn đổi ảnh cho từng chapter/cảnh thì cập nhật `image`, `imageAlt` và `gallery` trong `src/features/story/data/story.ts`.
 
 Nếu ảnh thiếu hoặc lỗi, component `PolaroidPhoto` sẽ hiện placeholder thay thế. Xem thêm `public/images/README.md`.
 
@@ -73,9 +85,9 @@ Các SFX hiện có trong `public/audio`:
 
 ## Cách Scrollama Và GSAP Phối Hợp
 
-Scrollama chỉ quản lý state chapter active qua `useActiveStoryStep`. Khi active chapter đổi, `StickyVisual` đổi mood, visual và ảnh. GSAP/ScrollTrigger nằm trong `useScrollAnimation`, dùng cho reveal animation của các khối nội dung và được `@gsap/react` cleanup tự động.
+Scrollama chỉ quản lý state item active qua stable ID trong `useActiveStoryStep`. Khi active chapter/cảnh đổi, `StickyMemoryStage` đổi mood, visual và ảnh; một `Set` visited độc lập giữ lịch sử mở kỷ vật nên jump navigation không tự đánh dấu các đoạn bị bỏ qua. GSAP/ScrollTrigger nằm trong `useScrollAnimation`, dùng cho reveal animation của các khối nội dung và được `@gsap/react` cleanup tự động.
 
-Lenis chỉ làm smooth scroll; khi `prefers-reduced-motion: reduce`, Lenis không khởi tạo, Scrollama bị bỏ qua và nội dung đọc như một trang tuyến tính.
+Lenis chỉ làm smooth scroll; khi `prefers-reduced-motion: reduce`, Lenis và reveal animation không chạy, còn nội dung vẫn đọc tuyến tính và state active vẫn theo đúng vị trí cuộn.
 
 ## Cấu Trúc Chính
 
@@ -101,6 +113,8 @@ npm run build
 ```
 
 Import repo vào Vercel, framework preset là Vite, output directory là `dist`.
+
+Vite đang dùng multi-page input trong `vite.config.ts`, vì vậy build tạo cả `dist/index.html` và `dist/part-2/index.html`.
 
 Netlify:
 

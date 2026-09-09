@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { heroPhotos, introCopy } from "../../story/data/story";
 import { BlossomSprig } from "../../../shared/components/visuals/BlossomSprig";
@@ -36,10 +36,16 @@ export function StoryIntro({ reducedMotion }: StoryIntroProps) {
             ))}
           </h1>
           <p className="intro-subtitle">{introCopy.subtitle}</p>
-          <a className="scroll-hint" href="#keepsake-title">
-            <ChevronDown aria-hidden="true" size={18} />
-            {introCopy.hint}
-          </a>
+          <div className="intro-actions">
+            <a className="scroll-hint" href="#keepsake-title">
+              <ChevronDown aria-hidden="true" size={18} />
+              {introCopy.hint}
+            </a>
+            <a className="intro-part-two-link" href="/part-2/">
+              Đọc nhanh Phần II
+              <ArrowRight aria-hidden="true" size={18} />
+            </a>
+          </div>
         </div>
 
         <div className="intro-photo-booth" aria-label="Ảnh kỷ niệm nổi bật">

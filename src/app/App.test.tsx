@@ -9,9 +9,11 @@ import { StoryEnding } from "../features/story/components/StoryEnding";
 import { StickyMemoryStage } from "../features/story/components/StickyMemoryStage";
 import { StoryStep } from "../features/story/components/StoryStep";
 import { PolaroidPhoto } from "../shared/components/visuals/PolaroidPhoto";
-import { storyChapters } from "../features/story/data/story";
+import { storyChapters, storyScrollItems } from "../features/story/data/story";
 
-describe("Hát và Nờ app", () => {
+const partOneItems = storyScrollItems.filter((item) => item.partId === "before-meeting");
+
+describe("Hát Và Nờ app", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.sessionStorage.clear();
@@ -26,16 +28,27 @@ describe("Hát và Nờ app", () => {
     expect(screen.getByRole("button", { name: "Khám phá câu chuyện" })).toBeInTheDocument();
   });
 
-  it("renders every story chapter from data", () => {
+  it("lets readers swipe or tap from the opening room directly to Part II", () => {
+    render(<App />);
+
+    expect(screen.getByRole("region", { name: "Chọn phần câu chuyện" })).toBeInTheDocument();
+    expect(screen.getByText("Vuốt để đổi phần")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Xem phần tiếp theo" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Đi thẳng tới Phần II/ })).toHaveAttribute("href", "/part-2/");
+  });
+
+  it("renders every Part I chapter on the main page", () => {
     window.sessionStorage.setItem("hvn-memory-intro-seen", "true");
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: "Hát và Nờ" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Hát Và Nờ" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Trước khi mọi thứ bắt đầu" })).toBeInTheDocument();
     expect(screen.getByText("Có một người rất xinh nhưng chưa biết sắp bị kéo vào drama tình cảm.")).toBeInTheDocument();
-    storyChapters.forEach((chapter) => {
+    partOneItems.forEach((chapter) => {
       expect(screen.getByRole("heading", { name: chapter.title })).toBeInTheDocument();
     });
+    expect(screen.queryByRole("heading", { name: "Lần này, là ngoài đời" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Đọc nhanh Phần II" })).toHaveAttribute("href", "/part-2/");
   });
 
   it("keeps sound disabled by default and toggles it by keyboard-accessible button", async () => {
@@ -51,27 +64,32 @@ describe("Hát và Nờ app", () => {
     expect(screen.getByText("Tình mình lạ kỳ")).toBeInTheDocument();
   });
 
-  it("replay button scrolls back to the top", async () => {
-    const user = userEvent.setup();
+  it("links the end of Part I to the separate Part II page", () => {
     window.sessionStorage.setItem("hvn-memory-intro-seen", "true");
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Xem lại hành trình" }));
-    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
+    expect(screen.getByRole("link", { name: "Đọc Phần II" })).toHaveAttribute("href", "/part-2/");
   });
 
   it("plays ending cues for replay and returning to the intro", async () => {
     const user = userEvent.setup();
     const onReturnToIntro = vi.fn();
     const playCue = vi.fn();
-    render(<StoryEnding onReturnToIntro={onReturnToIntro} playCue={playCue} reducedMotion />);
+    render(
+      <>
+        <div id="our-dates" />
+        <StoryEnding onReturnToIntro={onReturnToIntro} playCue={playCue} reducedMotion />
+      </>,
+    );
 
-    await user.click(screen.getByRole("button", { name: "Xem lại hành trình" }));
+    await user.click(screen.getByRole("button", { name: "Xem lại từ đầu" }));
+    await user.click(screen.getByRole("button", { name: "Xem lại những buổi hẹn" }));
     await user.click(screen.getByRole("button", { name: "Trở lại phòng ký ức" }));
 
     expect(playCue).toHaveBeenCalledWith("replay");
     expect(playCue).toHaveBeenCalledWith("dissolve");
     expect(onReturnToIntro).toHaveBeenCalled();
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "start" });
   });
 
   it("renders fallback when a chapter image is missing", async () => {
@@ -121,21 +139,21 @@ describe("Hát và Nờ app", () => {
   });
 
   it("starts the keepsake box with later memories locked", () => {
-    render(<KeepsakePlayground maxVisitedChapterIndex={0} reducedMotion />);
+    render(<KeepsakePlayground visitedStoryIds={new Set(["first-meeting"])} reducedMotion />);
 
     expect(screen.getByRole("button", { name: /Bó hoa xanh/ })).toBeEnabled();
     expect(screen.getByRole("button", { name: /Phong bì/ })).toBeEnabled();
-    expect(screen.getByRole("button", { name: /Tim giấy.*Mở ở chương 02/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Tim giấy.*Mở ở Phần I · Chương 02/ })).toBeDisabled();
   });
 
   it("unlocks later keepsakes as readers reach later chapters", async () => {
     const user = userEvent.setup();
-    render(<KeepsakePlayground maxVisitedChapterIndex={4} reducedMotion />);
+    render(<KeepsakePlayground visitedStoryIds={new Set(partOneItems.map((item) => item.id))} reducedMotion />);
 
     await user.click(screen.getByRole("button", { name: /Polaroid/ }));
 
     expect(screen.getByText(/Đang chọn:/)).toHaveTextContent("Polaroid");
-    expect(screen.getByText(/Polaroid cuối hộp/i)).toBeInTheDocument();
+    expect(screen.getByText(/Polaroid cuối Phần I/i)).toBeInTheDocument();
   });
 
   it("opens chapter gallery photos in a full image lightbox", async () => {
@@ -160,7 +178,7 @@ describe("Hát và Nờ app", () => {
   it("reveals a secret note from the chapter sticker", async () => {
     const user = userEvent.setup();
     const playCue = vi.fn();
-    render(<StoryStep chapter={storyChapters[0]} index={0} isActive playCue={playCue} soundEnabled={false} />);
+    render(<StoryStep chapter={partOneItems[0]} index={0} isActive playCue={playCue} soundEnabled={false} />);
 
     const secretButton = screen.getByRole("button", { name: /Mở tin nhắn bí mật/ });
     expect(secretButton).toHaveAttribute("aria-expanded", "false");
@@ -175,7 +193,7 @@ describe("Hát và Nờ app", () => {
   it("plays a context-specific cue when an unlocked keepsake is selected", async () => {
     const user = userEvent.setup();
     const playCue = vi.fn();
-    render(<KeepsakePlayground maxVisitedChapterIndex={4} playCue={playCue} reducedMotion />);
+    render(<KeepsakePlayground visitedStoryIds={new Set(partOneItems.map((item) => item.id))} playCue={playCue} reducedMotion />);
 
     await user.click(screen.getByRole("button", { name: /Polaroid/ }));
 
@@ -184,7 +202,7 @@ describe("Hát và Nờ app", () => {
 
   it("renders compact chapter progress from shared data", () => {
     const { container } = render(
-      <StickyMemoryStage chapter={storyChapters[2]} chapters={storyChapters} activeIndex={2} reducedMotion />,
+      <StickyMemoryStage chapter={partOneItems[2]} chapters={partOneItems} activeIndex={2} reducedMotion />,
     );
 
     expect(screen.getByText("03 / 05")).toBeInTheDocument();

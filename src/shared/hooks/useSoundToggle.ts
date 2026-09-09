@@ -40,25 +40,27 @@ const soundCueFiles: Record<SoundCue, { src: string; volume: number }> = {
 export function useSoundToggle() {
   const [soundEnabled, setSoundEnabled] = useState(false);
   const backgroundAudioRef = useRef<Howl | null>(null);
-  const cueAudioRef = useRef<Record<SoundCue, Howl> | null>(null);
-  const getCueAudio = useCallback(() => {
-    if (cueAudioRef.current) {
-      return cueAudioRef.current;
+  const cueAudioRef = useRef<Partial<Record<SoundCue, Howl>>>({});
+  const activeCueRef = useRef<Howl | null>(null);
+  const getCueAudio = useCallback((cue: SoundCue) => {
+    const cachedAudio = cueAudioRef.current[cue];
+    if (cachedAudio) {
+      return cachedAudio;
     }
 
-    cueAudioRef.current = Object.fromEntries(
-      Object.entries(soundCueFiles).map(([cue, { src, volume }]) => [
-        cue,
-        new Howl({ src: [src], html5: true, preload: true, volume }),
-      ]),
-    ) as Record<SoundCue, Howl>;
+    const { src, volume } = soundCueFiles[cue];
+    const audio = new Howl({ src: [src], preload: true, volume });
+    cueAudioRef.current = { ...cueAudioRef.current, [cue]: audio };
 
-    return cueAudioRef.current;
+    return audio;
   }, []);
 
   const playCueImmediately = useCallback(
     (cue: SoundCue) => {
-      getCueAudio()[cue].play();
+      const audio = getCueAudio(cue);
+      activeCueRef.current?.stop();
+      activeCueRef.current = audio;
+      audio.play();
     },
     [getCueAudio],
   );
@@ -74,6 +76,11 @@ export function useSoundToggle() {
   );
 
   useEffect(() => {
+    if (!soundEnabled) {
+      backgroundAudioRef.current?.stop();
+      return;
+    }
+
     const audio =
       backgroundAudioRef.current ??
       new Howl({
@@ -85,17 +92,24 @@ export function useSoundToggle() {
       });
     backgroundAudioRef.current = audio;
 
-    if (!soundEnabled) {
-      audio.stop();
-      return;
-    }
-
     audio.play();
 
     return () => {
       audio.pause();
     };
   }, [soundEnabled]);
+
+  useEffect(() => () => {
+    backgroundAudioRef.current?.stop();
+    backgroundAudioRef.current?.unload();
+    Object.values(cueAudioRef.current).forEach((audio) => {
+      audio.stop();
+      audio.unload();
+    });
+    backgroundAudioRef.current = null;
+    cueAudioRef.current = {};
+    activeCueRef.current = null;
+  }, []);
 
   const playCue = useCallback(
     (cue: SoundCue) => {

@@ -47,6 +47,7 @@ vi.mock("howler", () => ({
       pause: vi.fn(),
       play: vi.fn(),
       stop: vi.fn(),
+      unload: vi.fn(),
     };
   }),
 }));

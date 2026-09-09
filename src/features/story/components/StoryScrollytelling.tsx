@@ -1,71 +1,132 @@
-import { useEffect } from "react";
-import type { StoryChapter } from "../data/story";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { StoryPart, StoryPartId, StoryScrollItem } from "../data/story";
+import { createStoryScrollItems } from "../data/story";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import { useActiveStoryStep } from "../hooks/useActiveStoryStep";
 import { useMediaQuery } from "../../../shared/hooks/useMediaQuery";
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
+import { usePartTwoScroll } from "../hooks/usePartTwoScroll";
+import { useActiveStorySound } from "../hooks/useActiveStorySound";
 import { MobileChapterJourney } from "./MobileChapterJourney";
 import { StickyMemoryStage } from "./StickyMemoryStage";
+import { StoryPartNavigation } from "./StoryPartNavigation";
+import { StoryPartTransition } from "./StoryPartTransition";
 import { StoryStep } from "./StoryStep";
 
 interface StoryScrollytellingProps {
-  chapters: StoryChapter[];
-  onActiveIndexChange?: (index: number) => void;
+  navigationParts?: readonly StoryPart[];
+  parts: readonly StoryPart[];
+  onActiveItemChange?: (item: StoryScrollItem) => void;
   playCue?: (cue: SoundCue) => void;
   reducedMotion: boolean;
+  startWithTransition?: boolean;
   soundEnabled: boolean;
+  visitedStoryIds?: ReadonlySet<string>;
 }
 
 export function StoryScrollytelling({
-  chapters,
-  onActiveIndexChange,
+  parts,
+  navigationParts = parts,
+  onActiveItemChange,
   playCue,
   reducedMotion,
+  startWithTransition = false,
   soundEnabled,
+  visitedStoryIds,
 }: StoryScrollytellingProps) {
   const isMobile = useMediaQuery("(max-width: 900px)");
-  const activeIndex = useActiveStoryStep({ count: chapters.length, disabled: reducedMotion || isMobile });
-  const mobileActiveIndex = useActiveStoryStep({ count: chapters.length, disabled: reducedMotion || !isMobile });
-  const resolvedIndex = isMobile ? mobileActiveIndex : activeIndex;
-  const activeChapter = chapters[resolvedIndex] ?? chapters[0];
+  const items = useMemo(() => createStoryScrollItems(parts), [parts]);
+  const stepIds = useMemo(() => items.map((item) => item.id), [items]);
+  const [navigationPartId, setNavigationPartId] = useState<StoryPartId>(items[0]?.partId ?? "before-meeting");
+  const handleStepEnter = useCallback((stepId: string) => {
+    const enteredItem = items.find((item) => item.id === stepId);
+    if (enteredItem) {
+      setNavigationPartId(enteredItem.partId);
+    }
+  }, [items]);
+  const activeId = useActiveStoryStep({
+    stepIds,
+    disabled: items.length === 0,
+    layoutKey: `${isMobile}-${reducedMotion}`,
+    onStepEnter: handleStepEnter,
+  });
+  const activeItem = items.find((item) => item.id === activeId) ?? items[0];
   const scope = useScrollAnimation<HTMLDivElement>(!reducedMotion && !isMobile);
+  usePartTwoScroll(scope, isMobile, reducedMotion);
+  const activeSoundSource = activeItem?.partId === navigationPartId ? activeItem.optionalSound : undefined;
+  useActiveStorySound(activeSoundSource, soundEnabled);
 
   useEffect(() => {
-    onActiveIndexChange?.(resolvedIndex);
-  }, [resolvedIndex, onActiveIndexChange]);
+    if (!activeItem) {
+      return;
+    }
+
+    onActiveItemChange?.(activeItem);
+  }, [activeItem, onActiveItemChange]);
 
   return (
-    <section id="story" className="story-scrollytelling" ref={scope} aria-label="Các chương câu chuyện">
-      {isMobile ? (
-        <MobileChapterJourney
-          chapters={chapters}
-          activeIndex={resolvedIndex}
-          playCue={playCue}
-          reducedMotion={reducedMotion}
-          soundEnabled={soundEnabled}
-        />
-      ) : (
-        <div className="story-scrollytelling-desktop">
-          <StickyMemoryStage
-            chapter={activeChapter}
-            chapters={chapters}
-            activeIndex={resolvedIndex}
-            reducedMotion={reducedMotion}
-          />
-          <div className="story-steps">
-            {chapters.map((chapter, index) => (
-              <StoryStep
-                chapter={chapter}
-                index={index}
-                isActive={index === resolvedIndex}
-                key={chapter.id}
-                playCue={playCue}
-                soundEnabled={soundEnabled}
-              />
-            ))}
+    <div className="story-sequence" id="story" ref={scope} aria-label="Hai phần của câu chuyện">
+      <StoryPartNavigation
+        activePartId={navigationPartId}
+        currentPagePartId={parts[0]?.id ?? "before-meeting"}
+        onNavigate={setNavigationPartId}
+        parts={navigationParts}
+      />
+
+      {parts.map((part, partIndex) => {
+        const partItems = items.filter((item) => item.partId === part.id);
+        const activePartIndex = Math.max(0, partItems.findIndex((item) => item.id === activeId));
+        const partActiveItem = partItems[activePartIndex] ?? partItems[0];
+
+        return (
+          <div className={`story-part story-part-${part.number}`} key={part.id}>
+            {partIndex === 0 && !startWithTransition ? (
+              <header className="story-part-heading" id={`part-${part.id}`} data-reveal>
+                <span>{part.eyebrow}</span>
+                <h2>{part.title}</h2>
+                <p>{part.subtitle}</p>
+              </header>
+            ) : (
+              <StoryPartTransition onInView={setNavigationPartId} part={part} />
+            )}
+
+            <section className="story-scrollytelling" aria-label={`${part.eyebrow}: ${part.title}`}>
+              {isMobile || (reducedMotion && part.id === "together-offline") ? (
+                <MobileChapterJourney
+                  items={partItems}
+                  activeId={activeId}
+                  playCue={playCue}
+                  reducedMotion={reducedMotion}
+                  soundEnabled={soundEnabled}
+                  visitedStoryIds={visitedStoryIds}
+                />
+              ) : (
+                <div className="story-scrollytelling-desktop">
+                  <StickyMemoryStage
+                    chapter={partActiveItem}
+                    chapters={partItems}
+                    activeIndex={activePartIndex}
+                    reducedMotion={reducedMotion}
+                    visitedStoryIds={visitedStoryIds}
+                  />
+                  <div className="story-steps">
+                    {partItems.map((item, index) => (
+                      <StoryStep
+                        chapter={item}
+                        index={index}
+                        isActive={item.id === activeId}
+                        key={item.id}
+                        playCue={playCue}
+                        soundEnabled={soundEnabled}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
           </div>
-        </div>
-      )}
-    </section>
+        );
+      })}
+    </div>
   );
 }

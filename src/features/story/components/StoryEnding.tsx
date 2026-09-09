@@ -9,12 +9,13 @@ interface StoryEndingProps {
   onReturnToIntro: () => void;
   playCue?: (cue: SoundCue) => void;
   reducedMotion: boolean;
+  separatePartPages?: boolean;
 }
 
-export function StoryEnding({ onReturnToIntro, playCue, reducedMotion }: StoryEndingProps) {
-  const replay = () => {
+export function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separatePartPages = false }: StoryEndingProps) {
+  const replay = (targetId: "part-before-meeting" | "our-dates") => {
     playCue?.("replay");
-    window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+    document.getElementById(targetId)?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
   };
 
   const returnToIntro = () => {
@@ -32,9 +33,19 @@ export function StoryEnding({ onReturnToIntro, playCue, reducedMotion }: StoryEn
           <p key={paragraph}>{paragraph}</p>
         ))}
         <div className="ending-actions">
-          <button className="replay-button" type="button" onClick={replay}>
-            <RotateCcw aria-hidden="true" size={18} />
-            <span>{endingCopy.cta}</span>
+          {separatePartPages ? (
+            <a className="replay-button story-page-link" href="/" onClick={() => playCue?.("replay")}>
+              <RotateCcw aria-hidden="true" size={18} />
+              <span>{endingCopy.replayAllCta}</span>
+            </a>
+          ) : (
+            <button className="replay-button" type="button" onClick={() => replay("part-before-meeting")}>
+              <RotateCcw aria-hidden="true" size={18} />
+              <span>{endingCopy.replayAllCta}</span>
+            </button>
+          )}
+          <button className="dates-replay-button" type="button" onClick={() => replay("our-dates")}>
+            <span>{endingCopy.replayDatesCta}</span>
           </button>
           <button className="intro-return-button" type="button" onClick={returnToIntro}>
             Trở lại phòng ký ức

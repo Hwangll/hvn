@@ -1,25 +1,27 @@
 import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import gsap from "gsap";
-import type { StoryChapter } from "../data/story";
+import type { StoryScrollItem } from "../data/story";
 import { ChapterProgress } from "./ChapterProgress";
+import { MemoryJourneyRoute } from "./MemoryJourneyRoute";
 import { ChapterScene } from "./scenes/ChapterScene";
 
 interface StickyMemoryStageProps {
-  chapter: StoryChapter;
-  chapters: StoryChapter[];
+  chapter: StoryScrollItem;
+  chapters: StoryScrollItem[];
   activeIndex: number;
   reducedMotion: boolean;
+  visitedStoryIds?: ReadonlySet<string>;
 }
 
-export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotion }: StickyMemoryStageProps) {
+export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotion, visitedStoryIds }: StickyMemoryStageProps) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const previousIndexRef = useRef(activeIndex);
 
   useEffect(() => {
     const content = contentRef.current;
-    if (!content || reducedMotion || previousIndexRef.current === activeIndex) {
+    if (chapter.partId === "together-offline" || !content || reducedMotion || previousIndexRef.current === activeIndex) {
       previousIndexRef.current = activeIndex;
       return undefined;
     }
@@ -31,7 +33,7 @@ export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotio
     return () => {
       timeline.kill();
     };
-  }, [activeIndex, reducedMotion]);
+  }, [activeIndex, chapter.partId, reducedMotion]);
 
   return (
     <aside
@@ -40,16 +42,31 @@ export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotio
       style={{ "--chapter-accent": chapter.accent } as CSSProperties}
       aria-label={`Kỷ niệm: ${chapter.title}`}
     >
-      <div className="memory-canvas" data-testid="memory-canvas">
+      <div className={`memory-canvas memory-canvas-${chapter.partId}`} data-testid="memory-canvas">
         <div className="memory-canvas-texture" aria-hidden="true" />
+        <div className="memory-canvas-tape" aria-hidden="true" />
         <header className="memory-canvas-meta">
-          <span>{chapter.year}</span>
-          <strong>{chapter.shortTitle}</strong>
+          <span>{chapter.partId === "together-offline" ? "Nhật ký ngoài đời" : chapter.year}</span>
+          <strong><i aria-hidden="true" />{chapter.shortTitle}</strong>
         </header>
-        <div className="memory-canvas-scene" ref={contentRef} key={chapter.id}>
-          <ChapterScene chapter={chapter} isActive reducedMotion={reducedMotion} />
-        </div>
-        <ChapterProgress chapters={chapters} activeIndex={activeIndex} />
+        {chapter.partId === "together-offline" ? (
+          <div className="memory-canvas-scene offline-scene-stack">
+            {chapters.map((item, index) => (
+              <div className="offline-scene-panel" data-offline-panel={item.id} key={item.id} style={{ opacity: index === 0 ? 1 : 0 }}>
+                <ChapterScene chapter={item} isActive={item.id === chapter.id} reducedMotion={reducedMotion} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="memory-canvas-scene" ref={contentRef} key={chapter.id}>
+            <ChapterScene chapter={chapter} isActive reducedMotion={reducedMotion} />
+          </div>
+        )}
+        {chapter.partId === "together-offline" ? (
+          <MemoryJourneyRoute activeId={chapter.id} items={chapters} visitedStoryIds={visitedStoryIds} />
+        ) : (
+          <ChapterProgress items={chapters} activeId={chapter.id} visitedStoryIds={visitedStoryIds} />
+        )}
       </div>
     </aside>
   );

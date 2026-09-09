@@ -1,6 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Literata:opsz,wght@7..72,500;7..72,650;7..72,720&family=Nunito:wght@700;800;900&display=swap&subset=vietnamese");
 @import "tailwindcss";
 @import "./story-scrollytelling.css";
+@import "./story-scenes.css";
+@import "./story-part-two.css";
+@import "./intro-flowers.css";
 
 :root {
   color-scheme: light;
@@ -27,6 +30,7 @@
   --radius-lg: 1.35rem;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --story-nav-clearance: 4.75rem;
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 0.75rem;
@@ -41,6 +45,303 @@
   --body: "Be Vietnam Pro", "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
 }
 
+/* Opening room part picker and fast cross-page navigation. */
+
+.memory-cta-panel {
+  width: min(100%, 21rem);
+  max-width: 21rem;
+  padding-top: clamp(2.5rem, 8vh, 5rem);
+}
+
+.memory-part-picker {
+  display: grid;
+  gap: 0.7rem;
+  width: 100%;
+}
+
+.memory-picker-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  color: oklch(0.88 0.035 58 / 0.82);
+  font-size: 0.61rem;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.memory-picker-heading span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.memory-picker-heading strong {
+  color: oklch(0.96 0.04 58);
+}
+
+.memory-picker-viewport {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  scroll-snap-type: inline mandatory;
+}
+
+.memory-picker-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.memory-picker-track {
+  display: flex;
+  width: 100%;
+}
+
+.memory-part-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.8rem 0.7rem;
+  align-content: center;
+  flex: 0 0 100%;
+  min-height: 13.5rem;
+  padding: 1rem;
+  overflow: hidden;
+  border: 1px solid oklch(0.94 0.035 58 / 0.2);
+  border-radius: 0.6rem 1.4rem 0.7rem 1rem;
+  background:
+    radial-gradient(circle at 88% 8%, oklch(0.88 0.08 28 / 0.2), transparent 6rem),
+    oklch(0.2 0.045 312 / 0.82);
+  box-shadow:
+    inset 0 1px 0 oklch(0.98 0.03 58 / 0.12),
+    0.4rem 0.5rem 0 oklch(0.04 0.02 280 / 0.18);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.memory-part-card::after {
+  position: absolute;
+  right: -1rem;
+  bottom: -1.3rem;
+  width: 5rem;
+  height: 5rem;
+  border: 1px dashed oklch(0.94 0.04 58 / 0.2);
+  border-radius: 50%;
+  content: "";
+}
+
+.memory-part-card-two {
+  background:
+    radial-gradient(circle at 88% 8%, oklch(0.86 0.13 355 / 0.3), transparent 6rem),
+    oklch(0.25 0.07 342 / 0.9);
+}
+
+.memory-part-number {
+  grid-column: 1 / -1;
+  width: fit-content;
+  padding: 0.28rem 0.48rem;
+  border: 1px solid oklch(0.94 0.035 58 / 0.24);
+  border-radius: 999px;
+  color: oklch(0.93 0.04 58);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.memory-part-card > svg {
+  color: oklch(0.86 0.09 28);
+}
+
+.memory-part-card-two > svg {
+  color: oklch(0.88 0.13 355);
+}
+
+.memory-part-card > div {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.memory-part-card > div strong {
+  color: oklch(0.97 0.03 58);
+  font-family: var(--memory-display);
+  font-size: 1.05rem;
+  line-height: 1.08;
+}
+
+.memory-part-card > div small {
+  color: oklch(0.86 0.035 58 / 0.72);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.memory-part-card .memory-primary-cta,
+.memory-secondary-cta {
+  position: relative;
+  z-index: 2;
+  grid-column: 1 / -1;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 2.65rem;
+  border: 1px solid oklch(0.95 0.035 55 / 0.48);
+  border-radius: 999px;
+  padding: 0.68rem 0.82rem 0.68rem 0.95rem;
+  color: oklch(0.16 0.04 318);
+  background: oklch(0.95 0.045 40);
+  box-shadow: 0 0.7rem 1.8rem oklch(0.04 0.02 280 / 0.22);
+  font: inherit;
+  font-size: 0.73rem;
+  font-weight: 850;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color 0.24s var(--ease-out),
+    background 0.24s var(--ease-out),
+    transform 0.24s var(--ease-out);
+}
+
+.memory-secondary-cta {
+  color: oklch(0.98 0.025 48);
+  background: var(--pink-hot);
+}
+
+.memory-part-card .memory-primary-cta:hover,
+.memory-secondary-cta:hover {
+  transform: translateY(-0.12rem);
+}
+
+.memory-picker-controls {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.memory-picker-controls > button {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid oklch(0.93 0.035 58 / 0.24);
+  border-radius: 50%;
+  color: oklch(0.94 0.035 58);
+  background: oklch(0.2 0.04 310 / 0.66);
+  cursor: pointer;
+  transition:
+    opacity 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out);
+}
+
+.memory-picker-controls > button:hover:not(:disabled) {
+  transform: translateY(-0.1rem);
+}
+
+.memory-picker-controls > button:disabled {
+  cursor: default;
+  opacity: 0.28;
+}
+
+.memory-picker-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.36rem;
+}
+
+.memory-picker-dots span {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: oklch(0.9 0.035 58 / 0.34);
+  transition: transform 0.24s var(--ease-out);
+}
+
+.memory-picker-dots span.is-active {
+  background: oklch(0.92 0.12 355);
+  transform: scale(1.45);
+}
+
+.intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.intro-part-two-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: fit-content;
+  border: 1px solid var(--pink-hot);
+  border-radius: 999px;
+  padding: 0.72rem 1rem;
+  color: oklch(0.99 0.02 25);
+  background: var(--pink-hot);
+  box-shadow: 0 0.8rem 2rem oklch(0.54 0.14 350 / 0.2);
+  font-weight: 850;
+  text-decoration: none;
+  transition:
+    transform 0.24s var(--ease-out),
+    box-shadow 0.24s var(--ease-out);
+}
+
+.intro-part-two-link:hover {
+  box-shadow: 0 1rem 2.4rem oklch(0.54 0.14 350 / 0.28);
+  transform: translateY(-0.16rem);
+}
+
+.intro-part-two-link svg {
+  transition: transform 0.24s var(--ease-out);
+}
+
+.intro-part-two-link:hover svg {
+  transform: translateX(0.2rem);
+}
+
+@media (max-width: 900px) {
+  .memory-cta-panel {
+    width: min(24rem, 100%);
+    max-width: min(24rem, 100%);
+  }
+
+  .memory-part-card {
+    min-height: 12.5rem;
+    text-align: left;
+  }
+
+  .memory-picker-heading {
+    padding-inline: 0.25rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .intro-actions {
+    align-items: stretch;
+  }
+
+  .scroll-hint,
+  .intro-part-two-link {
+    justify-content: center;
+    flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .memory-picker-viewport {
+    scroll-behavior: auto;
+  }
+
+  .memory-picker-dots span,
+  .memory-picker-controls > button,
+  .intro-part-two-link,
+  .intro-part-two-link svg {
+    transition: none;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -49,6 +350,10 @@ html {
   background: var(--paper);
   color: var(--ink);
   scroll-behavior: smooth;
+}
+
+html.is-instant-story-jump {
+  scroll-behavior: auto;
 }
 
 body {
@@ -1589,6 +1894,7 @@ a:focus-visible {
 }
 
 .replay-button,
+.dates-replay-button,
 .intro-return-button {
   width: fit-content;
   min-height: 2.9rem;
@@ -1605,6 +1911,12 @@ a:focus-visible {
     background 0.24s var(--ease-out);
 }
 
+.dates-replay-button {
+  border: 1px solid oklch(0.68 0.12 28 / 0.34);
+  color: var(--coral-dark);
+  background: oklch(0.98 0.04 35 / 0.86);
+}
+
 .replay-button {
   display: inline-flex;
   align-items: center;
@@ -1614,6 +1926,24 @@ a:focus-visible {
   color: var(--paper);
   background: var(--coral-dark);
   box-shadow: 0 18px 42px oklch(0.42 0.1 14 / 0.22);
+}
+
+.story-page-link,
+.part-two-page-link {
+  text-decoration: none;
+}
+
+.part-one-ending .ending-copy h2 {
+  max-width: 11ch;
+  font-size: clamp(3rem, 7.5vw, 7rem);
+  line-height: 0.96;
+}
+
+.part-two-page-link:hover {
+  color: var(--paper);
+  background: var(--pink-hot);
+  box-shadow: var(--shadow-float);
+  transform: translateY(-0.14rem) rotate(-1deg);
 }
 
 .replay-button svg {
@@ -2504,5 +2834,48 @@ a:focus-visible {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Shared press feedback and focus ring so every control answers the same way. */
+.memory-primary-cta:active,
+.memory-secondary-cta:active,
+.replay-button:active,
+.dates-replay-button:active,
+.intro-return-button:active,
+.keepsake-controls button:not(.is-locked):active,
+.story-part-navigation a:active,
+.sound-toggle:active,
+.memory-picker-controls > button:not(:disabled):active,
+.add-friend-btn:active,
+.photo-thumb:not(.photo-thumb-placeholder):active,
+.story-secret-note button:active {
+  scale: 0.96;
+}
+
+.memory-primary-cta:focus-visible,
+.memory-secondary-cta:focus-visible,
+.replay-button:focus-visible,
+.dates-replay-button:focus-visible,
+.intro-return-button:focus-visible,
+.keepsake-controls button:focus-visible,
+.story-part-navigation a:focus-visible,
+.sound-toggle:focus-visible,
+.photo-thumb:focus-visible,
+.story-secret-note button:focus-visible {
+  outline: 2px solid var(--pink-hot);
+  outline-offset: 3px;
+}
+
+/* The base keepsake grid is declared after its responsive override above, so restate the single column here. */
+@media (max-width: 900px) {
+  .keepsake-playground {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .keepsake-memory-card {
+    justify-self: stretch;
+    width: 100%;
   }
 }

@@ -36,4 +36,25 @@ export const threadPaths: Record<StoryThreadState, ThreadSegment[]> = {
       tone: "main",
     },
   ],
+  "in-person": [
+    { id: "in-person-left", d: "M92 92 C126 158 164 218 210 278", tone: "main" },
+    { id: "in-person-right", d: "M328 92 C294 158 256 218 210 278", tone: "second" },
+    { id: "in-person-together", d: "M210 278 C206 354 214 430 210 520", tone: "main" },
+  ],
+  dating: [
+    { id: "dating-left", d: "M112 72 C96 168 142 230 190 292 C214 324 210 394 210 516", tone: "main" },
+    { id: "dating-right", d: "M308 72 C324 168 278 230 230 292 C206 324 210 394 210 516", tone: "second" },
+  ],
+  aquarium: [
+    { id: "aquarium-left", d: "M84 92 C132 146 126 228 184 278 C222 312 214 388 210 520", tone: "main" },
+    { id: "aquarium-right", d: "M336 92 C288 146 294 228 236 278 C198 312 206 388 210 520", tone: "second" },
+  ],
+  cafe: [
+    { id: "cafe-left", d: "M104 78 C126 168 170 222 202 286 C226 334 208 420 210 520", tone: "main" },
+    { id: "cafe-right", d: "M316 78 C294 168 250 222 218 286 C194 334 212 420 210 520", tone: "second" },
+  ],
+  sunset: [
+    { id: "sunset-left", d: "M76 104 C132 166 160 244 210 318 C210 386 210 458 210 532", tone: "main" },
+    { id: "sunset-right", d: "M344 104 C288 166 260 244 210 318 C210 386 210 458 210 532", tone: "second" },
+  ],
 };

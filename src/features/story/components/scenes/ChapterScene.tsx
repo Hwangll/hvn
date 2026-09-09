@@ -1,13 +1,14 @@
-import type { StoryChapter } from "../../data/story";
+import type { StoryScrollItem } from "../../data/story";
 import { ConnectionThread } from "../ConnectionThread";
 import { DisconnectedScene } from "./DisconnectedScene";
 import { MeetingScene } from "./MeetingScene";
 import { ParallelScene } from "./ParallelScene";
 import { ReconnectingScene } from "./ReconnectingScene";
 import { StayingScene } from "./StayingScene";
+import { TogetherScene } from "./TogetherScene";
 
 interface ChapterSceneProps {
-  chapter: StoryChapter;
+  chapter: StoryScrollItem;
   isActive: boolean;
   reducedMotion: boolean;
 }
@@ -25,6 +26,12 @@ export function ChapterScene({ chapter, isActive, reducedMotion }: ChapterSceneP
         return <ParallelScene chapter={chapter} isActive={isActive} />;
       case "staying":
         return <StayingScene chapter={chapter} isActive={isActive} />;
+      case "in-person":
+      case "dating":
+      case "aquarium":
+      case "cafe":
+      case "sunset":
+        return <TogetherScene chapter={chapter} isActive={isActive} />;
       default:
         return null;
     }

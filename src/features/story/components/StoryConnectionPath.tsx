@@ -7,6 +7,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 interface StoryConnectionPathProps {
   reducedMotion: boolean;
+  continuousBlue?: boolean;
 }
 
 interface ThreadMeasure {
@@ -27,10 +28,10 @@ const initialMeasure: ThreadMeasure = {
   yEnd: 5000,
 };
 
-export function StoryConnectionPath({ reducedMotion }: StoryConnectionPathProps) {
+export function StoryConnectionPath({ reducedMotion, continuousBlue = false }: StoryConnectionPathProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [measure, setMeasure] = useState<ThreadMeasure>(initialMeasure);
-  const geometry = useMemo(() => createThreadGeometry(measure), [measure]);
+  const geometry = useMemo(() => continuousBlue ? createBlueThreadGeometry(measure) : createThreadGeometry(measure), [continuousBlue, measure]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -85,7 +86,7 @@ export function StoryConnectionPath({ reducedMotion }: StoryConnectionPathProps)
 
       const paths = gsap.utils.toArray<SVGPathElement>(".story-thread-segment", root);
       paths.forEach((path) => {
-        const length = path.getTotalLength();
+        const length = continuousBlue ? 1 : path.getTotalLength();
         gsap.set(path, {
           strokeDasharray: length,
           strokeDashoffset: reducedMotion ? 0 : length,
@@ -107,7 +108,7 @@ export function StoryConnectionPath({ reducedMotion }: StoryConnectionPathProps)
         },
       });
     },
-    { scope: rootRef, dependencies: [geometry.animationKey, reducedMotion], revertOnUpdate: true },
+    { scope: rootRef, dependencies: [geometry.animationKey, reducedMotion, continuousBlue], revertOnUpdate: true },
   );
 
   return (
@@ -137,6 +138,18 @@ export function StoryConnectionPath({ reducedMotion }: StoryConnectionPathProps)
       </svg>
     </div>
   );
+}
+
+function createBlueThreadGeometry({ height, width }: ThreadMeasure) {
+  const lane = width <= 900 ? 3 : 51;
+  const end = height - 80;
+  const path = `M${lane} 80 C${lane - 2} ${end * 0.2}, ${lane + 2} ${end * 0.32}, ${lane} ${end * 0.46} S${lane - 2} ${end * 0.74}, ${lane} ${end}`;
+  return {
+    animationKey: `blue-${Math.round(height)}-${Math.round(width)}`,
+    glow: path,
+    segments: [{ id: "blue-continuous", className: "is-blue", d: path }],
+    nodes: [],
+  };
 }
 
 function createThreadGeometry(measure: ThreadMeasure) {
@@ -248,7 +261,7 @@ function createThreadGeometry(measure: ThreadMeasure) {
   ];
 
   return {
-    animationKey: `${Math.round(measure.height)}-${Math.round(measure.width)}-${Math.round(measure.yLost)}-${Math.round(measure.yMeet)}`,
+    animationKey: `${Math.round(measure.height)}-${Math.round(measure.width)}-${Math.round(measure.yLost)}-${Math.round(measure.yMeet)}-${Math.round(measure.yEnd)}`,
     glow: [pre, lostA, lostB, lostC, reconnect, stable, heartPath].join(" "),
     nodes: [
       { id: "thread-dot-start", className: "is-start", x: lane.start, y: top, r: isMobile ? 2.1 : 2.4 },

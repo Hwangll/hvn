@@ -51,16 +51,23 @@ export function PhotoGallery({ compact = false, label, playCue, photos }: PhotoG
       </div>
       <div className="photo-filmstrip" role="list" aria-label={label}>
         {photos.map((photo, index) => (
-          <button
-            type="button"
-            className="photo-thumb"
-            key={`${photo.src}-${photo.caption}`}
-            onClick={() => openPhoto(index)}
-            aria-label={`Mở ảnh: ${photo.caption}`}
-          >
-            <img src={photo.src} alt={photo.alt} loading="lazy" />
-            <span>{photo.caption}</span>
-          </button>
+          photo.src ? (
+            <button
+              type="button"
+              className="photo-thumb"
+              key={`${photo.src}-${photo.caption}`}
+              onClick={() => openPhoto(index)}
+              aria-label={`Mở ảnh: ${photo.caption}`}
+            >
+              <img src={photo.src} alt={photo.alt} loading="lazy" />
+              <span>{photo.caption}</span>
+            </button>
+          ) : (
+            <div className="photo-thumb photo-thumb-placeholder" role="listitem" key={`${photo.alt}-${photo.caption}`}>
+              <span>{photo.placeholderNote ?? "Thêm ảnh kỷ niệm tại đây."}</span>
+              <small>{photo.caption}</small>
+            </div>
+          )
         ))}
       </div>
 
@@ -71,7 +78,7 @@ export function PhotoGallery({ compact = false, label, playCue, photos }: PhotoG
             <button className="photo-lightbox-close" type="button" aria-label="Đóng ảnh" onClick={closePhoto}>
               <X aria-hidden="true" size={18} />
             </button>
-            <img src={activePhoto.src} alt={activePhoto.alt} />
+            {activePhoto.src ? <img src={activePhoto.src} alt={activePhoto.alt} /> : null}
             <figcaption>{activePhoto.caption}</figcaption>
           </figure>
         </div>

@@ -4,24 +4,35 @@ import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import { useThreeKeepsakes } from "../hooks/useThreeKeepsakes";
 import { BlossomSprig } from "../../../shared/components/visuals/BlossomSprig";
 import { keepsakeIcons, keepsakeSoundCues, keepsakes, type KeepsakeId, type KeepsakeItem } from "../model/keepsakes";
+import type { StoryPartId } from "../../story/data/story";
 
 export type { KeepsakeId, KeepsakeItem } from "../model/keepsakes";
 
 interface KeepsakePlaygroundProps {
-  maxVisitedChapterIndex: number;
+  partId?: StoryPartId;
+  visitedStoryIds: ReadonlySet<string>;
   playCue?: (cue: SoundCue) => void;
   reducedMotion: boolean;
 }
 
-export function KeepsakePlayground({ maxVisitedChapterIndex, playCue, reducedMotion }: KeepsakePlaygroundProps) {
+export function KeepsakePlayground({ partId, visitedStoryIds, playCue, reducedMotion }: KeepsakePlaygroundProps) {
   const [selectedId, setSelectedId] = useState<KeepsakeId>("bouquet");
+  const visibleItems = useMemo(
+    () => (partId ? keepsakes.filter((item) => item.partId === partId) : keepsakes),
+    [partId],
+  );
   const unlockedItems = useMemo(
-    () => keepsakes.filter((item) => item.unlockChapterIndex <= maxVisitedChapterIndex),
-    [maxVisitedChapterIndex],
+    () => visibleItems.filter((item) => visitedStoryIds.has(item.unlockStoryId)),
+    [visibleItems, visitedStoryIds],
   );
   const unlockedIds = useMemo(() => unlockedItems.map((item) => item.id), [unlockedItems]);
-  const effectiveSelectedId = unlockedIds.includes(selectedId) ? selectedId : (unlockedIds[unlockedIds.length - 1] ?? "bouquet");
-  const selectedItem = useMemo(() => keepsakes.find((item) => item.id === effectiveSelectedId) ?? keepsakes[0], [effectiveSelectedId]);
+  const effectiveSelectedId = unlockedIds.includes(selectedId)
+    ? selectedId
+    : (unlockedIds[unlockedIds.length - 1] ?? visibleItems[0]?.id ?? "bouquet");
+  const selectedItem = useMemo(
+    () => visibleItems.find((item) => item.id === effectiveSelectedId) ?? visibleItems[0] ?? keepsakes[0],
+    [effectiveSelectedId, visibleItems],
+  );
   const selectKeepsake = useCallback((id: KeepsakeId) => {
     playCue?.(keepsakeSoundCues[id]);
     setSelectedId(id);
@@ -31,12 +42,13 @@ export function KeepsakePlayground({ maxVisitedChapterIndex, playCue, reducedMot
     selectedId: effectiveSelectedId,
     unlockedIds,
     onSelect: selectKeepsake,
+    theme: partId === "together-offline" ? "night" : "blush",
   });
 
   return (
     <section className="keepsake-playground" data-selected-keepsake={effectiveSelectedId} aria-labelledby="keepsake-title">
-      <BlossomSprig className="keepsake-flower keepsake-flower-one" variant="pink" />
-      <BlossomSprig className="keepsake-flower keepsake-flower-two" variant="cream" />
+      <BlossomSprig className="keepsake-flower keepsake-flower-one" variant={partId === "together-offline" ? "blue" : "pink"} />
+      <BlossomSprig className="keepsake-flower keepsake-flower-two" variant={partId === "together-offline" ? "blue" : "cream"} />
       <div className="keepsake-copy">
         <p className="kicker">cute interactive corner</p>
         <h2 id="keepsake-title">Chạm vào mấy món kỷ vật nhỏ xíu này</h2>
@@ -50,7 +62,7 @@ export function KeepsakePlayground({ maxVisitedChapterIndex, playCue, reducedMot
 
       <div className="keepsake-stage">
         <div className="keepsake-memory-card" key={selectedItem.id}>
-          <span>{String(selectedItem.unlockChapterIndex + 1).padStart(2, "0")}</span>
+          <span>{String(visibleItems.findIndex((item) => item.id === selectedItem.id) + 1).padStart(2, "0")}</span>
           <strong>{selectedItem.label}</strong>
           <p>{selectedItem.memoryCaption}</p>
           <i aria-hidden="true" />
@@ -73,7 +85,7 @@ export function KeepsakePlayground({ maxVisitedChapterIndex, playCue, reducedMot
         </div>
 
         <div className="keepsake-controls" aria-label="Chọn kỷ vật 3D">
-          {keepsakes.map((item) => (
+          {visibleItems.map((item) => (
             <KeepsakeButton
               isActive={item.id === effectiveSelectedId}
               isLocked={!unlockedIds.includes(item.id)}
@@ -100,7 +112,7 @@ function KeepsakeButton({
   onSelect: () => void;
 }) {
   const Icon = isLocked ? LockKeyhole : keepsakeIcons[item.id];
-  const unlockLabel = `Mở ở chương ${String(item.unlockChapterIndex + 1).padStart(2, "0")}`;
+  const unlockLabel = `Mở ở ${item.unlockLabel}`;
 
   return (
     <button

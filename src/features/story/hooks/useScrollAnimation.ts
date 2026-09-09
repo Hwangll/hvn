@@ -16,6 +16,7 @@ export function useScrollAnimation<T extends HTMLElement>(enabled: boolean) {
 
       const elements = gsap.utils.toArray<HTMLElement>("[data-reveal]", scope.current);
       elements.forEach((element) => {
+        if (element.closest(".story-part-2")) return;
         gsap.fromTo(
           element,
           { autoAlpha: 0, y: 28 },
@@ -32,6 +33,26 @@ export function useScrollAnimation<T extends HTMLElement>(enabled: boolean) {
           },
         );
       });
+
+      let refreshFrame = 0;
+      let active = true;
+      const refresh = () => {
+        window.cancelAnimationFrame(refreshFrame);
+        refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
+      };
+
+      scope.current.addEventListener("load", refresh, true);
+      void document.fonts?.ready.then(() => {
+        if (active) {
+          refresh();
+        }
+      });
+
+      return () => {
+        active = false;
+        window.cancelAnimationFrame(refreshFrame);
+        scope.current?.removeEventListener("load", refresh, true);
+      };
     },
     { scope, dependencies: [enabled], revertOnUpdate: true },
   );

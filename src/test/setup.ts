@@ -16,6 +16,7 @@ Object.defineProperty(window, "matchMedia", {
 });
 
 window.scrollTo = vi.fn();
+Element.prototype.scrollIntoView = vi.fn();
 
 Object.defineProperty(window.HTMLMediaElement.prototype, "play", {
   configurable: true,

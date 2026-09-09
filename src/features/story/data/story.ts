@@ -1,14 +1,16 @@
-export type StoryMood = "spark" | "quiet" | "return" | "parallel" | "warmth";
+export type StoryPartId = "before-meeting" | "together-offline";
+export type StoryMood = "spark" | "quiet" | "return" | "parallel" | "warmth" | "daylight" | "aqua" | "cafe" | "sunset";
 export type StoryAlignment = "left" | "right";
-export type StoryVisualType = "swipe" | "disconnect" | "suggestion" | "parallel" | "wheel";
-export type StoryArtifactType = "profiles" | "silent-chat" | "friend-request" | "eight-hour-clock" | "open-loop";
-export type StoryThreadState = "meeting" | "disconnected" | "reconnecting" | "parallel" | "staying";
+export type StoryVisualType = "swipe" | "disconnect" | "suggestion" | "parallel" | "wheel" | "in-person" | "dates" | "aquarium" | "cafe" | "sunset";
+export type StoryArtifactType = "profiles" | "silent-chat" | "friend-request" | "eight-hour-clock" | "open-loop" | "pair-frame" | "date-card" | "aquarium-ticket" | "cafe-cup" | "sunset-photo";
+export type StoryThreadState = "meeting" | "disconnected" | "reconnecting" | "parallel" | "staying" | "in-person" | "dating" | "aquarium" | "cafe" | "sunset";
 export type SecretTone = "spark" | "soft" | "bold";
 
 export interface StoryPhoto {
-  src: string;
+  src?: string;
   alt: string;
   caption: string;
+  placeholderNote?: string;
 }
 
 export interface StoryChapter {
@@ -22,7 +24,7 @@ export interface StoryChapter {
   paragraphs: string[];
   microcopy: string;
   quote: string;
-  secretNote: {
+  secretNote?: {
     label: string;
     text: string;
   };
@@ -35,15 +37,41 @@ export interface StoryChapter {
   accent: string;
   image: string;
   imageAlt: string;
+  imageNote?: string;
   alignment: StoryAlignment;
   optionalSound?: string;
   visualType: StoryVisualType;
   artifactType: StoryArtifactType;
   threadState: StoryThreadState;
+  scenes?: StoryScene[];
+}
+
+export interface StoryScene extends Omit<StoryChapter, "index" | "scenes"> {
+  sceneIndex: number;
+}
+
+export interface StoryPart {
+  id: StoryPartId;
+  number: 1 | 2;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  chapters: StoryChapter[];
+}
+
+export interface StoryScrollItem extends Omit<StoryChapter, "scenes"> {
+  partId: StoryPartId;
+  partNumber: 1 | 2;
+  partTitle: string;
+  chapterId: string;
+  chapterIndex: number;
+  chapterCount: number;
+  sceneIndex?: number;
+  sceneCount?: number;
 }
 
 export const introCopy = {
-  title: "Hát và Nờ",
+  title: "Hát Và Nờ",
   subtitle: "Một câu chuyện về hai người cứ tưởng đã bỏ lỡ nhau.",
   hint: "Mở hộp kỷ niệm",
 };
@@ -292,7 +320,7 @@ export const storyChapters: StoryChapter[] = [
       "Giữa cuộc khủng hoảng tuổi hai mươi tư, cô gái gần như mất hoàn toàn niềm tin vào cuộc sống.",
       "Chàng trai quay lại. Lần này anh không chỉ xuất hiện, mà còn ở lại và kéo cô đi qua khoảng thời gian khó khăn nhất.",
       "Đến đây, cả hai dần hiểu vì sao những câu chuyện trước đó không thể đi đến cuối cùng.",
-      "Có lẽ tất cả chỉ đang đưa họ quay trở lại đúng người, vào đúng thời điểm.",
+      "Có lẽ tất cả chỉ đang đưa họ đến gần hơn với lần thật sự đứng cạnh nhau.",
     ],
     microcopy: "lần này ở lại.",
     quote: "Có người xuất hiện để làm bạn vui. Có người chọn ở lại khi bạn không còn biết cách tự cứu mình.",
@@ -311,7 +339,7 @@ export const storyChapters: StoryChapter[] = [
       {
         src: "/images/story/lover/white-mirror.jpg",
         alt: "Người yêu chụp selfie trước gương với áo trắng",
-        caption: "Cái kết mở nên cần một tấm ảnh nhiều hoa.",
+        caption: "Cuối một phần của câu chuyện nên cần một tấm ảnh nhiều hoa.",
       },
       {
         src: "/images/story/lover/plush-moments.jpg",
@@ -332,10 +360,285 @@ export const storyChapters: StoryChapter[] = [
   },
 ];
 
+export const partTwoChapters: StoryChapter[] = [
+  {
+    id: "in-person-meeting",
+    index: 1,
+    year: "Từ khi gặp nhau",
+    title: "Đi lượn cùng nhau",
+    shortTitle: "Đi lượn",
+    description:
+      "Sau những lần xuất hiện trên màn hình, giờ là những buổi tối đi lượn cùng nhau.\n\nNgười từng ở trong những dòng tin nhắn giờ đã thật sự ở ngay bên cạnh.\n\nSau bao đêm chuyện và những cuộc gọi dài qua màn hình nhỏ, cuối cùng ngày chúng mình gặp nhau cũng đến. Lần đầu tiên đối mặt, anh chẳng thể giấu nổi cảm giác hồi hộp. Bàn tay ôm nhành hoa tươi mà run run, lòng đầy ngại ngùng và lo sợ khi đứng chờ vk trước chân tòa chung cư.\n\nThế nhưng, dường như mọi điều đẹp đẽ nhất đều đang chúc phúc cho hai đứa mình. Ấn tượng đầu tiên về em là một cô gái nhỏ nhắn, xinh xắn, mi nhon và vô cùng đáng yêu. Cảm tưởng anh như người khổng lồ khi đứng cạnh em vậy. Dù khoảnh khắc ấy anh chưa kịp nhìn rõ từng nét mặt vì chút vội vàng, nhưng khi cùng nhau vi vu lượn quanh trên phố, cảm giác thật kỳ lạ. Dù là lần đầu gặp mặt, chúng ta lại gắn kết và thấu hiểu mà chẳng ngại ngần hết như những tri kỷ đã từng duyên nợ từ muôn vàn kiếp trước.\n\nChúng mình dừng chân bên một chiếc ghế đá ven đường, thủ thỉ kể cho nhau nghe những câu chuyện vặt vãnh không tên. Rồi buổi hẹn đầu cũng khép lại bằng những cái ôm ấm áp và vô vàn nụ hôn trao nhau đầy thắm thiết. Anh nhớ nụ hôn đầu mà anh trao cho em đấy.",
+    paragraphs: [
+      "Sau những lần xuất hiện trên màn hình, giờ là những buổi tối đi lượn cùng nhau.",
+      "Người từng ở trong những dòng tin nhắn giờ đã thật sự ở ngay bên cạnh.",
+      "Sau bao đêm chuyện và những cuộc gọi dài qua màn hình nhỏ, cuối cùng ngày chúng mình gặp nhau cũng đến. Lần đầu tiên đối mặt, anh chẳng thể giấu nổi cảm giác hồi hộp. Bàn tay ôm nhành hoa tươi mà run run, lòng đầy ngại ngùng và lo sợ khi đứng chờ vk trước chân tòa chung cư.",
+      "Thế nhưng, dường như mọi điều đẹp đẽ nhất đều đang chúc phúc cho hai đứa mình. Ấn tượng đầu tiên về em là một cô gái nhỏ nhắn, xinh xắn, mi nhon và vô cùng đáng yêu. Cảm tưởng anh như người khổng lồ khi đứng cạnh em vậy. Dù khoảnh khắc ấy anh chưa kịp nhìn rõ từng nét mặt vì chút vội vàng, nhưng khi cùng nhau vi vu lượn quanh trên phố, cảm giác thật kỳ lạ. Dù là lần đầu gặp mặt, chúng ta lại gắn kết và thấu hiểu mà chẳng ngại ngần hết ==như những tri kỷ đã từng duyên nợ từ muôn vàn kiếp trước==.",
+      "Chúng mình dừng chân bên một chiếc ghế đá ven đường, thủ thỉ kể cho nhau nghe những câu chuyện vặt vãnh không tên. Rồi buổi hẹn đầu cũng khép lại bằng những cái ôm ấm áp và vô vàn nụ hôn trao nhau đầy thắm thiết. ==Anh nhớ nụ hôn đầu mà anh trao cho em đấy.==",
+    ],
+    microcopy: "lần này, không còn qua màn hình.",
+    quote: "Từ một khung chat, câu chuyện bước ra ngoài đời thật.",
+    secretTone: "spark",
+    memoryCaption: "Bó hoa hồng của buổi gặp đầu, còn nằm nguyên trên xe trước khi trao cho em.",
+    gallery: [
+      {
+        src: "/images/story/part-two/first-meeting-roses.jpg",
+        alt: "Hộp hoa hồng đỏ đặt trên yên xe máy trong buổi tối gặp nhau lần đầu",
+        caption: "Bó hoa run run trong tay anh trước chân tòa chung cư.",
+      },
+      {
+        src: "/images/story/part-two/first-meeting-ride.jpg",
+        alt: "Tay lái xe máy với bó hoa hồng đỏ phía trước, trên đường đi đón em",
+        caption: "Trên đường đi đón em, tim đập nhanh hơn cả tốc độ xe.",
+      },
+    ],
+    mood: "daylight",
+    accentColor: "#B6C7DD",
+    accent: "#B6C7DD",
+    image: "/images/story/part-two/first-meeting-roses.jpg",
+    imageAlt: "Hộp hoa hồng đỏ đặt trên yên xe máy trong buổi tối gặp nhau lần đầu",
+    alignment: "left",
+    visualType: "in-person",
+    artifactType: "pair-frame",
+    threadState: "in-person",
+  },
+  {
+    id: "our-dates",
+    index: 2,
+    year: "Những ngày có nhau",
+    title: "Đi công viên",
+    shortTitle: "Công viên",
+    description:
+      "Câu chuyện có thêm những buổi đi công viên. Và những tấm ảnh có cả hai.\n\nMỗi lần đi chơi lại để thêm một mẩu ký ức vào cuốn nhật ký đang được viết tiếp.",
+    paragraphs: [
+      "Câu chuyện có thêm những buổi đi công viên. Và những tấm ảnh có cả hai.",
+      "Mỗi lần đi chơi lại để thêm một mẩu ký ức vào cuốn nhật ký đang được viết tiếp.",
+    ],
+    microcopy: "thêm một buổi hẹn, thêm một trang chung.",
+    quote: "Kỷ niệm từ đây không chỉ nằm trong màn hình nữa.",
+    secretTone: "soft",
+    memoryCaption: "Một trang scrapbook đang chờ những tấm ảnh có cả hai.",
+    gallery: [
+      {
+        src: "",
+        alt: "Vị trí chờ ảnh đi công viên",
+        caption: "Đi công viên",
+        placeholderNote: "Thêm ảnh và caption đi công viên tại đây.",
+      },
+    ],
+    mood: "daylight",
+    accentColor: "#8BCBD8",
+    accent: "#8BCBD8",
+    image: "",
+    imageAlt: "Vị trí chờ ảnh đi công viên",
+    imageNote: "Thêm ảnh đi công viên tại đây.",
+    alignment: "right",
+    visualType: "dates",
+    artifactType: "date-card",
+    threadState: "dating",
+  },
+  {
+    id: "most-comfortable-day",
+    index: 3,
+    year: "Gần đây",
+    title: "Một ngày thoải mái nhất trên đời",
+    shortTitle: "Một ngày thật thoải mái",
+    description: "Một ngày đi từ thủy cung, qua café, rồi cùng nhau ngắm hoàng hôn.",
+    paragraphs: ["Một ngày đi từ thủy cung, qua café, rồi cùng nhau ngắm hoàng hôn."],
+    microcopy: "ba điểm dừng, cùng một nhịp bình yên.",
+    quote: "Một ngày thoải mái nhất trên đời.",
+    secretTone: "spark",
+    memoryCaption: "Một ngày liền mạch, từ sắc xanh dưới nước đến ánh hoàng hôn.",
+    gallery: [],
+    mood: "sunset",
+    accentColor: "#D8BACF",
+    accent: "#D8BACF",
+    image: "",
+    imageAlt: "Vị trí chờ ảnh của ngày đi thủy cung, café và ngắm hoàng hôn",
+    imageNote: "Thêm ảnh đại diện cho cả ngày tại đây.",
+    alignment: "left",
+    visualType: "sunset",
+    artifactType: "sunset-photo",
+    threadState: "sunset",
+    scenes: [
+      {
+        id: "aquarium",
+        sceneIndex: 1,
+        year: "Điểm dừng 01",
+        title: "Thủy cung",
+        shortTitle: "Thủy cung",
+        description: "Ngày ấy bắt đầu ở thủy cung, nơi cả hai cùng ngắm nhìn thế giới dưới nước.",
+        paragraphs: [
+          "Ngày ấy bắt đầu ở thủy cung.",
+          "Giữa sắc xanh và những chuyển động chậm dưới nước, cả hai cùng đứng cạnh nhau để ngắm nhìn.",
+        ],
+        microcopy: "cùng nhìn về một phía.",
+        quote: "Một điểm dừng xanh và thật chậm.",
+        secretTone: "soft",
+        memoryCaption: "Vị trí dành cho ảnh và chiếc vé của buổi đi thủy cung.",
+        gallery: [
+          {
+            src: "",
+            alt: "Vị trí chờ ảnh ở thủy cung",
+            caption: "Khoảnh khắc ở thủy cung",
+            placeholderNote: "Thêm ảnh ở thủy cung tại đây.",
+          },
+        ],
+        mood: "aqua",
+        accentColor: "#67D9ED",
+        accent: "#67D9ED",
+        image: "",
+        imageAlt: "Vị trí chờ ảnh ở thủy cung",
+        imageNote: "Thêm ảnh ở thủy cung tại đây.",
+        alignment: "left",
+        visualType: "aquarium",
+        artifactType: "aquarium-ticket",
+        threadState: "aquarium",
+      },
+      {
+        id: "cafe",
+        sceneIndex: 2,
+        year: "Điểm dừng 02",
+        title: "Café",
+        shortTitle: "Café",
+        description: "Rời thủy cung, ngày ấy tiếp tục bằng một khoảng nghỉ ở café.",
+        paragraphs: [
+          "Rời thủy cung, ngày ấy tiếp tục bằng một khoảng nghỉ ở café.",
+          "Một nhịp chậm hơn, ấm hơn, vừa đủ để ngồi cạnh nhau và để thời gian trôi thật nhẹ.",
+        ],
+        microcopy: "một khoảng nghỉ thật êm.",
+        quote: "Không cần vội khi đang thấy thoải mái.",
+        secretTone: "soft",
+        memoryCaption: "Trang nhật ký bên bàn café đang chờ ảnh và một ghi chú thật của hai người.",
+        gallery: [
+          {
+            src: "",
+            alt: "Vị trí chờ ảnh ở café",
+            caption: "Khoảng nghỉ ở café",
+            placeholderNote: "Thêm ảnh và ghi chú ở café tại đây.",
+          },
+        ],
+        mood: "cafe",
+        accentColor: "#DCC9AD",
+        accent: "#DCC9AD",
+        image: "",
+        imageAlt: "Vị trí chờ ảnh ở café",
+        imageNote: "Thêm ảnh ở café tại đây.",
+        alignment: "right",
+        visualType: "cafe",
+        artifactType: "cafe-cup",
+        threadState: "cafe",
+      },
+      {
+        id: "sunset",
+        sceneIndex: 3,
+        year: "Điểm dừng 03",
+        title: "Ngắm hoàng hôn",
+        shortTitle: "Hoàng hôn",
+        description: "Cuối ngày, cả hai cùng ngắm hoàng hôn và nhận ra mình vừa có một ngày rất đặc biệt.",
+        paragraphs: [
+          "Cuối ngày là khoảng trời chuyển dần sang màu đào, cam và tím nhạt.",
+          "Sau thủy cung và café, cả hai cùng ngắm hoàng hôn rồi cùng thừa nhận cảm giác của ngày hôm ấy.",
+        ],
+        microcopy: "hai đường, cùng một hướng.",
+        quote: "Một ngày thoải mái nhất trên đời.",
+        secretTone: "spark",
+        memoryCaption: "Vị trí dành cho tấm ảnh cuối ngày, khi cả hai cùng nhìn về một hướng.",
+        gallery: [
+          {
+            src: "",
+            alt: "Vị trí chờ ảnh ngắm hoàng hôn",
+            caption: "Khoảnh khắc ngắm hoàng hôn",
+            placeholderNote: "Thêm ảnh hoàng hôn tại đây.",
+          },
+        ],
+        mood: "sunset",
+        accentColor: "#D8BACF",
+        accent: "#D8BACF",
+        image: "",
+        imageAlt: "Vị trí chờ ảnh ngắm hoàng hôn",
+        imageNote: "Thêm ảnh hoàng hôn tại đây.",
+        alignment: "left",
+        visualType: "sunset",
+        artifactType: "sunset-photo",
+        threadState: "sunset",
+      },
+    ],
+  },
+];
+
+export const storyParts: StoryPart[] = [
+  {
+    id: "before-meeting",
+    number: 1,
+    eyebrow: "PHẦN I",
+    title: "Trước khi gặp nhau",
+    subtitle: "Những lần kết nối, bỏ lỡ và tìm thấy nhau qua một màn hình.",
+    chapters: storyChapters,
+  },
+  {
+    id: "together-offline",
+    number: 2,
+    eyebrow: "PHẦN II",
+    title: "Thật sự đứng cạnh nhau",
+    subtitle: "Đi lượn, công viên, thủy cung, café và một buổi hoàng hôn. Lần đầu, kỷ niệm có đủ cả hai.",
+    chapters: partTwoChapters,
+  },
+];
+
+export function createStoryScrollItems(parts: readonly StoryPart[]): StoryScrollItem[] {
+  return parts.flatMap((part) =>
+    part.chapters.flatMap<StoryScrollItem>((chapter) => {
+      const shared = {
+        partId: part.id,
+        partNumber: part.number,
+        partTitle: part.title,
+        chapterId: chapter.id,
+        chapterIndex: chapter.index,
+        chapterCount: part.chapters.length,
+      };
+
+      if (chapter.scenes?.length) {
+        return chapter.scenes.map((scene): StoryScrollItem => ({
+          ...scene,
+          ...shared,
+          index: chapter.index,
+          sceneIndex: scene.sceneIndex,
+          sceneCount: chapter.scenes?.length,
+        }));
+      }
+
+      return [{ ...chapter, ...shared } as StoryScrollItem];
+    }),
+  );
+}
+
+export const storyScrollItems = createStoryScrollItems(storyParts);
+
+export const partTransitionCopy = {
+  lead: [
+    "Có những người bước vào đời mình qua một màn hình.",
+    "Rồi một ngày, người ấy đứng ngay bên cạnh.",
+  ],
+  eyebrow: "PHẦN II · 2026",
+  title: "Thật sự đứng cạnh nhau",
+  /** Leading words of the title that get the aqua-to-dusk gradient. */
+  accent: "Thật sự",
+};
+
+export const partOneEndingCopy = {
+  title: "Câu chuyện bước ra ngoài màn hình.",
+  body: "Phần tiếp theo bắt đầu khi hai người thật sự đứng cạnh nhau.",
+  cta: "Đọc Phần II",
+  footnote: "Cuối Phần I — và cũng là lúc một trang mới bắt đầu.",
+  image: "/images/story/lover/flower-peace.jpg",
+};
+
 export const endingCopy = {
   title: "Còn tiếp...",
-  body: "Câu chuyện này chưa có một cái kết hoàn chỉnh.\n\nHai người vẫn đang học cách bước vào cuộc đời nhau, không phải bằng những lời hứa thật lớn, mà bằng việc tiếp tục xuất hiện vào ngày mai.",
-  cta: "Xem lại hành trình",
-  footnote: "Được viết lại từ những lần gặp, mất kết nối và tìm thấy nhau.",
+  body: "Lần này, câu chuyện có thêm những ngày ở cạnh nhau.",
+  replayAllCta: "Xem lại từ đầu",
+  replayDatesCta: "Xem lại những buổi hẹn",
+  footnote: "Từ những lần gặp qua màn hình đến những ngày thật sự ở cạnh nhau.",
   image: "/images/story/lover/flower-peace.jpg",
 };

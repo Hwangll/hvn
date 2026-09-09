@@ -8,6 +8,9 @@ interface MemoryPhotoProps {
   tilt?: "left" | "right" | "none";
   className?: string;
   eager?: boolean;
+  placeholderLabel?: string;
+  /** Extra data-* attributes, e.g. scroll-effect hints read by usePartTwoScroll. */
+  attributes?: Record<string, string | number>;
 }
 
 export function MemoryPhoto({
@@ -18,18 +21,18 @@ export function MemoryPhoto({
   tilt = "none",
   className = "",
   eager = false,
+  placeholderLabel,
+  attributes,
 }: MemoryPhotoProps) {
   const [failed, setFailed] = useState(false);
-
-  if (!src) {
-    return null;
-  }
+  const [portrait, setPortrait] = useState(false);
+  const showPlaceholder = !src || failed;
 
   return (
-    <figure className={`memory-photo size-${size} tilt-${tilt} ${className}`.trim()}>
-      {failed ? (
+    <figure className={`memory-photo size-${size} tilt-${tilt} ${portrait ? "is-portrait" : ""} ${className}`.trim()} {...attributes}>
+      {showPlaceholder ? (
         <div className="memory-photo-fallback" role="img" aria-label={alt}>
-          <span>ảnh kỷ niệm đang chờ thay</span>
+          <span>{placeholderLabel ?? "ảnh kỷ niệm đang chờ thay"}</span>
         </div>
       ) : (
         <img
@@ -37,6 +40,7 @@ export function MemoryPhoto({
           alt={alt}
           loading={eager ? "eager" : "lazy"}
           onError={() => setFailed(true)}
+          onLoad={(event) => setPortrait(event.currentTarget.naturalHeight > event.currentTarget.naturalWidth * 1.15)}
         />
       )}
       {caption ? <figcaption>{caption}</figcaption> : null}

@@ -2,15 +2,18 @@ import { useEffect, useState } from "react";
 import scrollama from "scrollama";
 
 interface UseActiveStoryStepOptions {
-  count: number;
+  stepIds: string[];
   disabled: boolean;
+  layoutKey?: string;
+  onStepEnter?: (stepId: string) => void;
 }
 
-export function useActiveStoryStep({ count, disabled }: UseActiveStoryStepOptions): number {
-  const [activeIndex, setActiveIndex] = useState(0);
+export function useActiveStoryStep({ stepIds, disabled, layoutKey, onStepEnter }: UseActiveStoryStepOptions): string {
+  const [activeId, setActiveId] = useState(stepIds[0] ?? "");
+  const stepKey = stepIds.join("|");
 
   useEffect(() => {
-    if (disabled || count === 0) {
+    if (disabled || stepIds.length === 0) {
       return undefined;
     }
 
@@ -21,18 +24,30 @@ export function useActiveStoryStep({ count, disabled }: UseActiveStoryStepOption
         offset: 0.6,
         progress: false,
       })
-      .onStepEnter(({ index }) => {
-        setActiveIndex(Math.min(Math.max(index, 0), count - 1));
+      .onStepEnter(({ element, index }) => {
+        const fallbackId = stepIds[Math.min(Math.max(index, 0), stepIds.length - 1)];
+        const nextId = (element as HTMLElement | undefined)?.dataset.storyStepId ?? fallbackId ?? "";
+        setActiveId(nextId);
+        onStepEnter?.(nextId);
       });
 
     const resize = () => scroller.resize();
+    let active = true;
     window.addEventListener("resize", resize);
+    document.addEventListener("load", resize, true);
+    void document.fonts?.ready.then(() => {
+      if (active) {
+        resize();
+      }
+    });
 
     return () => {
+      active = false;
       window.removeEventListener("resize", resize);
+      document.removeEventListener("load", resize, true);
       scroller.destroy();
     };
-  }, [count, disabled]);
+  }, [disabled, layoutKey, onStepEnter, stepIds, stepKey]);
 
-  return activeIndex;
+  return activeId;
 }
