@@ -41,6 +41,14 @@ export function StoryPartTransition({ onInView, part }: StoryPartTransitionProps
       data-reveal
       ref={transitionRef}
     >
+      <div className="part-transition-sky" aria-hidden="true">
+        <i className="star-layer star-layer-far" />
+        <i className="star-layer star-layer-near" />
+        <i className="aurora aurora-one" />
+        <i className="aurora aurora-two" />
+        <i className="aurora aurora-three" />
+        <i className="part-transition-horizon" />
+      </div>
       <span className="part-transition-numeral" aria-hidden="true">{part.number === 2 ? "II" : "I"}</span>
       <svg className="part-transition-descent" viewBox="0 0 120 240" aria-hidden="true">
         <path className="descent-thread" d="M60 0 C60 60 40 80 52 120 C64 160 44 190 60 228" pathLength={1} />

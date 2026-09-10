@@ -7,6 +7,7 @@ import { SceneAvatar } from "../atoms/SceneAvatar";
 interface ParallelSceneProps {
   chapter: StoryChapter;
   isActive: boolean;
+  reducedMotion?: boolean;
 }
 
 const chatFragments = ["hôm nay drama hơi dài", "nghe tôi kể cái này", "ủa 8 tiếng rồi hả"];
@@ -20,12 +21,12 @@ function formatTimer(seconds: number): string {
 }
 
 /** Two separate roads, one long call between them: eight hours, like a shift at work. */
-export function ParallelScene({ chapter, isActive }: ParallelSceneProps) {
-  const [elapsed, setElapsed] = useState(FULL_SHIFT_SECONDS);
+export function ParallelScene({ chapter, isActive, reducedMotion = false }: ParallelSceneProps) {
+  const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
     // Only the active scene counts up; an inactive scene simply keeps showing the full shift.
-    if (!isActive || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (!isActive || reducedMotion) {
       return undefined;
     }
     const started = performance.now();
@@ -38,7 +39,9 @@ export function ParallelScene({ chapter, isActive }: ParallelSceneProps) {
     };
     frame = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(frame);
-  }, [isActive]);
+  }, [isActive, reducedMotion]);
+
+  const displayedSeconds = reducedMotion || !isActive ? FULL_SHIFT_SECONDS : elapsed;
 
   return (
     <div className={`memory-scene parallel-scene ${isActive ? "is-active" : ""}`} aria-hidden="true">
@@ -51,8 +54,8 @@ export function ParallelScene({ chapter, isActive }: ParallelSceneProps) {
         </div>
         <div className="call-card">
           <span className="call-title"><Phone size={13} aria-hidden="true" />Cuộc gọi đang diễn ra</span>
-          <strong className="call-timer">{formatTimer(elapsed)}</strong>
-          <div className="call-bar"><i style={{ width: `${(elapsed / FULL_SHIFT_SECONDS) * 100}%` }} /></div>
+          <strong className="call-timer">{formatTimer(displayedSeconds)}</strong>
+          <div className="call-bar"><i style={{ width: `${(displayedSeconds / FULL_SHIFT_SECONDS) * 100}%` }} /></div>
           <div className="call-hours"><span>9:00</span><span>17:00</span></div>
           <small>{chapter.microcopy}</small>
         </div>

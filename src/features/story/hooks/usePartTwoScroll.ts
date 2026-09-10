@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { clampProgress, sceneBlend } from "../utils/sceneBlend";
+import { readingRevealProgress } from "../utils/partTwoMotion";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -10,25 +11,19 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 export const partTwoMotion = {
   entrance: 0.92,
   settle: 0.44,
-  scrub: 0.4,
-  rise: 12,
-  depth: 18,
+  scrub: 0.3,
+  rise: 9,
+  depth: 14,
   /** Layer drift through a scene, as a share of the viewport height per unit of data-parallax. */
-  parallax: 0.12,
+  parallax: 0.085,
   /** Sideways travel in px per unit of data-drift. */
-  drift: 240,
+  drift: 170,
   /** Upward travel of rising props, as a share of the viewport height. */
-  riseTravel: 0.4,
+  riseTravel: 0.3,
   /** Downward travel of sinking props, as a share of the viewport height. */
-  sinkTravel: 0.16,
+  sinkTravel: 0.12,
   /** How many sine periods a bobbing prop completes across one scene. */
-  waveCycles: 1.6,
-  /** Distance (share of viewport) over which a piece of copy fades in, and the stagger between siblings. */
-  reveal: 0.34,
-  revealStagger: 0.06,
-  /** Blur applied to a panel at the far end of a crossfade, and to copy before it settles. */
-  panelBlur: 10,
-  copyBlur: 6,
+  waveCycles: 1.1,
 };
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
@@ -39,8 +34,11 @@ interface SceneEffect {
   drift: number;
   wave: number;
   rise: number;
+  float: number;
   sink: number;
   spin: number;
+  sway: number;
+  zoom: number;
   tilt: number;
   glow: number;
   delay: number;
@@ -64,8 +62,11 @@ function readEffect(element: HTMLElement, index: number): SceneEffect {
     drift: num("drift"),
     wave: num("wave"),
     rise: num("rise"),
+    float: num("float"),
     sink: num("sink"),
     spin: num("spin"),
+    sway: num("sway"),
+    zoom: num("zoom"),
     tilt: num("tilt"),
     glow: num("glow"),
     delay: Math.min(0.9, Math.max(0, num("delay"))),
@@ -83,7 +84,7 @@ function readEffect(element: HTMLElement, index: number): SceneEffect {
   };
 }
 
-const EFFECT_SELECTOR = "[data-parallax], [data-drift], [data-wave], [data-rise], [data-sink], [data-spin], [data-tilt], [data-glow], [data-delay], [data-sheen]";
+const EFFECT_SELECTOR = "[data-parallax], [data-drift], [data-wave], [data-rise], [data-float], [data-sink], [data-spin], [data-sway], [data-zoom], [data-tilt], [data-glow], [data-delay], [data-sheen]";
 
 export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile: boolean, reducedMotion: boolean) {
   useGSAP(() => {
@@ -107,11 +108,12 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
       ...effectElements.flat(), ...revealElements.flat(),
     ];
     const originalStyles = animated.map((element) => element.getAttribute("style"));
+    // Fully faded skies are also hidden (and their idle loops paused via CSS), so only the skies in view cost anything.
     const moodSetters = Array.from(moods, (mood) => gsap.quickSetter(mood, "opacity"));
+    const moodHidden = Array.from(moods, () => false);
     const panelSetters = panels.map((panel) => ({
       alpha: gsap.quickSetter(panel, "opacity"),
       visibility: gsap.quickSetter(panel, "visibility"),
-      filter: gsap.quickSetter(panel, "filter"),
       y: gsap.quickSetter(panel, "y", "px"),
       scaleX: gsap.quickSetter(panel, "scaleX"),
       scaleY: gsap.quickSetter(panel, "scaleY"),
@@ -121,6 +123,8 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
     const depthRates = Array.from(depths, (depth) => Number(depth.dataset.waterDepth));
     const statementSetter = statement ? gsap.quickSetter(statement, "opacity") : undefined;
     const effects = effectElements.map((elements) => elements.map(readEffect));
+    // Keep photos and captions sharp throughout the dissolve.
+    if (panels.length) gsap.set(panels, { filter: "none" });
     const reveals = revealElements.map((elements) => elements.map((element) => ({
       // Word-mode copy keeps its own opacity and lets CSS cascade the words from `--reveal`.
       words: element.dataset.stepReveal === "words",
@@ -142,19 +146,24 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
       if (!mounted) return;
       const position = driver.progress * travel;
       const blend = sceneBlend(position, boundaries, viewport * (partTwoMotion.entrance - partTwoMotion.settle));
-      moodSetters.forEach((set, i) => set(blend[i] ?? 0));
+      moodSetters.forEach((set, i) => {
+        const alpha = blend[i] ?? 0;
+        set(alpha);
+        const hidden = alpha <= 0;
+        if (hidden !== moodHidden[i]) {
+          moodHidden[i] = hidden;
+          moods[i].classList.toggle("is-hidden", hidden);
+        }
+      });
       panelSetters.forEach((set, i) => {
         const entered = i === 0 ? 1 : (blend[i - 1] ?? 0);
         const leaving = blend[i] ?? 0;
         const opacity = entered * (1 - leaving);
         set.alpha(opacity);
         set.visibility(opacity > 0 ? "visible" : "hidden");
-        set.y(reducedMotion ? 0 : (1 - entered) * partTwoMotion.rise - leaving * 8);
-        set.scaleX(reducedMotion ? 1 : 0.98 + opacity * 0.02);
-        set.scaleY(reducedMotion ? 1 : 0.98 + opacity * 0.02);
-        // Crossfades pass through a soft focus instead of a plain dissolve.
-        const blur = reducedMotion ? 0 : (1 - opacity) * partTwoMotion.panelBlur;
-        set.filter(blur > 0.2 ? `blur(${blur.toFixed(2)}px)` : "none");
+        set.y(reducedMotion ? 0 : (1 - entered) * partTwoMotion.rise - leaving * 5);
+        set.scaleX(reducedMotion ? 1 : 0.992 + opacity * 0.008);
+        set.scaleY(reducedMotion ? 1 : 0.992 + opacity * 0.008);
 
         // Props inside the scene move with the reader's progress through that scene.
         const local = clampProgress((position - starts[i] + viewport * partTwoMotion.entrance) / (heights[i] + viewport * partTwoMotion.entrance));
@@ -173,24 +182,30 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
           if (fx.parallax) y -= centred * fx.parallax * viewport * partTwoMotion.parallax;
           if (fx.drift) x += centred * fx.drift * partTwoMotion.drift;
           if (fx.wave) {
-            y += Math.sin(wavePhase + fx.phase) * fx.wave;
+            y += Math.sin(wavePhase + fx.phase) * fx.wave * 0.7;
             // Drifting props lean into the crest and trough of their wave.
-            if (fx.drift) rotation += Math.cos(wavePhase + fx.phase) * Math.sign(fx.drift) * 6;
+            if (fx.drift) rotation += Math.cos(wavePhase + fx.phase) * Math.sign(fx.drift) * 3;
           }
           if (fx.rise) {
             y -= local * fx.rise * viewport * partTwoMotion.riseTravel;
             alpha *= 1 - Math.pow(local, 3);
           }
+          // Floating props travel upward like bubbles but never fade (jellyfish, lanterns, hearts).
+          if (fx.float) y -= local * fx.float * viewport * partTwoMotion.riseTravel;
           if (fx.sink) y += local * fx.sink * viewport * partTwoMotion.sinkTravel;
           if (fx.spin) rotation += local * fx.spin;
+          // Swaying props rock on the same wave, in degrees of amplitude (kelp tips, hanging lamps).
+          if (fx.sway) rotation += Math.sin(wavePhase + fx.phase) * fx.sway;
+          // Zooming props grow (or shrink, negative) across the scene, as a share of their size.
+          if (fx.zoom) scale *= 1 + centred * fx.zoom;
           if (fx.glow) alpha *= clampProgress(local * 2.4);
           if (fx.tilt) rotation += (1 - entered) * fx.tilt;
           if (fx.delay) {
-            // Staggered arrival: pop in slightly after the scene itself has started entering.
+            // Small staggered arrivals keep the photo as the visual anchor.
             const arrival = easeOut(clampProgress((entered - fx.delay) / (1 - fx.delay)));
             alpha *= smooth(arrival);
-            scale = 0.86 + arrival * 0.14;
-            y += (1 - arrival) * 18;
+            scale = 0.95 + arrival * 0.05;
+            y += (1 - arrival) * 12;
           }
           fx.x(x);
           fx.y(y);
@@ -204,7 +219,7 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
         const draw = reducedMotion ? 1 : clampProgress((position - starts[i] + viewport * 0.8) / (heights[i] + viewport * 0.1));
         set(1 - draw);
       });
-      // Copy in the reading column rises into focus as it approaches the eye line.
+      // Copy settles before the eye line; its measured top never includes this rise.
       reveals.forEach((sets, i) => {
         sets.forEach((set, k) => {
           if (reducedMotion) {
@@ -212,17 +227,15 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
             return;
           }
           const top = (revealTops[i]?.[k] ?? starts[i]) - position;
-          const progress = clampProgress((viewport * 0.92 - top) / (viewport * partTwoMotion.reveal) - k * partTwoMotion.revealStagger);
-          const eased = easeOut(progress);
+          const eased = readingRevealProgress(top, viewport, k, mobile);
           set.reveal(eased);
           if (set.words) {
-            set.opacity(1); set.y((1 - eased) * 10); set.filter("none");
+            set.opacity(1); set.y((1 - eased) * (mobile ? 0 : 4)); set.filter("none");
             return;
           }
           set.opacity(eased);
-          set.y((1 - eased) * 26);
-          const blur = (1 - eased) * partTwoMotion.copyBlur;
-          set.filter(blur > 0.2 ? `blur(${blur.toFixed(2)}px)` : "none");
+          set.y((1 - eased) * (mobile ? 7 : 14));
+          set.filter("none");
         });
       });
       if (!mobile && !reducedMotion) {
@@ -235,6 +248,9 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
       travel = Math.max(1, trigger.end - trigger.start);
       starts = steps.map((step) => step.getBoundingClientRect().top + window.scrollY - trigger.start);
       heights = steps.map((step) => step.offsetHeight);
+      // A font/image/viewport refresh can occur while copy is translated. Reset all
+      // reveal transforms before measuring or each refresh adds that rise to its baseline.
+      reveals.forEach((sets) => sets.forEach((set) => set.y(0)));
       revealTops = revealElements.map((elements) => elements.map((element) => element.getBoundingClientRect().top + window.scrollY - trigger.start));
       boundaries = starts.slice(1).map((start) => start - viewport * partTwoMotion.entrance);
       paint();
@@ -258,6 +274,7 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
       observer.disconnect();
       root.removeEventListener("load", refresh, true);
       cancelAnimationFrame(refreshFrame);
+      moods.forEach((mood) => mood.classList.remove("is-hidden"));
       animated.forEach((element, i) => {
         const style = originalStyles[i];
         if (style === null) element.removeAttribute("style");

@@ -87,6 +87,8 @@ Các SFX hiện có trong `public/audio`:
 
 Scrollama chỉ quản lý state item active qua stable ID trong `useActiveStoryStep`. Khi active chapter/cảnh đổi, `StickyMemoryStage` đổi mood, visual và ảnh; một `Set` visited độc lập giữ lịch sử mở kỷ vật nên jump navigation không tự đánh dấu các đoạn bị bỏ qua. GSAP/ScrollTrigger nằm trong `useScrollAnimation`, dùng cho reveal animation của các khối nội dung và được `@gsap/react` cleanup tự động.
 
+Phần II dùng một scroll driver duy nhất trong `usePartTwoScroll`: nền trời (`PartTwoAtmosphere`), năm lớp cảnh và chữ đều đọc cùng một tiến độ cuộn qua GSAP quickSetter, nên cuộn ngược hay nhảy chương đều dựng lại đúng hình. Prop trong `TogetherScene` khai báo chuyển động bằng `data-*` (`parallax`, `drift`, `wave`, `rise`, `float`, `sink`, `spin`, `sway`, `zoom`, `tilt`, `glow`, `delay`, `sheen`); các vòng lặp thời gian (sao nhấp nháy, sứa co bóp, hơi café, cỏ biển đung đưa) nằm trong CSS và chỉ chạy khi cảnh `.is-active`. Trên desktop, `usePointerParallax` ghi `--mx/--my` lên sticky stage để các lớp nghiêng theo chuột; mobile và reduced motion tắt hiệu ứng này.
+
 Lenis chỉ làm smooth scroll; khi `prefers-reduced-motion: reduce`, Lenis và reveal animation không chạy, còn nội dung vẫn đọc tuyến tính và state active vẫn theo đúng vị trí cuộn.
 
 ## Cấu Trúc Chính

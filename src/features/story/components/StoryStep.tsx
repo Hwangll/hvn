@@ -59,11 +59,17 @@ export function StoryStep({ chapter, index, isActive, playCue, variant = "deskto
     >
       <div className="story-step-layout">
         <div className="story-step-year-tab" aria-label={`Năm ${chapter.year}`}>
+          {chapter.partNumber === 1 ? <span className="diary-step-number" aria-hidden="true">{String(chapter.chapterIndex).padStart(2, "0")}</span> : null}
           <span>{chapter.year}</span>
         </div>
 
         <div className="story-step-arrow">
           <header className="story-step-header">
+            {chapter.partNumber === 2 ? (
+              <span className="story-step-numeral" aria-hidden="true">
+                {String(chapter.chapterIndex).padStart(2, "0")}{chapter.sceneIndex ? <small>.{chapter.sceneIndex}</small> : null}
+              </span>
+            ) : null}
             <p className="story-step-eyebrow" data-step-reveal>
               PHẦN {chapter.partNumber === 1 ? "I" : "II"} · CHƯƠNG {String(chapter.chapterIndex).padStart(2, "0")}
               {chapter.sceneIndex ? ` · CẢNH ${String(chapter.sceneIndex).padStart(2, "0")}` : ""}
@@ -87,6 +93,12 @@ export function StoryStep({ chapter, index, isActive, playCue, variant = "deskto
           <blockquote className="story-step-quote" data-step-reveal>
             <Sparkles aria-hidden="true" size={16} />
             {chapter.quote}
+            {chapter.partNumber === 2 ? (
+              // A hand-drawn stroke under the quote draws itself from `--reveal` as the reader reaches it.
+              <svg className="story-quote-stroke" viewBox="0 0 240 14" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M3 9 C40 3 70 12 110 6 S170 2 205 8 S230 9 237 6" pathLength={1} />
+              </svg>
+            ) : null}
           </blockquote>
 
           <div data-step-reveal>

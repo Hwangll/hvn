@@ -8,6 +8,8 @@ import { StoryEnding } from "./StoryEnding";
 import { StoryIntro } from "../../intro/components/StoryIntro";
 import { MoodSetup } from "../../intro/components/MoodSetup";
 import { PartTwoAtmosphere } from "./PartTwoAtmosphere";
+import { useMemoryReveals } from "../../../shared/hooks/useMemoryReveals";
+import { useMediaQuery } from "../../../shared/hooks/useMediaQuery";
 import { StoryPartOneEnding } from "./StoryPartOneEnding";
 
 const KeepsakePlayground = lazy(() =>
@@ -23,6 +25,8 @@ interface StoryExperienceProps {
 }
 
 export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion, soundEnabled }: StoryExperienceProps) {
+  const mobile = useMediaQuery("(max-width: 900px)");
+  const revealScope = useMemoryReveals(reducedMotion, mobile);
   const pageParts = useMemo(
     () => storyParts.filter((part) => part.id === (page === "part-two" ? "together-offline" : "before-meeting")),
     [page],
@@ -53,8 +57,8 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
   );
 
   return (
-    <main className={`story-experience story-page-${page}`} id="top">
-      {page === "part-two" ? <PartTwoAtmosphere /> : null}
+    <main className={`story-experience story-page-${page}`} id="top" ref={revealScope}>
+      {page === "part-two" ? <PartTwoAtmosphere reducedMotion={reducedMotion} /> : null}
       <StoryConnectionPath reducedMotion={reducedMotion} continuousBlue={page === "part-two"} />
       {page === "part-one" ? <StoryIntro reducedMotion={reducedMotion} /> : null}
       {page === "part-one" ? <MoodSetup /> : null}

@@ -1,5 +1,6 @@
-import { ArrowRight, ChevronDown } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowDown, ArrowRight, ChevronDown } from "lucide-react";
+import { Fragment, type CSSProperties } from "react";
+import { jumpToStoryTarget } from "../../story/utils/jumpToStoryTarget";
 import { heroPhotos, introCopy } from "../../story/data/story";
 import { BlossomSprig } from "../../../shared/components/visuals/BlossomSprig";
 
@@ -8,10 +9,14 @@ interface StoryIntroProps {
 }
 
 export function StoryIntro({ reducedMotion }: StoryIntroProps) {
-  const letters = Array.from(introCopy.title);
+  const words = introCopy.title.split(" ");
 
   return (
     <section className="story-intro" aria-labelledby="story-title">
+      <header className="diary-masthead">
+        <a href="#top" aria-label="Hát Và Nờ — đầu trang">h<span>&</span>n<span className="diary-brand-dot">.</span></a>
+        <span>MỘT CUỐN NHẬT KÝ CỦA HAI NGƯỜI</span>
+      </header>
       <div className="intro-orbit" aria-hidden="true">
         <span className="intro-dot intro-dot-left" />
         <span className="intro-thread" />
@@ -21,22 +26,29 @@ export function StoryIntro({ reducedMotion }: StoryIntroProps) {
 
       <div className="intro-layout">
         <div className="intro-copy">
-          <p className="kicker">interactive diary / 2023-2026</p>
+          <p className="kicker">NHỮNG ĐIỀU MÌNH GIỮ LẠI · 2023—2026</p>
           <h1 id="story-title" className="intro-title" aria-label={introCopy.title}>
-            {letters.map((letter, index) => (
-              <motion.span
-                aria-hidden="true"
-                initial={reducedMotion ? false : { opacity: 0, y: 36, rotate: index % 2 === 0 ? -2 : 2 }}
-                animate={reducedMotion ? undefined : { opacity: 1, y: 0, rotate: 0 }}
-                transition={{ duration: 0.72, delay: index * 0.035, ease: [0.16, 1, 0.3, 1] }}
-                key={`${letter}-${index}`}
-              >
-                {letter}
-              </motion.span>
+            {words.map((word, index) => (
+              <Fragment key={`${word}-${index}`}>
+                {index > 0 ? " " : null}
+                <span
+                  aria-hidden="true"
+                  className={`intro-title-word ${index === words.length - 1 ? "is-accent" : ""} ${reducedMotion ? "" : "is-animated"}`}
+                  style={{ "--word-index": index } as CSSProperties}
+                >
+                  {word}
+                </span>
+              </Fragment>
             ))}
           </h1>
-          <p className="intro-subtitle">{introCopy.subtitle}</p>
-          <div className="intro-actions">
+          <p className="intro-subtitle" data-memory-reveal data-memory-order="2">{introCopy.subtitle}</p>
+          <div className="intro-actions" data-memory-reveal data-memory-order="3">
+            <a className="diary-read-button" href="#first-meeting" onClick={(event) => {
+              event.preventDefault();
+              jumpToStoryTarget("first-meeting");
+            }}>
+              Bắt đầu đọc <ArrowDown aria-hidden="true" size={16} />
+            </a>
             <a className="scroll-hint" href="#keepsake-title">
               <ChevronDown aria-hidden="true" size={18} />
               {introCopy.hint}
@@ -55,13 +67,18 @@ export function StoryIntro({ reducedMotion }: StoryIntroProps) {
           <span className="booth-sticker booth-flower" aria-hidden="true">
             ✿
           </span>
+          <span className="diary-photo-note" aria-hidden="true">những ngày mình thương</span>
           {heroPhotos.map((photo, index) => (
-            <figure className={`booth-photo booth-photo-${index + 1}`} key={photo.src}>
+            <figure data-memory-reveal data-memory-order={index + 1} className={`booth-photo booth-photo-${index + 1}`} key={photo.src}>
               <img src={photo.src} alt={photo.alt} />
               <figcaption>{photo.caption}</figcaption>
             </figure>
           ))}
         </div>
+      </div>
+      <div className="diary-colophon">
+        <span>01 / NHỮNG LẦN TÌM THẤY NHAU</span>
+        <span>Cuộn chậm thôi, chuyện mình còn dài. <ChevronDown aria-hidden="true" size={14} /></span>
       </div>
     </section>
   );

@@ -1,0 +1,417 @@
+/* Part I's little keepsakes share the diary's rose ink and quiet paper surfaces.
+   Scene placement and motion remain in story-scenes.css / story-motion.css. */
+
+.story-page-part-one :is(.meeting-scene, .disconnected-scene, .reconnecting-scene, .parallel-scene, .staying-scene) {
+  --scene-line: oklch(0.77 0.065 355 / 0.32);
+  --scene-shadow: 0 8px 22px oklch(0.38 0.07 350 / 0.07), 0 1px 2px oklch(0.38 0.07 350 / 0.04);
+  --scene-sheet: oklch(0.993 0.012 15);
+}
+
+.story-page-part-one .memory-scene .scene-microcopy {
+  color: var(--ink-soft);
+  font-family: var(--display);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.6;
+  text-wrap: balance;
+}
+
+/* Chat excerpts read as correspondence, with one clear outgoing ink colour. */
+.story-page-part-one .memory-scene .message-bubble {
+  border-color: var(--scene-line);
+  border-radius: 0.8em;
+  padding: 0.65em 0.9em;
+  font-weight: 500;
+  line-height: 1.5;
+  box-shadow: none;
+}
+
+.story-page-part-one .memory-scene .message-bubble.chat-left {
+  border-bottom-left-radius: 0.2em;
+}
+
+.story-page-part-one .memory-scene .message-bubble.chat-right {
+  border-bottom-right-radius: 0.2em;
+}
+
+.story-page-part-one .memory-scene .message-bubble.tone-paper {
+  color: var(--ink);
+  background: var(--scene-sheet);
+}
+
+.story-page-part-one .memory-scene .message-bubble.tone-coral {
+  border-color: var(--coral-dark);
+  color: var(--paper);
+  background: var(--coral-dark);
+}
+
+.story-page-part-one .memory-scene .message-bubble.tone-typing {
+  background: var(--pink-milk);
+}
+
+.story-page-part-one .memory-scene .chat-meta {
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.5;
+  opacity: 1;
+}
+
+.story-page-part-one .memory-scene .chat-gap {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  text-transform: none;
+  opacity: 1;
+}
+
+.story-page-part-one .memory-scene .scene-screen {
+  border-color: var(--scene-line);
+  border-radius: 0.65em;
+  background: var(--scene-sheet);
+  box-shadow: var(--scene-shadow);
+}
+
+.story-page-part-one .memory-scene .scene-screen.tone-blue {
+  background: linear-gradient(180deg, var(--scene-sheet), oklch(0.962 0.019 330));
+}
+
+.story-page-part-one .memory-scene .scene-screen-bar {
+  min-height: 3em;
+  border-color: var(--scene-line);
+  color: var(--ink-soft);
+  background: var(--pink-milk);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.story-page-part-one .memory-scene .scene-screen-bar i {
+  width: 0.4em;
+  height: 0.4em;
+  background: var(--coral-dark);
+  opacity: 0.45;
+}
+
+.story-page-part-one .memory-scene .scene-screen-bar i:nth-child(2) { opacity: 0.25; }
+.story-page-part-one .memory-scene .scene-screen-bar i:nth-child(3) { opacity: 0.12; }
+
+.story-page-part-one .memory-scene .scene-avatar {
+  background: oklch(0.87 0.065 355);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.story-page-part-one .memory-scene :is(.swipe-avatar-hat, .lane-avatar-hat) {
+  background: oklch(0.91 0.04 20);
+}
+
+.story-page-part-one .memory-scene :is(.swipe-avatar, .suggest-avatar, .lane-avatar) {
+  border: 2px solid var(--scene-sheet);
+  box-shadow: 0 0 0 1px var(--scene-line);
+}
+
+/* 01 — Two portraits, a small stamp, then the first conversation. */
+.story-page-part-one .meeting-scene .swipe-card {
+  gap: 0.3em;
+  border-color: var(--scene-line);
+  border-radius: 0.35em;
+  background: var(--scene-sheet);
+  box-shadow: var(--scene-shadow);
+}
+
+.story-page-part-one .meeting-scene .swipe-card strong {
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.story-page-part-one .meeting-scene .swipe-card small {
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.story-page-part-one .meeting-scene .match-badge {
+  border-width: 1px;
+  background: var(--coral-dark);
+  box-shadow: 0 3px 10px oklch(0.4 0.09 355 / 0.12);
+  font-family: var(--display);
+  font-size: 1em;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0;
+}
+
+.story-page-part-one .meeting-scene .meeting-platform {
+  gap: 0.75em;
+  padding: 0.45em 0;
+  border-radius: 0;
+  color: var(--ink-soft);
+  background: transparent;
+  font-size: 0.78em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.story-page-part-one .meeting-scene .meeting-platform svg {
+  color: var(--coral-dark);
+}
+
+/* 02 — The empty interval has more presence than the interface around it. */
+.story-page-part-one .disconnected-scene .chat-draft {
+  min-height: 3em;
+  border-color: var(--scene-line);
+  border-radius: 0.55em;
+  background: var(--scene-sheet);
+  font-weight: 400;
+}
+
+.story-page-part-one .disconnected-scene .chat-draft em {
+  opacity: 0.8;
+}
+
+.story-page-part-one .disconnected-scene .chat-draft svg {
+  color: var(--coral-dark);
+  opacity: 0.65;
+}
+
+.story-page-part-one .disconnected-scene .story-peek {
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.story-page-part-one .disconnected-scene .story-ring {
+  background: var(--coral-dark);
+  padding: 0.15em;
+}
+
+/* 03 — An old name reappears in a clean, softly outlined suggestion. */
+.story-page-part-one .reconnecting-scene .suggest-card {
+  border-color: var(--scene-line);
+  border-radius: 0.4em;
+  background: var(--pink-milk);
+}
+
+.story-page-part-one .reconnecting-scene .suggest-copy strong {
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.story-page-part-one .reconnecting-scene .suggest-copy :is(span, small) {
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.story-page-part-one .reconnecting-scene .add-friend-btn {
+  min-height: 2.7em;
+  border: 1px solid var(--coral-dark);
+  border-radius: 0.35em;
+  background: var(--coral-dark);
+  font-weight: 500;
+  box-shadow: none;
+}
+
+.story-page-part-one .memory-scene .memory-photo {
+  border-color: var(--scene-line);
+  border-radius: 0.2em;
+  background: var(--scene-sheet);
+  box-shadow: var(--scene-shadow);
+}
+
+.story-page-part-one .memory-scene .memory-photo img {
+  border-radius: 0;
+}
+
+/* 04 — The duration is the focal point; the connecting lines stay quiet. */
+.story-page-part-one .parallel-scene .lane strong {
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.story-page-part-one .parallel-scene .lane small {
+  font-weight: 400;
+}
+
+.story-page-part-one .parallel-scene .lane-line {
+  border-left-width: 1px;
+  border-left-style: dashed;
+  border-color: var(--scene-line);
+}
+
+.story-page-part-one .parallel-scene .call-card {
+  border-color: var(--scene-line);
+  border-radius: 0.5em;
+  background: var(--scene-sheet);
+  box-shadow: var(--scene-shadow);
+}
+
+.story-page-part-one .parallel-scene .call-title {
+  color: var(--coral-dark);
+  font-size: 0.75em;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.story-page-part-one .parallel-scene .call-title svg {
+  flex-shrink: 0;
+}
+
+.story-page-part-one .parallel-scene .call-timer {
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.4;
+}
+
+.story-page-part-one .parallel-scene .call-bar {
+  height: 0.3em;
+  background: var(--pink-soft);
+}
+
+.story-page-part-one .parallel-scene .call-bar i {
+  background: var(--coral-dark);
+}
+
+.story-page-part-one .parallel-scene .call-hours {
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.story-page-part-one .parallel-scene .call-card small {
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+/* 05 — A photograph, paper tape and fourteen small promises. */
+.story-page-part-one .staying-scene .staying-glow {
+  background: radial-gradient(circle, var(--pink-soft), transparent 68%);
+  opacity: 0.5;
+}
+
+.story-page-part-one .staying-scene .staying-tape {
+  border-inline: 1px solid oklch(0.85 0.06 355 / 0.4);
+  background: oklch(0.9 0.06 10 / 0.8);
+  box-shadow: none;
+}
+
+.story-page-part-one .staying-scene .staying-note {
+  border: 1px solid var(--scene-line);
+  border-radius: 0.25em;
+  color: var(--coral-dark);
+  background: var(--scene-sheet);
+  box-shadow: 0 2px 8px oklch(0.4 0.07 350 / 0.06);
+  font-family: var(--display);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.story-page-part-one .staying-scene .staying-calendar {
+  border-color: var(--scene-line);
+  border-radius: 0.4em;
+  background: var(--scene-sheet);
+  box-shadow: var(--scene-shadow);
+}
+
+.story-page-part-one .staying-scene .staying-calendar header {
+  padding-bottom: 0.55em;
+  border-bottom: 1px solid var(--scene-line);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.story-page-part-one .staying-scene .staying-calendar li {
+  border-radius: 0.2em;
+  color: var(--coral-dark);
+  background: var(--pink-milk);
+}
+
+.story-page-part-one .staying-scene .staying-calendar li.is-today {
+  color: var(--paper);
+  background: var(--coral-dark);
+  box-shadow: 0 0 0 1px var(--scene-sheet), 0 0 0 2px var(--scene-line);
+}
+
+.story-page-part-one .staying-scene .staying-calendar small {
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.story-page-part-one .staying-scene .plot-twist-sticker {
+  border: 1px solid var(--scene-line);
+  border-radius: 0.3em;
+  background: var(--scene-sheet);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+/* The progress dots keep their small visual footprint and gain a usable target. */
+.story-page-part-one .story-chapter-progress {
+  min-height: 3rem;
+  gap: 0.85rem;
+  font-weight: 500;
+}
+
+.story-page-part-one .story-chapter-progress-count {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+.story-page-part-one .story-chapter-progress-track {
+  height: 2px;
+  background: var(--line-soft);
+}
+
+.story-page-part-one .story-chapter-progress-fill {
+  background: var(--coral-dark);
+}
+
+.story-page-part-one .story-chapter-progress-dot {
+  position: relative;
+  background: var(--paper);
+  box-shadow: 0 0 0 1px var(--line-soft);
+}
+
+.story-page-part-one .story-chapter-progress-dot::after {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  transform: translate(-50%, -50%);
+  content: "";
+}
+
+.story-page-part-one .story-chapter-progress-dot.is-seen {
+  background: var(--pink-soft);
+}
+
+.story-page-part-one .story-chapter-progress-dot.is-active {
+  background: var(--coral-dark);
+  box-shadow: 0 0 0 3px var(--paper), 0 0 0 4px var(--line-soft);
+}
+
+.story-page-part-one .story-chapter-progress-dot:focus-visible {
+  outline: 2px solid var(--coral-dark);
+  outline-offset: 7px;
+}
+
+.story-page-part-one .story-chapter-progress-label {
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 420px) {
+  .story-page-part-one .memory-scene .message-bubble {
+    padding: 0.55em 0.7em;
+  }
+
+  .story-page-part-one .parallel-scene .call-card {
+    padding-inline: 0.7em;
+  }
+
+  .story-page-part-one .parallel-scene .call-title {
+    gap: 0.25em;
+  }
+}

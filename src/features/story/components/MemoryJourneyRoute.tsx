@@ -11,7 +11,7 @@ interface MemoryJourneyRouteProps {
 
 const routeLabels: Partial<Record<StoryThreadState, string>> = {
   "in-person": "Đi lượn",
-  dating: "Công viên",
+  dating: "Mixue",
   aquarium: "Thủy cung",
   cafe: "Café",
   sunset: "Hoàng hôn",
@@ -39,7 +39,9 @@ export function MemoryJourneyRoute({ activeId, items, visitedStoryIds = new Set(
         <span>Hành trình của chúng mình</span>
         <strong>{String(activeIndex + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}</strong>
       </div>
-      <ol>
+      <div className="memory-route-track">
+        <span className="memory-route-traveler" aria-hidden="true"><i /></span>
+        <ol>
         {items.map((item, index) => {
           const Icon = routeIcons[item.threadState as keyof typeof routeIcons];
           const isActive = item.id === activeId;
@@ -65,7 +67,8 @@ export function MemoryJourneyRoute({ activeId, items, visitedStoryIds = new Set(
             </li>
           );
         })}
-      </ol>
+        </ol>
+      </div>
     </nav>
   );
 }

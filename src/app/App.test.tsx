@@ -168,9 +168,9 @@ describe("Hát Và Nờ app", () => {
 
     expect(playCue).toHaveBeenCalledWith("galleryOpen");
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Đóng ảnh" })).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "Đóng ảnh" })).toBeInTheDocument();
 
-    await user.click(screen.getAllByRole("button", { name: "Đóng ảnh" })[1]);
+    await user.click(screen.getByRole("button", { name: "Đóng ảnh" }));
 
     expect(playCue).toHaveBeenCalledWith("galleryClose");
   });

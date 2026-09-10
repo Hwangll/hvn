@@ -1,0 +1,90 @@
+/* Shared motion: a short entrance, a clear response, then stillness for reading. */
+.story-page-part-one .intro-title span.intro-title-word {
+  display: inline-block;
+  color: var(--ink);
+}
+.story-page-part-one .intro-title-word + .intro-title-word { margin-inline-start: 0.08em; }
+.story-page-part-one .intro-title .intro-title-word.is-accent { color: var(--coral-dark); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .intro-title-word.is-animated { animation: paper-arrive 900ms var(--ease-out) calc(120ms + var(--word-index) * 120ms) both; }
+  .photo-lightbox { animation: viewer-arrive 220ms ease-out; }
+  .photo-lightbox figure { animation: paper-arrive 420ms var(--ease-out); }
+  .photo-lightbox figure > img { animation: viewer-arrive 320ms ease-out; }
+  .story-secret-note.is-open .story-secret-paper { animation: paper-arrive 420ms var(--ease-out); transform-origin: top center; }
+  .story-page-part-one .memory-canvas { transition: background-color 800ms ease, border-color 600ms ease; }
+  .story-page-part-one .mood-quiet .memory-canvas { background-color: oklch(0.945 0.03 320); border-color: oklch(0.82 0.06 320); }
+  .story-page-part-one .mood-return .memory-canvas { background-color: oklch(0.955 0.04 15); border-color: oklch(0.82 0.09 10); }
+  .story-page-part-one .mood-parallel .memory-canvas { background-color: oklch(0.945 0.03 345); border-color: oklch(0.82 0.06 345); }
+  .story-page-part-one .mood-warmth .memory-canvas { background-color: oklch(0.955 0.05 25); border-color: oklch(0.82 0.1 20); }
+
+  /* Each scene tells a small sequence instead of moving every prop continuously. */
+  .story-page-part-one .meeting-scene.is-active .swipe-card-left { animation: diary-swipe-left 1s var(--ease-out) both; }
+  .story-page-part-one .meeting-scene.is-active .swipe-card-right { animation: diary-swipe-right 1s var(--ease-out) 120ms both; }
+  .story-page-part-one .meeting-scene.is-active .match-badge { animation: diary-match 650ms var(--ease-out) 650ms both; }
+  .story-page-part-one .meeting-scene.is-active .meeting-platform { animation: paper-arrive 600ms var(--ease-out) 800ms both; }
+  .story-page-part-one .meeting-scene.is-active .meeting-chat .message-bubble { animation-duration: 650ms; }
+  .story-page-part-one .meeting-scene.is-active .meeting-chat .chat-left { animation-delay: 1s; }
+  .story-page-part-one .meeting-scene.is-active .meeting-chat .chat-right { animation-delay: 1.25s; }
+  .story-page-part-one .disconnected-scene.is-active .silent-chat { animation: paper-arrive 850ms var(--ease-out) both; }
+  .story-page-part-one .disconnected-scene.is-active .story-peek { animation: paper-arrive 850ms var(--ease-out) 350ms both; }
+  .story-page-part-one .is-active .typing-dots i { animation-duration: 1.6s; animation-iteration-count: 3; }
+  .story-page-part-one .reconnecting-scene.is-active .suggest-card { animation: paper-arrive 700ms var(--ease-out) both; }
+  .story-page-part-one .reconnecting-scene.is-active .chat-log > * { animation-duration: 650ms; }
+  .story-page-part-one .reconnecting-scene.is-active .chat-log > :nth-child(1) { animation-delay: 1.25s; }
+  .story-page-part-one .reconnecting-scene.is-active .chat-log > :nth-child(2) { animation-delay: 1.5s; }
+  .story-page-part-one .reconnecting-scene.is-active .chat-log > :nth-child(3) { animation-delay: 1.75s; }
+  .story-page-part-one .reconnecting-scene.is-active .chat-log > :nth-child(4) { animation-delay: 2s; }
+  .story-page-part-one .reconnecting-scene.is-active .reconnect-photo { animation: paper-arrive 900ms var(--ease-out) 450ms both; }
+  .story-page-part-one .parallel-scene.is-active .lane-hat { animation: lane-arrive-left 850ms var(--ease-out) both; }
+  .story-page-part-one .parallel-scene.is-active .lane-no { animation: lane-arrive-right 850ms var(--ease-out) 100ms both; }
+  .story-page-part-one .parallel-scene.is-active .call-card { animation: paper-arrive 800ms var(--ease-out) 250ms both; }
+  .story-page-part-one .parallel-scene.is-active .call-title svg { animation-iteration-count: 2; }
+  .story-page-part-one .parallel-scene.is-active .parallel-chats .message-bubble { animation-duration: 650ms; animation-delay: 450ms; }
+  .story-page-part-one .parallel-scene.is-active .parallel-chats .message-bubble:nth-child(2) { animation-delay: 700ms; }
+  .story-page-part-one .parallel-scene.is-active .parallel-chats .message-bubble:nth-child(3) { animation-delay: 950ms; }
+  .story-page-part-one .staying-scene.is-active .staying-frame { animation: paper-arrive 1s var(--ease-out) both; }
+  .story-page-part-one .staying-scene.is-active .staying-calendar { animation: paper-arrive 800ms var(--ease-out) 250ms both; }
+  .story-page-part-one .staying-scene.is-active .staying-calendar li { animation-duration: 500ms; animation-delay: calc(350ms + var(--day) * 55ms); }
+  .story-page-part-one .staying-scene.is-active .staying-calendar li.is-today svg { animation-iteration-count: 2; }
+  .story-page-part-one .staying-scene.is-active .plot-twist-sticker svg { animation-duration: 2s; animation-iteration-count: 1; }
+  .story-page-part-one .connection-thread.is-active .thread-path { animation: diary-thread 1.4s var(--ease-out) 180ms both; }
+  .story-page-part-one .thread-disconnected.is-active .thread-path { animation-name: diary-thread-fade; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .booth-photo, .mood-photo, .polaroid, .photo-thumb {
+      transition: translate 380ms var(--ease-out), scale 380ms var(--ease-out), box-shadow 380ms var(--ease-out);
+    }
+    .booth-photo:hover, .mood-photo:hover, .polaroid:hover, .photo-thumb:hover {
+      translate: 0 -5px;
+      scale: 1.025;
+    }
+    .story-part-navigation a, .keepsake-controls button { transition-duration: 240ms; }
+    .replay-button:hover svg, .intro-part-two-link:hover svg { translate: 3px 0; transition: translate 240ms var(--ease-out); }
+  }
+
+  @media (max-width: 900px) {
+    .story-page-part-one .memory-scene.is-active { animation-duration: 650ms; }
+    .story-page-part-one .meeting-scene.is-active .swipe-card-left,
+    .story-page-part-one .meeting-scene.is-active .swipe-card-right { animation-duration: 750ms; }
+    .story-page-part-one .connection-thread.is-active .thread-path { animation-duration: 1s; }
+  }
+}
+
+@keyframes viewer-arrive { from { opacity: 0; } to { opacity: 1; } }
+@keyframes paper-arrive { from { opacity: 0; translate: 0 16px; } to { opacity: 1; translate: 0 0; } }
+@keyframes lane-arrive-left { from { opacity: 0; translate: -14px 0; } to { opacity: 1; translate: 0 0; } }
+@keyframes lane-arrive-right { from { opacity: 0; translate: 14px 0; } to { opacity: 1; translate: 0 0; } }
+@keyframes diary-swipe-left { from { opacity: 0; transform: translateX(-14%) rotate(-10deg); } to { opacity: 1; transform: translateX(8%) rotate(-6deg); } }
+@keyframes diary-swipe-right { from { opacity: 0; transform: translateX(14%) rotate(9deg); } to { opacity: 1; transform: translateX(-8%) rotate(5deg); } }
+@keyframes diary-match { from { opacity: 0; transform: translate(-50%, -50%) rotate(-8deg) scale(0.82); } to { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(1); } }
+@keyframes diary-thread { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes diary-thread-fade { from { opacity: 0.9; } to { opacity: 0.5; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-lightbox, .photo-lightbox figure, .photo-lightbox figure > img,
+  .story-secret-paper, .story-page-part-one .memory-scene * { animation: none !important; }
+  .story-page-part-one .match-badge { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) !important; }
+  .story-page-part-one .add-friend-btn .label-add { opacity: 0 !important; }
+  .story-page-part-one .add-friend-btn .label-sent, .story-page-part-one .staying-calendar li { opacity: 1 !important; }
+}

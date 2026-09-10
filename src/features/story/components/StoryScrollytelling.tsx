@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { StoryPart, StoryPartId, StoryScrollItem } from "../data/story";
 import { createStoryScrollItems } from "../data/story";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import { useActiveStoryStep } from "../hooks/useActiveStoryStep";
 import { useMediaQuery } from "../../../shared/hooks/useMediaQuery";
-import { useScrollAnimation } from "../hooks/useScrollAnimation";
 import { usePartTwoScroll } from "../hooks/usePartTwoScroll";
 import { useActiveStorySound } from "../hooks/useActiveStorySound";
 import { MobileChapterJourney } from "./MobileChapterJourney";
 import { StickyMemoryStage } from "./StickyMemoryStage";
 import { StoryPartNavigation } from "./StoryPartNavigation";
 import { StoryPartTransition } from "./StoryPartTransition";
+import { PartOneChapterIndex } from "./PartOneChapterIndex";
 import { StoryStep } from "./StoryStep";
 
 interface StoryScrollytellingProps {
@@ -51,7 +51,7 @@ export function StoryScrollytelling({
     onStepEnter: handleStepEnter,
   });
   const activeItem = items.find((item) => item.id === activeId) ?? items[0];
-  const scope = useScrollAnimation<HTMLDivElement>(!reducedMotion && !isMobile);
+  const scope = useRef<HTMLDivElement | null>(null);
   usePartTwoScroll(scope, isMobile, reducedMotion);
   const activeSoundSource = activeItem?.partId === navigationPartId ? activeItem.optionalSound : undefined;
   useActiveStorySound(activeSoundSource, soundEnabled);
@@ -81,10 +81,11 @@ export function StoryScrollytelling({
         return (
           <div className={`story-part story-part-${part.number}`} key={part.id}>
             {partIndex === 0 && !startWithTransition ? (
-              <header className="story-part-heading" id={`part-${part.id}`} data-reveal>
+              <header className="story-part-heading" id={`part-${part.id}`} data-memory-reveal>
                 <span>{part.eyebrow}</span>
                 <h2>{part.title}</h2>
                 <p>{part.subtitle}</p>
+                {part.number === 1 ? <PartOneChapterIndex items={partItems} /> : null}
               </header>
             ) : (
               <StoryPartTransition onInView={setNavigationPartId} part={part} />

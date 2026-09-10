@@ -29,9 +29,9 @@ interface ScenePalette {
 
 const scenePalettes: Record<KeepsakeTheme, ScenePalette> = {
   blush: {
-    background: 0xffedf5, sky: 0xffffff, ground: 0xff9fbd, key: 0xffffff, accentLight: 0xff7dab,
-    floor: 0xffd5e3, wall: 0xffe9f2, arch: 0xff9fbd, petal: 0xffa8c7, petalCenter: 0xffd84f,
-    sparkles: [0xff4f93, 0xffa8c7, 0xffd84f, 0xffffff],
+    background: 0xececdf, sky: 0xfffcf5, ground: 0xa5ad8e, key: 0xfffcf5, accentLight: 0xd9bca5,
+    floor: 0xdedecb, wall: 0xf2eee2, arch: 0xa5ad8e, petal: 0xc7a093, petalCenter: 0xdac78a,
+    sparkles: [0xb88a7c, 0xc2c9a8, 0xdac78a, 0xfffcf5],
   },
   night: {
     background: 0x0b1e38, sky: 0xdfe9ff, ground: 0x143458, key: 0xeaf2ff, accentLight: 0x8bcbd8,

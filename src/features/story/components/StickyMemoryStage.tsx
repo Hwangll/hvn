@@ -1,10 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import gsap from "gsap";
 import type { StoryScrollItem } from "../data/story";
+import { PartOneChapterIndex } from "./PartOneChapterIndex";
 import { ChapterProgress } from "./ChapterProgress";
 import { MemoryJourneyRoute } from "./MemoryJourneyRoute";
 import { ChapterScene } from "./scenes/ChapterScene";
+import { usePointerParallax } from "../../../shared/hooks/usePointerParallax";
 
 interface StickyMemoryStageProps {
   chapter: StoryScrollItem;
@@ -18,21 +20,28 @@ export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotio
   const stageRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const previousIndexRef = useRef(activeIndex);
+  // Part II layers lean toward the cursor (CSS reads --mx/--my); the scroll engine keeps owning `transform`.
+  usePointerParallax(stageRef, chapter.partId === "together-offline" && !reducedMotion);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const content = contentRef.current;
     if (chapter.partId === "together-offline" || !content || reducedMotion || previousIndexRef.current === activeIndex) {
       previousIndexRef.current = activeIndex;
       return undefined;
     }
 
-    const timeline = gsap.timeline({ defaults: { ease: "power2.out" } });
-    timeline.fromTo(content, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.58 });
+    const direction = activeIndex > previousIndexRef.current ? 1 : -1;
+    const context = gsap.context(() => {
+      gsap.fromTo(content,
+        { autoAlpha: 0.2, y: 18 * direction, scale: 0.985 },
+        { autoAlpha: 1, y: 0, scale: 1, duration: 0.72, ease: "power3.out" },
+      );
+    }, content);
     previousIndexRef.current = activeIndex;
 
-    return () => {
-      timeline.kill();
-    };
+    // Revert also restores visibility when reduced motion is enabled mid-transition.
+    return () => context.revert();
+
   }, [activeIndex, chapter.partId, reducedMotion]);
 
   return (
@@ -65,7 +74,10 @@ export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotio
         {chapter.partId === "together-offline" ? (
           <MemoryJourneyRoute activeId={chapter.id} items={chapters} visitedStoryIds={visitedStoryIds} />
         ) : (
-          <ChapterProgress items={chapters} activeId={chapter.id} visitedStoryIds={visitedStoryIds} />
+          <div className="diary-stage-navigation">
+            <ChapterProgress items={chapters} activeId={chapter.id} visitedStoryIds={visitedStoryIds} />
+            <PartOneChapterIndex items={chapters} activeId={chapter.id} compact />
+          </div>
         )}
       </div>
     </aside>

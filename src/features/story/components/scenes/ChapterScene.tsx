@@ -23,7 +23,7 @@ export function ChapterScene({ chapter, isActive, reducedMotion }: ChapterSceneP
       case "reconnecting":
         return <ReconnectingScene chapter={chapter} isActive={isActive} />;
       case "parallel":
-        return <ParallelScene chapter={chapter} isActive={isActive} />;
+        return <ParallelScene chapter={chapter} isActive={isActive} reducedMotion={reducedMotion} />;
       case "staying":
         return <StayingScene chapter={chapter} isActive={isActive} />;
       case "in-person":

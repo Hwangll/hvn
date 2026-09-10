@@ -49,8 +49,8 @@ export function KeepsakePlayground({ partId, visitedStoryIds, playCue, reducedMo
     <section className="keepsake-playground" data-selected-keepsake={effectiveSelectedId} aria-labelledby="keepsake-title">
       <BlossomSprig className="keepsake-flower keepsake-flower-one" variant={partId === "together-offline" ? "blue" : "pink"} />
       <BlossomSprig className="keepsake-flower keepsake-flower-two" variant={partId === "together-offline" ? "blue" : "cream"} />
-      <div className="keepsake-copy">
-        <p className="kicker">cute interactive corner</p>
+      <div className="keepsake-copy" data-memory-reveal>
+        <p className="kicker">HỘP KỶ VẬT CỦA CHÚNG MÌNH</p>
         <h2 id="keepsake-title">Chạm vào mấy món kỷ vật nhỏ xíu này</h2>
         <p>{selectedItem.hint}</p>
         <div className="keepsake-selected" aria-live="polite">
@@ -60,7 +60,7 @@ export function KeepsakePlayground({ partId, visitedStoryIds, playCue, reducedMo
         </div>
       </div>
 
-      <div className="keepsake-stage">
+      <div className="keepsake-stage" data-memory-reveal>
         <div className="keepsake-memory-card" key={selectedItem.id}>
           <span>{String(visibleItems.findIndex((item) => item.id === selectedItem.id) + 1).padStart(2, "0")}</span>
           <strong>{selectedItem.label}</strong>

@@ -36,7 +36,7 @@ export function MemoryFlower3D({ reducedMotion, variant = "sunflower" }: MemoryF
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
+    renderer.toneMappingExposure = 1.12;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.domElement.setAttribute("aria-hidden", "true");
@@ -47,17 +47,17 @@ export function MemoryFlower3D({ reducedMotion, variant = "sunflower" }: MemoryF
     const pmrem = new THREE.PMREMGenerator(renderer);
     const environment = pmrem.fromScene(new RoomEnvironment(), 0.04);
     scene.environment = environment.texture;
-    scene.environmentIntensity = 0.26;
+    scene.environmentIntensity = 0.34;
     pmrem.dispose();
     const camera = new THREE.PerspectiveCamera(31, 1, 0.1, 30);
     // Both keepsakes share one renderer. Changing parts never recreates the WebGL context.
     const flowers = { sunflower: createIntroFlower("sunflower"), hydrangea: createIntroFlower("hydrangea") };
     scene.add(flowers.sunflower, flowers.hydrangea);
-    const ambient = new THREE.HemisphereLight(0xfff8f0, 0x152031, 1.65);
-    const key = new THREE.DirectionalLight(0xfff3dd, 2.7);
-    const lighting: Record<IntroFlowerVariant, { sky: number; ground: number; key: number; rim: number; fill: number }> = {
-      sunflower: { sky: 0xfff8f0, ground: 0x152031, key: 0xfff3dd, rim: 0xffd194, fill: 0xf3f6ff },
-      hydrangea: { sky: 0xeaf3ff, ground: 0x0e1f38, key: 0xf2f7ff, rim: 0x8fc3ff, fill: 0xc7dcff },
+    const ambient = new THREE.HemisphereLight(0xfff8f0, 0x152031, 1.15);
+    const key = new THREE.DirectionalLight(0xfff3dd, 2.9);
+    const lighting: Record<IntroFlowerVariant, { sky: number; ground: number; key: number; rim: number; fill: number; spot: number }> = {
+      sunflower: { sky: 0xfff8f0, ground: 0x152031, key: 0xfff3dd, rim: 0xffc98a, fill: 0xf3f6ff, spot: 0xffecd2 },
+      hydrangea: { sky: 0xeaf3ff, ground: 0x0e1f38, key: 0xf2f7ff, rim: 0x8fc3ff, fill: 0xc7dcff, spot: 0xdfefff },
     };
     key.position.set(-2.4, 4.8, 5);
     key.castShadow = true;
@@ -65,11 +65,16 @@ export function MemoryFlower3D({ reducedMotion, variant = "sunflower" }: MemoryF
     key.shadow.camera.near = 0.5;
     key.shadow.camera.far = 14;
     key.shadow.normalBias = 0.018;
-    const rim = new THREE.DirectionalLight(0xffd194, 1.7);
-    rim.position.set(2.6, 2.8, -1.7);
-    const fill = new THREE.DirectionalLight(0xf3f6ff, 0.7);
+    // A backlight catches petal edges so the blooms separate from the dark room.
+    const rim = new THREE.DirectionalLight(0xffc98a, 2.2);
+    rim.position.set(2.6, 3, -2.2);
+    const fill = new THREE.DirectionalLight(0xf3f6ff, 0.65);
     fill.position.set(2, 0.3, 4);
-    scene.add(ambient, key, rim, fill);
+    // The museum spot: a soft-edged pool of light from above the case, pooling on the pedestal.
+    const spot = new THREE.SpotLight(0xffecd2, 42, 0, 0.46, 0.8, 2);
+    spot.position.set(0.5, 5.4, 3.4);
+    spot.target.position.set(0, -0.3, 0);
+    scene.add(ambient, key, rim, fill, spot, spot.target);
 
     let active = flowers[selectedVariant.current];
     let changedAt = performance.now();
@@ -83,6 +88,7 @@ export function MemoryFlower3D({ reducedMotion, variant = "sunflower" }: MemoryF
       key.color.setHex(palette.key);
       rim.color.setHex(palette.rim);
       fill.color.setHex(palette.fill);
+      spot.color.setHex(palette.spot);
       changedAt = performance.now();
       // Draw at once so the new keepsake shows even while animation frames are paused.
       renderer.render(scene, camera);

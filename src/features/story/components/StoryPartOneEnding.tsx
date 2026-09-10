@@ -6,7 +6,7 @@ import { PolaroidPhoto } from "../../../shared/components/visuals/PolaroidPhoto"
 export function StoryPartOneEnding() {
   return (
     <section className="story-ending part-one-ending" aria-labelledby="part-one-ending-title">
-      <div className="ending-copy" data-reveal>
+      <div className="ending-copy" data-memory-reveal>
         <BlossomSprig className="ending-blossom" />
         <p className="kicker">hết phần i</p>
         <h2 id="part-one-ending-title">{partOneEndingCopy.title}</h2>

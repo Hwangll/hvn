@@ -46,7 +46,7 @@ describe("two-part story expansion", () => {
 
     expect(screen.getByRole("heading", { name: "Thật sự đứng cạnh nhau" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Đi lượn cùng nhau" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Đi công viên" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Hai cốc Mixue và bốn giờ bên nhau" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Thủy cung" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Café" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ngắm hoàng hôn" })).toBeInTheDocument();
@@ -108,7 +108,7 @@ describe("two-part story expansion", () => {
   it("shows intentional photo placeholders for memories that are waiting for real images", () => {
     render(<StoryScrollytelling parts={storyParts} reducedMotion soundEnabled={false} />);
 
-    expect(screen.getAllByText("Thêm ảnh đi công viên tại đây.").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Thêm ảnh buổi tối Mixue tại đây.").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Thêm ảnh ở thủy cung tại đây.").length).toBeGreaterThan(0);
   });
 
@@ -146,7 +146,7 @@ describe("two-part story expansion", () => {
     expect(stops).toHaveLength(5);
     expect(stops.map((stop) => stop.textContent)).toEqual([
       "Đi lượn",
-      "Công viên",
+      "Mixue",
       "Thủy cung",
       "Café",
       "Hoàng hôn",

@@ -23,12 +23,24 @@ export function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separateP
     onReturnToIntro();
   };
 
+  // "Còn tiếp..." keeps its three dots as separate glyphs so they can breathe one after another.
+  const trailingDots = endingCopy.title.match(/(\.{3}|…)$/)?.[0];
+  const titleText = trailingDots ? endingCopy.title.slice(0, -trailingDots.length) : endingCopy.title;
+
   return (
     <section className="story-ending" aria-labelledby="ending-title">
-      <div className="ending-copy" data-reveal>
+      <div className="ending-sky" aria-hidden="true">
+        <i className="star-layer star-layer-far" />
+        <i className="aurora aurora-one" />
+        <i className="aurora aurora-two" />
+      </div>
+      <div className="ending-copy" data-memory-reveal>
         <BlossomSprig className="ending-blossom" />
         <p className="kicker">open ending</p>
-        <h2 id="ending-title">{endingCopy.title}</h2>
+        <h2 id="ending-title">
+          {titleText}
+          {trailingDots ? <span className="ending-ellipsis"><i>.</i><i>.</i><i>.</i></span> : null}
+        </h2>
         {splitParagraphs(endingCopy.body).map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
