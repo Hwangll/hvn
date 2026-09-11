@@ -499,7 +499,9 @@
   margin: 0;
 }
 
-.story-word {
+.story-word,
+.story-title-word,
+.story-title-word > span {
   display: inline-block;
 }
 

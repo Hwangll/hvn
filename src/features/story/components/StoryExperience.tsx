@@ -8,6 +8,7 @@ import { StoryEnding } from "./StoryEnding";
 import { StoryIntro } from "../../intro/components/StoryIntro";
 import { MoodSetup } from "../../intro/components/MoodSetup";
 import { PartTwoAtmosphere } from "./PartTwoAtmosphere";
+import { PartOneAtmosphere } from "./PartOneAtmosphere";
 import { useMemoryReveals } from "../../../shared/hooks/useMemoryReveals";
 import { useMediaQuery } from "../../../shared/hooks/useMediaQuery";
 import { StoryPartOneEnding } from "./StoryPartOneEnding";
@@ -58,8 +59,11 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
 
   return (
     <main className={`story-experience story-page-${page}`} id="top" ref={revealScope}>
-      {page === "part-two" ? <PartTwoAtmosphere reducedMotion={reducedMotion} /> : null}
-      <StoryConnectionPath reducedMotion={reducedMotion} continuousBlue={page === "part-two"} />
+      {page === "part-two"
+        ? <PartTwoAtmosphere reducedMotion={reducedMotion} />
+        : <PartOneAtmosphere moods={pageParts[0]?.chapters.map((chapter) => chapter.mood) ?? []} reducedMotion={reducedMotion} />}
+      {/* Part I's page-length thread; Part II carries its own thread motif on the title page and the ending. */}
+      {page === "part-one" ? <StoryConnectionPath reducedMotion={reducedMotion} /> : null}
       {page === "part-one" ? <StoryIntro reducedMotion={reducedMotion} /> : null}
       {page === "part-one" ? <MoodSetup /> : null}
       {page === "part-one" ? keepsakePlayground : null}

@@ -1,4 +1,4 @@
-import type { CSSProperties, SVGProps } from "react";
+import { useId, type CSSProperties, type SVGProps } from "react";
 
 /* Small vector props for the Part II dioramas. Colours live in CSS so each scene can tint them;
    extra props (data-* scroll hints) pass straight through to the <svg>. */
@@ -56,8 +56,8 @@ export function JellyfishSprite({ className = "", ...rest }: SpriteProps) {
 export function KelpSprite({ className = "", ...rest }: SpriteProps) {
   return (
     <svg className={`kelp-sprite ${className}`.trim()} {...rest} viewBox="0 0 40 120" aria-hidden="true">
-      <path className="kelp-blade" d="M20 120 C6 104 30 92 18 76 C8 62 30 52 20 36 C12 22 26 12 20 0 C28 14 12 26 24 40 C34 54 10 64 22 78 C32 92 8 104 20 120 Z" />
-      <path className="kelp-blade kelp-blade-back" d="M30 120 C22 106 38 96 30 84 C22 72 36 62 30 48 C24 40 34 30 32 18 C36 30 26 40 32 50 C38 62 24 72 32 86 C40 98 24 108 30 120 Z" />
+      <path className="kelp-blade kelp-blade-back" transform="translate(8 0)" d="M20 120 C4 100 34 86 14 66 C0 50 30 40 18 22 C10 10 24 4 22 0 C34 10 20 24 30 40 C40 56 12 66 26 82 C38 96 10 106 20 120 Z" />
+      <path className="kelp-blade" d="M20 120 C4 100 34 86 14 66 C0 50 30 40 18 22 C10 10 24 4 22 0 C34 10 20 24 30 40 C40 56 12 66 26 82 C38 96 10 106 20 120 Z" />
     </svg>
   );
 }
@@ -72,10 +72,11 @@ export function LeafSprite({ className = "", ...rest }: SpriteProps) {
   );
 }
 
+/** A lenticular dusk cloud: long and thin, with a lit underside painted in CSS. */
 export function CloudSprite({ className = "", ...rest }: SpriteProps) {
   return (
-    <svg className={`cloud-sprite ${className}`.trim()} {...rest} viewBox="0 0 120 44" aria-hidden="true">
-      <path d="M14 38 C2 38 2 22 14 22 C14 8 36 4 44 16 C50 4 76 4 80 18 C96 12 114 22 108 38 Z" />
+    <svg className={`cloud-sprite ${className}`.trim()} {...rest} viewBox="0 0 200 44" aria-hidden="true">
+      <path d="M6 30 C24 16 64 12 112 18 C144 22 172 18 196 26 C172 34 124 38 74 36 C42 35 18 36 6 30 Z" />
     </svg>
   );
 }
@@ -99,7 +100,7 @@ export function DrinkCupSprite({ className = "", ...rest }: SpriteProps) {
       <path className="drink-fill" d="M13.5 62 L46.5 62 L43 104 C43 107 17 107 17 104 Z" />
       <path className="drink-swirl" d="M18 32 C18 20 26 20 26 26 C26 14 40 12 40 22 C40 12 50 20 44 30 Z" />
       <path className="drink-shine" d="M17 46 L20 96" />
-      <path className="drink-drop" d="M46 70 C46 66 50 62 50 60 C50 62 54 66 54 70 C54 73 46 73 46 70 Z" />
+      <path className="drink-drop" d="M40 74 C40 71 43 68 43 66 C43 68 46 71 46 74 C46 76 40 76 40 74 Z" />
     </svg>
   );
 }
@@ -121,8 +122,16 @@ export function CoffeeCupSprite({ className = "", ...rest }: SpriteProps) {
 
 /** Two riders on a scooter, drawn as a silhouette for the night streets of the first ride. */
 export function ScooterSprite({ className = "", ...rest }: SpriteProps) {
+  const beamId = useId();
   return (
-    <svg className={`scooter-sprite ${className}`.trim()} {...rest} viewBox="0 0 140 84" aria-hidden="true">
+    <svg className={`scooter-sprite ${className}`.trim()} {...rest} viewBox="0 0 220 84" aria-hidden="true">
+      <defs>
+        <linearGradient id={beamId} x1="0" x2="1">
+          <stop offset="0" stopColor="#ffe9b8" stopOpacity="0.42" />
+          <stop offset="1" stopColor="#ffe9b8" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <ellipse className="scooter-shadow" cx="70" cy="80" rx="64" ry="4" />
       <g className="scooter-body">
         <circle className="scooter-wheel" cx="28" cy="70" r="12" />
         <circle className="scooter-wheel" cx="112" cy="70" r="12" />
@@ -135,7 +144,7 @@ export function ScooterSprite({ className = "", ...rest }: SpriteProps) {
         <path className="scooter-rider scooter-rider-back" d="M74 52 C72 42 76 34 82 32 C80 26 82 20 86 20 C91 20 93 26 90 32 C98 34 100 44 98 54 Z" />
         <path className="scooter-headlight" d="M118 34 C122 32 124 32 126 34 C126 37 124 39 120 40 Z" />
       </g>
-      <path className="scooter-beam" d="M126 34 L140 22 L140 52 L126 40 Z" />
+      <path className="scooter-beam" fill={`url(#${beamId})`} d="M126 34 L220 6 L220 66 L126 40 Z" />
     </svg>
   );
 }

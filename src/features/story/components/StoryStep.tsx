@@ -24,6 +24,7 @@ function renderProse(paragraph: string) {
   let wordIndex = 0;
   const nodes = paragraph.split(/(==.+?==)/g).filter(Boolean).map((segment, segmentIndex) => {
     const marked = segment.startsWith("==") && segment.endsWith("==");
+    const start = wordIndex;
     const words = (marked ? segment.slice(2, -2) : segment).split(/(\s+)/).map((token, tokenIndex) => {
       if (!token) return null;
       if (/^\s+$/.test(token)) return token;
@@ -33,7 +34,25 @@ function renderProse(paragraph: string) {
         </span>
       );
     });
-    return marked ? <mark key={segmentIndex} className="story-ink-mark">{words}</mark> : <Fragment key={segmentIndex}>{words}</Fragment>;
+    // The marker stroke knows its first word and its length, so it can draw as one continuous line across wraps.
+    return marked
+      ? <mark key={segmentIndex} className="story-ink-mark" style={{ "--mi": start, "--mn": wordIndex - start } as CSSProperties}>{words}</mark>
+      : <Fragment key={segmentIndex}>{words}</Fragment>;
+  });
+  return { nodes, words: wordIndex };
+}
+
+/** Title words rise one after another through a clipped box; the scroll paint drives them from `--reveal`. */
+function renderTitle(title: string) {
+  let wordIndex = 0;
+  const nodes = title.split(/(\s+)/).map((token, tokenIndex) => {
+    if (!token) return null;
+    if (/^\s+$/.test(token)) return token;
+    return (
+      <span key={tokenIndex} className="story-title-word" style={{ "--i": wordIndex++ } as CSSProperties}>
+        <span>{token}</span>
+      </span>
+    );
   });
   return { nodes, words: wordIndex };
 }
@@ -65,17 +84,18 @@ export function StoryStep({ chapter, index, isActive, playCue, variant = "deskto
 
         <div className="story-step-arrow">
           <header className="story-step-header">
-            {chapter.partNumber === 2 ? (
-              <span className="story-step-numeral" aria-hidden="true">
-                {String(chapter.chapterIndex).padStart(2, "0")}{chapter.sceneIndex ? <small>.{chapter.sceneIndex}</small> : null}
-              </span>
-            ) : null}
+            {/* Both parts carry the chapter numeral as a watermark behind the heading. */}
+            <span className="story-step-numeral" aria-hidden="true">
+              {String(chapter.chapterIndex).padStart(2, "0")}{chapter.sceneIndex ? <small>.{chapter.sceneIndex}</small> : null}
+            </span>
             <p className="story-step-eyebrow" data-step-reveal>
               PHẦN {chapter.partNumber === 1 ? "I" : "II"} · CHƯƠNG {String(chapter.chapterIndex).padStart(2, "0")}
               {chapter.sceneIndex ? ` · CẢNH ${String(chapter.sceneIndex).padStart(2, "0")}` : ""}
             </p>
-            {chapter.sceneIndex ? <p className="story-step-day-title" data-step-reveal>MỘT NGÀY THOẢI MÁI NHẤT TRÊN ĐỜI</p> : null}
-            <h2 className="story-step-title" data-step-reveal>{chapter.title}</h2>
+            {chapter.sceneIndex ? <p className="story-step-day-title" data-step-reveal>{chapter.chapterTitle.toUpperCase()}</p> : null}
+            <h2 className="story-step-title" data-step-reveal="words" style={{ "--words": renderTitle(chapter.title).words } as CSSProperties}>
+              {renderTitle(chapter.title).nodes}
+            </h2>
           </header>
 
           <div className="story-step-body">
@@ -93,17 +113,17 @@ export function StoryStep({ chapter, index, isActive, playCue, variant = "deskto
           <blockquote className="story-step-quote" data-step-reveal>
             <Sparkles aria-hidden="true" size={16} />
             {chapter.quote}
-            {chapter.partNumber === 2 ? (
-              // A hand-drawn stroke under the quote draws itself from `--reveal` as the reader reaches it.
-              <svg className="story-quote-stroke" viewBox="0 0 240 14" preserveAspectRatio="none" aria-hidden="true">
-                <path d="M3 9 C40 3 70 12 110 6 S170 2 205 8 S230 9 237 6" pathLength={1} />
-              </svg>
-            ) : null}
+            {/* A hand-drawn stroke under the quote draws itself from `--reveal` as the reader reaches it. */}
+            <svg className="story-quote-stroke" viewBox="0 0 240 14" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M3 9 C40 3 70 12 110 6 S170 2 205 8 S230 9 237 6" pathLength={1} />
+            </svg>
           </blockquote>
 
-          <div data-step-reveal>
-            <PhotoGallery compact={variant === "mobile"} label={`Album ${chapter.shortTitle}`} photos={chapter.gallery} playCue={playCue} />
-          </div>
+          {chapter.gallery.length ? (
+            <div data-step-reveal>
+              <PhotoGallery compact={variant === "mobile"} label={`Album ${chapter.shortTitle}`} photos={chapter.gallery} playCue={playCue} />
+            </div>
+          ) : null}
 
           {chapter.secretNote ? <div className={`story-secret-note secret-tone-${chapter.secretTone} ${secretOpen ? "is-open" : ""}`}>
             <button

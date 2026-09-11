@@ -130,13 +130,23 @@
   font-size: clamp(2.5rem, 3.75vw, 4.6rem); font-weight: 400; letter-spacing: -0.055em; line-height: 1.1; text-wrap: balance;
   text-shadow: 0 16px 50px #00000080;
 }
-.memory-title-word { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 0.08em 0.14em; margin: 0 -0.08em -0.14em; }
+.memory-title-word {
+  display: inline-block;
+  overflow: visible;
+  vertical-align: bottom;
+  /* Opacity drives the reveal; visible overflow preserves Vietnamese marks and italic swashes. */
+  padding: 0.2em 0.14em 0.18em;
+  margin: -0.2em -0.14em -0.18em;
+}
 .memory-title-word > span { display: inline-block; animation: room-word-up 0.85s var(--room-ease) calc(0.1s + var(--i) * 0.07s) both; transform-origin: left bottom; }
 .memory-title-word.is-accent > span {
   font-style: italic;
   background: linear-gradient(100deg, var(--room-accent) 0%, #fff8ea 40%, var(--room-glow) 55%, var(--room-accent) 72%);
   background-size: 260% 100%; background-position: 100% 0;
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  /* Same as the Part II title: the painted box has to clear the Vietnamese marks under the baseline. */
+  padding: 0.26em 0.08em 0.32em;
+  margin: -0.26em -0.08em -0.32em;
   animation: room-word-up 0.85s var(--room-ease) calc(0.1s + var(--i) * 0.07s) both, room-shimmer 7s ease-in-out 1.6s infinite;
 }
 .memory-intro.is-part-two-selected .memory-title-word.is-accent > span { background-image: linear-gradient(100deg, #b2cfdc 0%, #eaf7fb 40%, #8bcbd8 55%, #b2cfdc 72%); }

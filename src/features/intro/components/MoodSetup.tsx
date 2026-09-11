@@ -1,5 +1,6 @@
 import { HeartHandshake, Sparkles } from "lucide-react";
 import { moodSetupPhotos } from "../../story/data/story";
+import { StoryPicture } from "../../../shared/components/visuals/StoryPicture";
 
 export function MoodSetup() {
   return (
@@ -20,7 +21,7 @@ export function MoodSetup() {
       <div className="mood-scrapbook" aria-label="Scrapbook mở đầu bằng ảnh">
         {moodSetupPhotos.map((photo, index) => (
           <figure data-memory-reveal data-memory-order={index + 1} className={`mood-photo mood-photo-${index + 1}`} key={photo.src}>
-            <img src={photo.src} alt={photo.alt} loading="lazy" />
+            <StoryPicture src={photo.src} alt={photo.alt} loading="lazy" />
             <figcaption>
               <Sparkles aria-hidden="true" size={14} />
               {photo.caption}

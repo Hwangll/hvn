@@ -62,7 +62,8 @@ export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotio
           <div className="memory-canvas-scene offline-scene-stack">
             {chapters.map((item, index) => (
               <div className="offline-scene-panel" data-offline-panel={item.id} key={item.id} style={{ opacity: index === 0 ? 1 : 0 }}>
-                <ChapterScene chapter={item} isActive={item.id === chapter.id} reducedMotion={reducedMotion} />
+                {/* Every stage panel stays live: idle loops breathe through the dissolve and pause via .is-hidden when a panel is gone. */}
+                <ChapterScene chapter={item} isActive reducedMotion={reducedMotion} />
               </div>
             ))}
           </div>

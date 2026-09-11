@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { StoryPicture } from "../../../../shared/components/visuals/StoryPicture";
 
 interface MemoryPhotoProps {
   src?: string;
@@ -35,7 +36,7 @@ export function MemoryPhoto({
           <span>{placeholderLabel ?? "ảnh kỷ niệm đang chờ thay"}</span>
         </div>
       ) : (
-        <img
+        <StoryPicture
           src={src}
           alt={alt}
           loading={eager ? "eager" : "lazy"}

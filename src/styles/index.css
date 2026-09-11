@@ -5,6 +5,9 @@
 @import "./story-part-two.css";
 @import "./intro-flowers.css";
 
+/* The WebP wrapper must not create a box of its own, so existing `img` layout rules keep applying. */
+picture { display: contents; }
+
 :root {
   color-scheme: light;
   --paper: oklch(0.975 0.028 13);

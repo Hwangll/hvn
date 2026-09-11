@@ -7,6 +7,7 @@ import "./styles/memory-opening.css";
 import "./styles/story-motion.css";
 import "./styles/part-one-scenes.css";
 import "./styles/part-one-layout.css";
+import "./styles/part-one-edition.css";
 
 createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>

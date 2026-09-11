@@ -7,3 +7,6 @@ coverage/
 .DS_Store
 .vercel
 .env*
+
+# Third-party Claude skills installed locally (re-install from their own repo)
+.claude/skills/

@@ -3,6 +3,7 @@ import { Fragment, type CSSProperties } from "react";
 import { jumpToStoryTarget } from "../../story/utils/jumpToStoryTarget";
 import { heroPhotos, introCopy } from "../../story/data/story";
 import { BlossomSprig } from "../../../shared/components/visuals/BlossomSprig";
+import { StoryPicture } from "../../../shared/components/visuals/StoryPicture";
 
 interface StoryIntroProps {
   reducedMotion: boolean;
@@ -70,7 +71,7 @@ export function StoryIntro({ reducedMotion }: StoryIntroProps) {
           <span className="diary-photo-note" aria-hidden="true">những ngày mình thương</span>
           {heroPhotos.map((photo, index) => (
             <figure data-memory-reveal data-memory-order={index + 1} className={`booth-photo booth-photo-${index + 1}`} key={photo.src}>
-              <img src={photo.src} alt={photo.alt} />
+              <StoryPicture src={photo.src} alt={photo.alt} />
               <figcaption>{photo.caption}</figcaption>
             </figure>
           ))}

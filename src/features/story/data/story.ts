@@ -64,6 +64,8 @@ export interface StoryScrollItem extends Omit<StoryChapter, "scenes"> {
   partNumber: 1 | 2;
   partTitle: string;
   chapterId: string;
+  /** Title of the parent chapter, shown above scenes that belong to the same day. */
+  chapterTitle: string;
   chapterIndex: number;
   chapterCount: number;
   sceneIndex?: number;
@@ -419,21 +421,19 @@ export const partTwoChapters: StoryChapter[] = [
     microcopy: "hai cốc Mixue, bốn tiếng, một giờ sáng.",
     quote: "Không cần gì lớn lao. Chỉ cần người ngồi cạnh là em.",
     secretTone: "soft",
-    memoryCaption: "Chỗ dành cho tấm ảnh của buổi tối hai cốc Mixue kéo dài tới một giờ sáng.",
+    memoryCaption: "Buổi tối hai cốc Mixue, kéo dài tới tận một giờ sáng.",
     gallery: [
       {
-        src: "",
-        alt: "Vị trí chờ ảnh buổi tối Mixue",
-        caption: "Hai cốc Mixue",
-        placeholderNote: "Thêm ảnh buổi tối Mixue tại đây.",
+        src: "/images/story/part-two/mixue-night.jpg",
+        alt: "Hai người chụp cận cảnh trong đêm, bên bông hướng dương và chú gấu bông",
+        caption: "Bông hướng dương, chú gấu bông và một buổi tối rất dài.",
       },
     ],
     mood: "daylight",
     accentColor: "#8BCBD8",
     accent: "#8BCBD8",
-    image: "",
-    imageAlt: "Vị trí chờ ảnh buổi tối Mixue",
-    imageNote: "Thêm ảnh buổi tối Mixue tại đây.",
+    image: "/images/story/part-two/mixue-night.jpg",
+    imageAlt: "Hai người chụp cận cảnh trong đêm, bên bông hướng dương và chú gấu bông",
     alignment: "right",
     visualType: "dates",
     artifactType: "date-card",
@@ -443,12 +443,12 @@ export const partTwoChapters: StoryChapter[] = [
     id: "most-comfortable-day",
     index: 3,
     year: "Gần đây",
-    title: "Một ngày thoải mái nhất trên đời",
-    shortTitle: "Một ngày thật thoải mái",
-    description: "Một ngày đi từ thủy cung, qua café, rồi cùng nhau ngắm hoàng hôn.",
-    paragraphs: ["Một ngày đi từ thủy cung, qua café, rồi cùng nhau ngắm hoàng hôn."],
-    microcopy: "ba điểm dừng, cùng một nhịp bình yên.",
-    quote: "Một ngày thoải mái nhất trên đời.",
+    title: "Ai mà chả có rất nhiều lần đầu tiên",
+    shortTitle: "Rất nhiều lần đầu tiên",
+    description: "Một ngày đi từ thủy cung, qua café Hồ Tây, rồi cùng nhau ngắm hoàng hôn.",
+    paragraphs: ["Một ngày đi từ thủy cung, qua café Hồ Tây, rồi cùng nhau ngắm hoàng hôn."],
+    microcopy: "ba điểm dừng, rất nhiều lần đầu tiên.",
+    quote: "Ai mà chả có rất nhiều lần đầu tiên.",
     secretTone: "spark",
     memoryCaption: "Một ngày liền mạch, từ sắc xanh dưới nước đến ánh hoàng hôn.",
     gallery: [],
@@ -469,29 +469,44 @@ export const partTwoChapters: StoryChapter[] = [
         year: "Điểm dừng 01",
         title: "Thủy cung",
         shortTitle: "Thủy cung",
-        description: "Ngày ấy bắt đầu ở thủy cung, nơi cả hai cùng ngắm nhìn thế giới dưới nước.",
+        description: "Với thời khắc này, phải nói là trọn vẹn 1 buổi sáng cuối tuần đối với em, về tất cả mọi thứ. Tuy tiết trời hơi nóng nực một chút, nhưng không gian, thời gian và cái người đàn ông đi bên cạnh em, khiến em cảm thấy dịu nhẹ và ấm áp, như chợt đổ đông giữa mùa hè ấy =)))))\n\nThú thật là em rất hay ngượng ngùng, nhưng đi với anh như kiểu bắt trúng tần số ấy, k biết ngại là gì mà thật ra mình toàn làm mấy cái rất là sến giữa đám đông, em nghĩ lại mà đôi khi cũng cười tủm tỉm =)))) vô tư thật, tình yêu khiến 2 người xa lạ kết nối thành 1 như thế ấy, đôi lúc em vẫn không tin mình có ngày hôm nay.\n\nCòn cảnh thủy cung, em không còn gì để bàn, quá là đẹp i, nó thơ nó cổ tích nó xanh mướt mà nó xuân hoàng vl raaa. Outfit của chúng ta ngày hôm ấy đi kèm bó hoa nó lại cũng là hợp đét nữa.\n\nEm thích mấy khúc mình bàn luận về bầy cá hài hước, mình như 2 đứa trẻ được đi xem hàng zậy, cute lắm. Cảm ơn anh vì đã dẫn em tới thủy cung, iu anh nhắmm!",
         paragraphs: [
-          "Ngày ấy bắt đầu ở thủy cung.",
-          "Giữa sắc xanh và những chuyển động chậm dưới nước, cả hai cùng đứng cạnh nhau để ngắm nhìn.",
+          "Với thời khắc này, phải nói là trọn vẹn 1 buổi sáng cuối tuần đối với em, về tất cả mọi thứ. Tuy tiết trời hơi nóng nực một chút, nhưng không gian, thời gian và cái người đàn ông đi bên cạnh em, khiến em cảm thấy dịu nhẹ và ấm áp, như chợt đổ đông giữa mùa hè ấy =)))))",
+          "Thú thật là em rất hay ngượng ngùng, nhưng đi với anh như kiểu bắt trúng tần số ấy, k biết ngại là gì mà thật ra mình toàn làm mấy cái rất là sến giữa đám đông, em nghĩ lại mà đôi khi cũng cười tủm tỉm =)))) vô tư thật, tình yêu khiến 2 người xa lạ kết nối thành 1 như thế ấy, đôi lúc em vẫn không tin mình có ngày hôm nay.",
+          "Còn cảnh thủy cung, em không còn gì để bàn, quá là đẹp i, nó thơ nó cổ tích nó xanh mướt mà nó xuân hoàng vl raaa. Outfit của chúng ta ngày hôm ấy đi kèm bó hoa nó lại cũng là hợp đét nữa.",
+          "Em thích mấy khúc mình bàn luận về bầy cá hài hước, mình như 2 đứa trẻ được đi xem hàng zậy, cute lắm. ==Cảm ơn anh vì đã dẫn em tới thủy cung, iu anh nhắmm!==",
         ],
-        microcopy: "cùng nhìn về một phía.",
-        quote: "Một điểm dừng xanh và thật chậm.",
+        microcopy: "nó thơ, nó cổ tích, nó xanh mướt.",
+        quote: "Như hai đứa trẻ được đi xem hàng.",
         secretTone: "soft",
-        memoryCaption: "Vị trí dành cho ảnh và chiếc vé của buổi đi thủy cung.",
+        memoryCaption: "Buổi sáng cuối tuần trọn vẹn, giữa sắc xanh của thủy cung.",
         gallery: [
           {
-            src: "",
-            alt: "Vị trí chờ ảnh ở thủy cung",
-            caption: "Khoảnh khắc ở thủy cung",
-            placeholderNote: "Thêm ảnh ở thủy cung tại đây.",
+            src: "/images/story/part-two/aquarium-couple.jpg",
+            alt: "Hai người đứng cạnh nhau trước ô kính lớn của thủy cung",
+            caption: "Hai đứa đứng lặng trước ô kính xanh mướt.",
+          },
+          {
+            src: "/images/story/part-two/aquarium-jellyfish.jpg",
+            alt: "Khoảnh khắc của hai người bên bức tường sứa phát sáng cùng bó hoa",
+            caption: "Bức tường sứa và bó hoa của buổi sáng hôm ấy.",
+          },
+          {
+            src: "/images/story/part-two/aquarium-funny-fish.jpg",
+            alt: "Chú cá màu cam với gương mặt ngộ nghĩnh sát ô kính",
+            caption: "Bầy cá hài hước mà hai đứa bàn luận mãi.",
+          },
+          {
+            src: "/images/story/part-two/aquarium-big-tank.jpg",
+            alt: "Ô kính khổng lồ của thủy cung với đàn cá bơi phía sau",
+            caption: "Ô kính khổng lồ, cả hai như hai đứa trẻ đi xem hàng.",
           },
         ],
         mood: "aqua",
         accentColor: "#67D9ED",
         accent: "#67D9ED",
-        image: "",
-        imageAlt: "Vị trí chờ ảnh ở thủy cung",
-        imageNote: "Thêm ảnh ở thủy cung tại đây.",
+        image: "/images/story/part-two/aquarium-couple.jpg",
+        imageAlt: "Hai người đứng cạnh nhau trước ô kính lớn của thủy cung",
         alignment: "left",
         visualType: "aquarium",
         artifactType: "aquarium-ticket",
@@ -501,25 +516,18 @@ export const partTwoChapters: StoryChapter[] = [
         id: "cafe",
         sceneIndex: 2,
         year: "Điểm dừng 02",
-        title: "Café",
-        shortTitle: "Café",
-        description: "Rời thủy cung, ngày ấy tiếp tục bằng một khoảng nghỉ ở café.",
+        title: "Café Hồ Tây",
+        shortTitle: "Café Hồ Tây",
+        description: "Hmmm, gọi là như nào nhỉ, chúng ta không có nhiều hoạt động ở khúc này, ngoài ôm nhau và hôn. Chắc em sẽ nhớ mãi quá tại vì lần đầu tiên đi tới quán cafe mà em bị nhân viên nhắc nhở là giữ ý tứ lun í =))))) nhưng mà chỉ ngại lúc đó thôi, sau hình như vì có anh, em chả cần biết xung quanh có bố con thằng nào nữa.\n\nCó lẽ cái ngốc của lứa đôi cũng chỉ đến thế. Chỉ cần hôm nay được bên người, được thấy anh cười, xoa dịu và âu yếm, hai kẻ ngốc cứ vậy mà tựa vào nhau. Thế gian dẫu có bao nhiêu đổi dời, cũng chẳng hề hấn gì.",
         paragraphs: [
-          "Rời thủy cung, ngày ấy tiếp tục bằng một khoảng nghỉ ở café.",
-          "Một nhịp chậm hơn, ấm hơn, vừa đủ để ngồi cạnh nhau và để thời gian trôi thật nhẹ.",
+          "Hmmm, gọi là như nào nhỉ, chúng ta không có nhiều hoạt động ở khúc này, ngoài ôm nhau và hôn. Chắc em sẽ nhớ mãi quá tại vì lần đầu tiên đi tới quán cafe mà em bị nhân viên nhắc nhở là giữ ý tứ lun í =))))) nhưng mà chỉ ngại lúc đó thôi, sau hình như vì có anh, em chả cần biết xung quanh có bố con thằng nào nữa.",
+          "Có lẽ cái ngốc của lứa đôi cũng chỉ đến thế. Chỉ cần hôm nay được bên người, được thấy anh cười, xoa dịu và âu yếm, hai kẻ ngốc cứ vậy mà tựa vào nhau. ==Thế gian dẫu có bao nhiêu đổi dời, cũng chẳng hề hấn gì.==",
         ],
-        microcopy: "một khoảng nghỉ thật êm.",
-        quote: "Không cần vội khi đang thấy thoải mái.",
+        microcopy: "hai kẻ ngốc tựa vào nhau.",
+        quote: "Chỉ cần hôm nay được bên người.",
         secretTone: "soft",
-        memoryCaption: "Trang nhật ký bên bàn café đang chờ ảnh và một ghi chú thật của hai người.",
-        gallery: [
-          {
-            src: "",
-            alt: "Vị trí chờ ảnh ở café",
-            caption: "Khoảng nghỉ ở café",
-            placeholderNote: "Thêm ảnh và ghi chú ở café tại đây.",
-          },
-        ],
+        memoryCaption: "Không có tấm ảnh nào ở điểm dừng này, chỉ có tờ hoá đơn của quán.",
+        gallery: [],
         mood: "cafe",
         accentColor: "#DCC9AD",
         accent: "#DCC9AD",
@@ -537,29 +545,28 @@ export const partTwoChapters: StoryChapter[] = [
         year: "Điểm dừng 03",
         title: "Ngắm hoàng hôn",
         shortTitle: "Hoàng hôn",
-        description: "Cuối ngày, cả hai cùng ngắm hoàng hôn và nhận ra mình vừa có một ngày rất đặc biệt.",
+        description: "Anh nói mình đã bị em lấy đi rất nhiều lần đầu, nhưng có vẻ như chính em cũng cảm nhận được từ phía mình như thế. Lần đầu em có 1 buổi ngắm hoàng hôn đúng giờ mà không cần hẹn trước, kéo dài không lâu nhưng em cảm giác thật hạnh phúc vì được ngắm cùng anh.\n\nHoàng hôn buồn cái gì chứ =))) vui muốn chớt, đẹp nao lòng. Đó không chắc là buổi chiều hoàng hôn đẹp nhất, nhưng đó là lần đầu tiên em được ngắm cùng với người yêu đấy, đơn giản mà đáng nhớ vô cùng.\n\nCảm ơn anh, đã lên lịch cho một ngày cuối tuần bình yên và trọn vẹn với chúng mình đến vậy. Yêu ơi của em, em yêu người rất nhiềuuuuu.",
         paragraphs: [
-          "Cuối ngày là khoảng trời chuyển dần sang màu đào, cam và tím nhạt.",
-          "Sau thủy cung và café, cả hai cùng ngắm hoàng hôn rồi cùng thừa nhận cảm giác của ngày hôm ấy.",
+          "Anh nói mình đã bị em lấy đi rất nhiều lần đầu, nhưng có vẻ như chính em cũng cảm nhận được từ phía mình như thế. Lần đầu em có 1 buổi ngắm hoàng hôn đúng giờ mà không cần hẹn trước, kéo dài không lâu nhưng em cảm giác thật hạnh phúc vì được ngắm cùng anh.",
+          "Hoàng hôn buồn cái gì chứ =))) vui muốn chớt, đẹp nao lòng. Đó không chắc là buổi chiều hoàng hôn đẹp nhất, nhưng đó là lần đầu tiên em được ngắm cùng với người yêu đấy, đơn giản mà đáng nhớ vô cùng.",
+          "Cảm ơn anh, đã lên lịch cho một ngày cuối tuần bình yên và trọn vẹn với chúng mình đến vậy. ==Yêu ơi của em, em yêu người rất nhiềuuuuu.==",
         ],
-        microcopy: "hai đường, cùng một hướng.",
-        quote: "Một ngày thoải mái nhất trên đời.",
+        microcopy: "hoàng hôn đúng giờ, không cần hẹn trước.",
+        quote: "Đơn giản mà đáng nhớ vô cùng.",
         secretTone: "spark",
-        memoryCaption: "Vị trí dành cho tấm ảnh cuối ngày, khi cả hai cùng nhìn về một hướng.",
+        memoryCaption: "Buổi hoàng hôn đầu tiên được ngắm cùng người yêu.",
         gallery: [
           {
-            src: "",
-            alt: "Vị trí chờ ảnh ngắm hoàng hôn",
-            caption: "Khoảnh khắc ngắm hoàng hôn",
-            placeholderNote: "Thêm ảnh hoàng hôn tại đây.",
+            src: "/images/story/part-two/sunset-westlake.jpg",
+            alt: "Mặt trời lặn xuống mặt hồ, ánh nắng vàng cam trải dài trên nước",
+            caption: "Hoàng hôn đúng giờ, không cần hẹn trước.",
           },
         ],
         mood: "sunset",
         accentColor: "#D8BACF",
         accent: "#D8BACF",
-        image: "",
-        imageAlt: "Vị trí chờ ảnh ngắm hoàng hôn",
-        imageNote: "Thêm ảnh hoàng hôn tại đây.",
+        image: "/images/story/part-two/sunset-westlake.jpg",
+        imageAlt: "Mặt trời lặn xuống mặt hồ, ánh nắng vàng cam trải dài trên nước",
         alignment: "left",
         visualType: "sunset",
         artifactType: "sunset-photo",
@@ -596,6 +603,7 @@ export function createStoryScrollItems(parts: readonly StoryPart[]): StoryScroll
         partNumber: part.number,
         partTitle: part.title,
         chapterId: chapter.id,
+        chapterTitle: chapter.title,
         chapterIndex: chapter.index,
         chapterCount: part.chapters.length,
       };
@@ -636,11 +644,54 @@ export const partOneEndingCopy = {
   image: "/images/story/lover/flower-peace.jpg",
 };
 
+/**
+ * The sealed envelope that closes Part II.
+ *
+ * ▸ ĐỔI NGÀY Ở ĐÂY: `opensAt` là ngày giờ phong bì tự mở ra (ISO 8601, giờ Việt Nam +07:00).
+ *   Trước ngày đó trang hiện phong bì dán kín kèm đồng hồ đếm ngược; đúng ngày thì phong bì mở ra.
+ */
+export const partThreeCopy = {
+  opensAt: "2026-12-20T20:00:00+07:00",
+  sealedTitle: "Một phong bì đang chờ",
+  openTitle: "Phần III",
+  sealedNote: "Bên trong là chương tiếp theo. Chưa tới ngày nên anh niêm lại đã.",
+  openNote: "Tới ngày rồi. Phong bì mở ra, và chuyện của chúng mình được viết tiếp.",
+  stamp: "Hát & Nờ",
+  openLabel: "Mở vào ngày",
+  countdownLabels: { days: "ngày", hours: "giờ", minutes: "phút", seconds: "giây" },
+};
+
+/** The five real places Part II actually happened, laid out on a stylised map of Hà Nội. */
+export const journeyMapStops = [
+  { id: "in-person-meeting", name: "SDU Tower", place: "Văn Quán, Hà Đông", x: 76, y: 416 },
+  { id: "our-dates", name: "Công viên Phùng Khoang", place: "Hai cốc Mixue", x: 108, y: 330 },
+  { id: "aquarium", name: "Lotte Mall Tây Hồ", place: "Thủy cung", x: 72, y: 96 },
+  { id: "cafe", name: "Philo Garden", place: "Café sân vườn", x: 160, y: 212 },
+  { id: "sunset", name: "Đường Thanh Niên", place: "Hoàng hôn Hồ Tây", x: 268, y: 172 },
+];
+
+export const journeyMapCopy = {
+  eyebrow: "Bản đồ của chúng mình",
+  title: "Năm điểm dừng trên một thành phố",
+  note: "Từ chân tòa nhà ở Hà Đông, ngược lên Hồ Tây, rồi kết lại bên đường Thanh Niên.",
+};
+
+/** The single Saturday that Chapter 3 covers, split across its three stops. */
+export const dayTimeline = {
+  start: "10:30",
+  end: "19:00",
+  stops: {
+    aquarium: { from: "10:30", to: "14:00", note: "gặp nhau, thủy cung rồi đi ăn" },
+    cafe: { from: "14:00", to: "17:30", note: "café sân vườn bên hồ" },
+    sunset: { from: "17:30", to: "19:00", note: "ngắm hoàng hôn rồi đưa em về" },
+  },
+} as const;
+
 export const endingCopy = {
   title: "Còn tiếp...",
-  body: "Lần này, câu chuyện có thêm những ngày ở cạnh nhau.",
+  body: "Người bảo em chẳng nhớ chẳng thương, nhưng người nào biết, nỗi nhớ người em chẳng dám tỏ cùng ai. Viết đến khi những nếp giấy dày lên theo năm tháng, hay đến khi mực cũ nhòe đi, mà nỗi nhớ vẫn vẹn nguyên như thuở ban đầu. Và nếu có thể, em vẫn luôn muốn cùng người đi qua hết thảy những mùa thương của nhân gian.\nEm bé của anh, Hồng Ngọc, nhớ thương anh rất nhiều!",
   replayAllCta: "Xem lại từ đầu",
   replayDatesCta: "Xem lại những buổi hẹn",
   footnote: "Từ những lần gặp qua màn hình đến những ngày thật sự ở cạnh nhau.",
-  image: "/images/story/lover/flower-peace.jpg",
+  image: "/images/story/part-two/aquarium-couple.jpg",
 };

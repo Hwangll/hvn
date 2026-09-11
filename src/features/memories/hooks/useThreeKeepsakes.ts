@@ -105,12 +105,13 @@ export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSe
 
     let renderer: THREE.WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: false });
     } catch {
       unsupportedTimer = window.setTimeout(() => setSupported(false), 0);
       return () => window.clearTimeout(unsupportedTimer);
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Phones render at 1.5x at most: the box shares the frame budget with the scroll engine.
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.matchMedia("(max-width: 900px)").matches ? 1.5 : 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
@@ -118,11 +119,11 @@ export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSe
     renderer.shadowMap.type = THREE.PCFShadowMap;
     container.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.HemisphereLight(palette.sky, palette.ground, theme === "night" ? 2.4 : 3.4);
-    const keyLight = new THREE.DirectionalLight(palette.key, theme === "night" ? 3 : 3.4);
+    const ambientLight = new THREE.HemisphereLight(palette.sky, palette.ground, theme === "blush" ? 3.4 : 2.4);
+    const keyLight = new THREE.DirectionalLight(palette.key, theme === "blush" ? 3.4 : 3);
     keyLight.position.set(2.8, 5.4, 3.6);
     keyLight.castShadow = true;
-    const blushLight = new THREE.PointLight(palette.accentLight, theme === "night" ? 3.2 : 2.6, 14);
+    const blushLight = new THREE.PointLight(palette.accentLight, theme === "blush" ? 2.6 : 3.2, 14);
     blushLight.position.set(-3, 2.2, 2.8);
     scene.add(ambientLight, keyLight, blushLight);
 
@@ -131,7 +132,7 @@ export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSe
 
     const floor = new THREE.Mesh(
       new THREE.CylinderGeometry(3.25, 3.75, 0.24, 80),
-      new THREE.MeshPhysicalMaterial({ color: palette.floor, roughness: theme === "night" ? 0.42 : 0.72, clearcoat: theme === "night" ? 0.6 : 0.18, clearcoatRoughness: theme === "night" ? 0.3 : 0.65 }),
+      new THREE.MeshPhysicalMaterial({ color: palette.floor, roughness: theme !== "blush" ? 0.42 : 0.72, clearcoat: theme !== "blush" ? 0.6 : 0.18, clearcoatRoughness: theme !== "blush" ? 0.3 : 0.65 }),
     );
     floor.position.y = -1.05;
     floor.receiveShadow = true;
@@ -149,6 +150,7 @@ export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSe
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2(9, 9);
     let hovered: KeepsakeObject | null = null;
+    let pointerDirty = true;
     let frameId = 0;
     const resize = () => {
       const width = container.clientWidth;
@@ -171,10 +173,12 @@ export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSe
 
     const onPointerMove = (event: PointerEvent) => {
       setPointer(event);
+      pointerDirty = true;
     };
 
     const onPointerLeave = () => {
       pointer.set(9, 9);
+      pointerDirty = true;
       renderer.domElement.style.cursor = "grab";
     };
 
@@ -198,10 +202,14 @@ export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSe
 
     const animate = (time: number) => {
       const elapsed = time * 0.001;
-      raycaster.setFromCamera(pointer, camera);
-      const visibleKeepsakes = keepsakeObjects.filter((object) => object.visible);
-      hovered = findKeepsake(raycaster.intersectObjects(visibleKeepsakes, true)[0]?.object);
-      renderer.domElement.style.cursor = hovered ? "pointer" : "grab";
+      // Raycast only after the pointer moved; hovering is the only reader of the result.
+      if (pointerDirty) {
+        raycaster.setFromCamera(pointer, camera);
+        const visibleKeepsakes = keepsakeObjects.filter((object) => object.visible);
+        hovered = findKeepsake(raycaster.intersectObjects(visibleKeepsakes, true)[0]?.object);
+        renderer.domElement.style.cursor = hovered ? "pointer" : "grab";
+        pointerDirty = false;
+      }
 
       keepsakeObjects.forEach((object, index) => {
         const isUnlocked = unlockedIdsRef.current.includes(object.userData.id);
@@ -237,13 +245,42 @@ export function useThreeKeepsakes({ reducedMotion, selectedId, unlockedIds, onSe
       camera.position.x = Math.sin(elapsed * 0.18) * 0.28;
       camera.lookAt(0, 0.1, 0);
       renderer.render(scene, camera);
-      frameId = window.requestAnimationFrame(animate);
+      if (running) frameId = window.requestAnimationFrame(animate);
     };
 
-    frameId = window.requestAnimationFrame(animate);
+    // The loop only runs while the box is near the viewport and the tab is visible; an offscreen
+    // WebGL loop would otherwise starve the scroll engine on phones.
+    let running = false;
+    const start = () => {
+      if (running) return;
+      running = true;
+      frameId = window.requestAnimationFrame(animate);
+    };
+    const stop = () => {
+      running = false;
+      window.cancelAnimationFrame(frameId);
+    };
+    const nearViewport = typeof IntersectionObserver === "undefined"
+      ? null
+      : new IntersectionObserver((entries) => (entries.some((entry) => entry.isIntersecting) ? start() : stop()), { rootMargin: "25% 0px" });
+    if (nearViewport) nearViewport.observe(container);
+    else start();
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        stop();
+      } else if (nearViewport) {
+        nearViewport.unobserve(container);
+        nearViewport.observe(container);
+      } else {
+        start();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
-      window.cancelAnimationFrame(frameId);
+      stop();
+      nearViewport?.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       window.clearTimeout(unsupportedTimer);
       resizeObserver.disconnect();
       renderer.domElement.removeEventListener("pointermove", onPointerMove);

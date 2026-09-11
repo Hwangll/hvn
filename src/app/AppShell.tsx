@@ -39,7 +39,7 @@ export function AppShell({ page = "part-one" }: AppShellProps) {
   const introVisible = experienceState === "intro" || experienceState === "focusing" || (experienceState === "transitioning" && !isIntroSeen);
   const storyVisible = experienceState === "story-reveal" || experienceState === "story-ready" || (experienceState === "transitioning" && isIntroSeen);
 
-  useLenisScroll(prefersReducedMotion || isPartTwoPage);
+  useLenisScroll(prefersReducedMotion);
 
   useEffect(() => {
     const shouldLock = experienceState === "intro" || experienceState === "focusing" || experienceState === "transitioning";
@@ -107,7 +107,7 @@ export function AppShell({ page = "part-one" }: AppShellProps) {
   }, [clearTransitionTimers, isPartTwoPage, prefersReducedMotion, scheduleTransition]);
 
   return (
-    <div className={`app-shell experience-${experienceState} ${isPartTwoPage ? "app-part-two" : ""}`}>
+    <div className={`app-shell experience-${experienceState} ${isPartTwoPage ? "app-part-two" : "app-part-one"}`}>
       {!isPartTwoPage ? <AmbientPetals /> : null}
       <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
       {introVisible ? <MemoryIntro onEnterStory={runToStory} phase={experienceState} reducedMotion={prefersReducedMotion} /> : null}

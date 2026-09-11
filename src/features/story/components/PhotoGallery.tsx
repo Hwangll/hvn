@@ -1,8 +1,10 @@
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import gsap from "gsap";
 import type { StoryPhoto } from "../data/story";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
+import { StoryPicture } from "../../../shared/components/visuals/StoryPicture";
 
 interface PhotoGalleryProps {
   compact?: boolean;
@@ -14,6 +16,7 @@ interface PhotoGalleryProps {
 export function PhotoGallery({ compact = false, label, playCue, photos }: PhotoGalleryProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const figureRef = useRef<HTMLElement | null>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const availableIndices = useMemo(() => photos.flatMap((photo, index) => photo.src ? [index] : []), [photos]);
   const activePhoto = activeIndex === null ? null : photos[activeIndex];
@@ -38,6 +41,23 @@ export function PhotoGallery({ compact = false, label, playCue, photos }: PhotoG
       return availableIndices[(position + direction + availableIndices.length) % availableIndices.length];
     });
   }, [availableIndices]);
+
+  // The viewer grows out of the thumbnail that opened it, so the photo reads as the same object picked up off the page.
+  useLayoutEffect(() => {
+    if (!isOpen) return undefined;
+    const figure = figureRef.current;
+    const opener = openerRef.current;
+    if (!figure || !opener || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const from = opener.getBoundingClientRect();
+    const to = figure.getBoundingClientRect();
+    if (!from.width || !to.width || !to.height) return undefined;
+    dialogRef.current?.classList.add("is-flip");
+    const tween = gsap.fromTo(figure,
+      { x: from.left + from.width / 2 - (to.left + to.width / 2), y: from.top + from.height / 2 - (to.top + to.height / 2), scaleX: from.width / to.width, scaleY: from.height / to.height, opacity: 0.4 },
+      { x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1, duration: 0.6, ease: "power3.out", clearProps: "transform,opacity" },
+    );
+    return () => { tween?.kill?.(); };
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -95,7 +115,7 @@ export function PhotoGallery({ compact = false, label, playCue, photos }: PhotoG
               onClick={(event) => openPhoto(index, event.currentTarget)}
               aria-label={`Mở ảnh: ${photo.caption}`}
             >
-              <img src={photo.src} alt={photo.alt} loading="lazy" />
+              <StoryPicture src={photo.src} alt={photo.alt} loading="lazy" />
               <span>{photo.caption}</span>
             </button>
           ) : (
@@ -110,11 +130,11 @@ export function PhotoGallery({ compact = false, label, playCue, photos }: PhotoG
       {activePhoto ? createPortal(
         <div ref={dialogRef} className="photo-lightbox" data-lenis-prevent role="dialog" aria-modal="true" aria-label={activePhoto.caption}>
           <button className="photo-lightbox-backdrop" type="button" aria-hidden="true" tabIndex={-1} onClick={closePhoto} />
-          <figure>
+          <figure ref={figureRef}>
             <button className="photo-lightbox-close" type="button" aria-label="Đóng ảnh" onClick={closePhoto}>
               <X aria-hidden="true" size={18} />
             </button>
-            {activePhoto.src ? <img src={activePhoto.src} alt={activePhoto.alt} /> : null}
+            {activePhoto.src ? <StoryPicture key={activePhoto.src} src={activePhoto.src} alt={activePhoto.alt} /> : null}
             <figcaption>
               <span aria-live="polite">{activePhoto.caption}</span>
               <span className="photo-lightbox-count">{availableIndices.indexOf(activeIndex!) + 1} / {availableIndices.length}</span>

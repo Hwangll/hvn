@@ -10,7 +10,7 @@
   .intro-title-word.is-animated { animation: paper-arrive 900ms var(--ease-out) calc(120ms + var(--word-index) * 120ms) both; }
   .photo-lightbox { animation: viewer-arrive 220ms ease-out; }
   .photo-lightbox figure { animation: paper-arrive 420ms var(--ease-out); }
-  .photo-lightbox figure > img { animation: viewer-arrive 320ms ease-out; }
+  .photo-lightbox figure img { animation: viewer-arrive 320ms ease-out; }
   .story-secret-note.is-open .story-secret-paper { animation: paper-arrive 420ms var(--ease-out); transform-origin: top center; }
   .story-page-part-one .memory-canvas { transition: background-color 800ms ease, border-color 600ms ease; }
   .story-page-part-one .mood-quiet .memory-canvas { background-color: oklch(0.945 0.03 320); border-color: oklch(0.82 0.06 320); }
@@ -82,7 +82,7 @@
 @keyframes diary-thread-fade { from { opacity: 0.9; } to { opacity: 0.5; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .photo-lightbox, .photo-lightbox figure, .photo-lightbox figure > img,
+  .photo-lightbox, .photo-lightbox figure, .photo-lightbox figure img,
   .story-secret-paper, .story-page-part-one .memory-scene * { animation: none !important; }
   .story-page-part-one .match-badge { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) !important; }
   .story-page-part-one .add-friend-btn .label-add { opacity: 0 !important; }

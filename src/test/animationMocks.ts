@@ -21,6 +21,7 @@ vi.mock("gsap", () => ({
     fromTo: vi.fn(),
     set: vi.fn(),
     to: vi.fn(),
+    ticker: { add: vi.fn(), remove: vi.fn(), lagSmoothing: vi.fn() },
   },
 }));
 
@@ -29,13 +30,16 @@ vi.mock("@gsap/react", () => ({
 }));
 
 vi.mock("gsap/ScrollTrigger", () => ({
-  ScrollTrigger: {},
+  ScrollTrigger: { update: vi.fn(), refresh: vi.fn() },
 }));
 
 vi.mock("lenis", () => ({
   default: vi.fn().mockImplementation(function LenisMock() {
     return {
       raf: vi.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
+      scrollTo: vi.fn(),
       destroy: vi.fn(),
     };
   }),

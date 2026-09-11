@@ -48,9 +48,9 @@ describe("two-part story expansion", () => {
     expect(screen.getByRole("heading", { name: "Đi lượn cùng nhau" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Hai cốc Mixue và bốn giờ bên nhau" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Thủy cung" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Café" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Café Hồ Tây" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ngắm hoàng hôn" })).toBeInTheDocument();
-    expect(screen.getAllByText("Một ngày thoải mái nhất trên đời.").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Ai mà chả có rất nhiều lần đầu tiên.").length).toBeGreaterThan(0);
   });
 
   it("shows every Part II visual in reading order with reduced motion on desktop", () => {
@@ -105,11 +105,12 @@ describe("two-part story expansion", () => {
     expect(screen.queryByRole("button", { name: /Bó hoa xanh/ })).not.toBeInTheDocument();
   });
 
-  it("shows intentional photo placeholders for memories that are waiting for real images", () => {
+  it("stands in for the café photo that was never taken with the café bill", () => {
     render(<StoryScrollytelling parts={storyParts} reducedMotion soundEnabled={false} />);
 
-    expect(screen.getAllByText("Thêm ảnh buổi tối Mixue tại đây.").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Thêm ảnh ở thủy cung tại đây.").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("hai bạn giữ ý tứ giúp mình nhé").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("một buổi chiều không muốn về").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Thêm ảnh café/)).not.toBeInTheDocument();
   });
 
   it("provides compact navigation for both story parts", () => {

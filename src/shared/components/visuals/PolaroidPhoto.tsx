@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { StoryPicture } from "./StoryPicture";
 
 interface PolaroidPhotoProps {
   src: string;
@@ -19,7 +20,7 @@ export function PolaroidPhoto({ src, alt, caption, tilt }: PolaroidPhotoProps) {
           <strong>vẫn giữ chỗ thật xinh ở đây</strong>
         </div>
       ) : (
-        <img
+        <StoryPicture
           src={src}
           alt={alt}
           loading="lazy"
