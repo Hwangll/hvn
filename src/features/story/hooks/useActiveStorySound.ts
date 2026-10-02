@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Howl } from "howler";
+import { audioSources } from "../../../shared/hooks/useSoundToggle";
 
 export function useActiveStorySound(source: string | undefined, enabled: boolean) {
   useEffect(() => {
@@ -7,7 +8,7 @@ export function useActiveStorySound(source: string | undefined, enabled: boolean
       return undefined;
     }
 
-    const audio = new Howl({ src: [source], preload: true, volume: 0.24 });
+    const audio = new Howl({ src: audioSources(source), preload: true, volume: 0.24 });
     audio.play();
 
     return () => {

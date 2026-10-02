@@ -15,7 +15,6 @@ Website được build thành hai trang riêng:
 - GSAP + ScrollTrigger + `@gsap/react`: reveal animation có cleanup khi unmount.
 - Three.js: scene 3D tương tác cho các kỷ vật nhỏ trong câu chuyện.
 - Lenis: smooth scrolling, tự tắt khi người dùng bật reduced motion.
-- Framer Motion: intro title xuất hiện từng chữ.
 - Lucide React: icon nhẹ, nhất quán.
 - Vitest + React Testing Library: test render, replay, reduced motion, fallback ảnh, sound toggle.
 
@@ -56,11 +55,21 @@ Muốn đổi ảnh cho từng chapter/cảnh thì cập nhật `image`, `imageA
 
 Nếu ảnh thiếu hoặc lỗi, component `PolaroidPhoto` sẽ hiện placeholder thay thế. Xem thêm `public/images/README.md`.
 
+Mỗi ảnh gốc (`.jpg`/`.png`) có hai bản đi kèm cùng tên: `.avif` (trình duyệt hiện đại tải bản này, nhẹ hơn WebP 25–40%) và `.webp` (dự phòng). `StoryPicture` tự chọn bản phù hợp. Khi thêm hoặc thay ảnh, chạy:
+
+```bash
+node scripts/optimize-images.mjs
+```
+
+Script chỉ xử lý các ảnh được dùng trong `src/`, cần `sips` (macOS) cùng `cwebp` và `avifenc` (`brew install webp libavif`).
+
 ## Thêm Âm Thanh
 
-Nút âm thanh mặc định tắt và không autoplay. Nhạc nền hiện tại nằm ở `public/audio/tinh-minh-la-ky.mp4` và được phát loop sau khi người xem bấm bật âm thanh.
+Nút âm thanh mặc định tắt và không autoplay. Nhạc nền hiện tại nằm ở `public/audio/tinh-minh-la-ky.m4a` (chỉ track âm thanh AAC, tách từ file mp4 gốc) và được phát loop sau khi người xem bấm bật âm thanh.
 
 Sound effect theo chapter dùng `optionalSound` trong `src/features/story/data/story.ts`. Các tương tác chung dùng cue map trong `src/shared/hooks/useSoundToggle.ts`.
+
+Mỗi SFX có hai bản: `.m4a` (AAC, vài kB) được phát trước, `.wav` gốc là bản dự phòng cho trình duyệt không có AAC. Thêm SFX mới thì tạo bản `.m4a` cạnh file `.wav`: `afconvert -f m4af -d aac -s 0 -b 96000 ten.wav ten.m4a`.
 
 Các SFX hiện có trong `public/audio`:
 
@@ -95,14 +104,18 @@ Lenis chỉ làm smooth scroll; khi `prefers-reduced-motion: reduce`, Lenis và 
 
 ```text
 src/
-  app/                    # Điểm vào và điều phối trạng thái trải nghiệm
+  main.tsx                # Điểm vào Phần I (/)
+  main-part-two.tsx       # Điểm vào Phần II (/part-2/), cùng app nhưng CSS riêng
+  app/                    # Điều phối trạng thái trải nghiệm
+  assets/fonts/           # Font tự host và fonts.css
   features/
     intro/                # Mở đầu và transition vào câu chuyện
     story/                # Nội dung, scenes, scroll và gallery của hành trình
-    memories/             # Hộp kỷ vật và WebGL tương tác
+    memories/             # Hộp kỷ vật và WebGL tương tác (three/ tải khi cần)
   shared/                 # Hook, component và utility dùng chung
   styles/                 # Global styles và style của scrollytelling
   test/
+scripts/                  # optimize-images.mjs: tạo bản AVIF/WebP cho ảnh
 public/images/
 ```
 
@@ -116,7 +129,7 @@ npm run build
 
 Import repo vào Vercel, framework preset là Vite, output directory là `dist`.
 
-Vite đang dùng multi-page input trong `vite.config.ts`, vì vậy build tạo cả `dist/index.html` và `dist/part-2/index.html`.
+Vite đang dùng multi-page input trong `vite.config.ts`, vì vậy build tạo cả `dist/index.html` và `dist/part-2/index.html`, mỗi trang một file CSS riêng. Header cache đã có sẵn trong `vercel.json`.
 
 Netlify:
 
@@ -124,7 +137,16 @@ Netlify:
 npm run build
 ```
 
-Build command: `npm run build`, publish directory: `dist`.
+Build command: `npm run build`, publish directory: `dist`. Header cache nằm trong `public/_headers`.
+
+## Hiệu Năng
+
+- **Font tự host** trong `src/assets/fonts` (đúng các file Google Fonts trước đây, giấy phép OFL): không còn round trip sang bên thứ ba, và font tiêu đề Literata được preload nên tiêu đề không nhảy dòng khi font về. Các file `*-vietnamese-ext` chỉ chứa ~12 chữ Việt (ă, đ, ơ, ư…) cắt ra từ file latin-ext, nên mỗi trang không phải tải cả latin-ext (đã giảm ~110 kB) mà chữ vẫn dựng y hệt. Chi tiết thứ tự khai báo ở đầu `fonts.css`.
+- **CSS theo trang**: hai trang dùng chung các file CSS theo cùng thứ tự; Phần II import bản `?page=two` (`src/main-part-two.tsx`). Khi build, plugin `pageScopedCss` trong `vite.config.ts` bỏ các selector chỉ khớp được ở trang kia (`.story-part-2`, `.story-page-part-two`, `.app-part-two` và phiên bản Phần I). Style dành riêng cho một trang nên được scope bằng các class này để được tách tự động.
+- **Three.js tải khi cần**: hộp kỷ vật render chữ và nút ngay, còn scene 3D (`src/features/memories/three/keepsakeScene.ts`) chỉ tải khi hộp còn cách khoảng một màn hình. Canvas do React giữ chỗ sẵn nên layout không nhảy.
+- **Engine cuộn**: `usePartTwoScroll` bỏ qua cảnh đã mờ hẳn hoặc chưa đổi tiến độ, không ghi lại giá trị không đổi, và `--reveal` là custom property không kế thừa (`@property`), được đưa tới từng chữ đang chuyển thay vì cả đoạn văn. Các biến hiệu ứng của sân khấu Phần II (`--vblur`, `--leak`…) cũng không kế thừa.
+- **Animation ngoài màn hình tạm dừng**: section nào có vòng lặp CSS chạy mãi (sao, ánh kim, polaroid trôi…) thì gắn `data-idle-zone`; `useIdleZones` tạm dừng chúng khi section ra khỏi màn hình và chạy tiếp khi quay lại.
+- **Cache khi deploy**: `vercel.json` (Vercel) và `public/_headers` (Netlify) đặt cache vĩnh viễn cho `/assets/*` (tên file có hash) và cache một tuần cho ảnh, âm thanh.
 
 ## Quyết Định Kỹ Thuật
 

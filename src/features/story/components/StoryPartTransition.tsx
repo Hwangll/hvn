@@ -39,6 +39,7 @@ export function StoryPartTransition({ onInView, part }: StoryPartTransitionProps
       id={`part-${part.id}`}
       aria-labelledby={`${part.id}-transition-title`}
       data-reveal
+      data-idle-zone
       ref={transitionRef}
     >
       <div className="part-transition-sky" aria-hidden="true">

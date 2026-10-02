@@ -37,7 +37,7 @@ export function KeepsakePlayground({ partId, visitedStoryIds, playCue, reducedMo
     playCue?.(keepsakeSoundCues[id]);
     setSelectedId(id);
   }, [playCue]);
-  const { containerRef, supported } = useThreeKeepsakes({
+  const { canvasRef, containerRef, supported } = useThreeKeepsakes({
     reducedMotion,
     selectedId: effectiveSelectedId,
     unlockedIds,
@@ -46,7 +46,7 @@ export function KeepsakePlayground({ partId, visitedStoryIds, playCue, reducedMo
   });
 
   return (
-    <section className="keepsake-playground" data-selected-keepsake={effectiveSelectedId} aria-labelledby="keepsake-title">
+    <section className="keepsake-playground" data-selected-keepsake={effectiveSelectedId} aria-labelledby="keepsake-title" data-idle-zone>
       <BlossomSprig className="keepsake-flower keepsake-flower-one" variant={partId === "together-offline" ? "blue" : "pink"} />
       <BlossomSprig className="keepsake-flower keepsake-flower-two" variant={partId === "together-offline" ? "blue" : "cream"} />
       <div className="keepsake-copy" data-memory-reveal>
@@ -75,13 +75,13 @@ export function KeepsakePlayground({ partId, visitedStoryIds, playCue, reducedMo
           role="img"
           aria-label="Hộp kỷ vật 3D tương tác, các món sẽ mở dần theo chương câu chuyện."
         >
-          {!supported ? (
+          {supported ? <canvas ref={canvasRef} /> : (
             <div className="keepsake-fallback">
               <Flower2 aria-hidden="true" size={34} />
               <strong>Chế độ nhẹ</strong>
               <span>Trình duyệt đang dùng bản tĩnh để đọc mượt hơn.</span>
             </div>
-          ) : null}
+          )}
         </div>
 
         <div className="keepsake-controls" aria-label="Chọn kỷ vật 3D">

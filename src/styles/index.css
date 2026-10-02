@@ -1,12 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=Literata:opsz,wght@7..72,500;7..72,650;7..72,720&family=Nunito:wght@700;800;900&family=Dancing+Script:wght@500;600;700&display=swap&subset=vietnamese");
+/* Self-hosted copies of the Google Fonts files: no third-party round trip, and the page can preload what it paints first. */
+@import "../assets/fonts/fonts.css";
 @import "tailwindcss";
 @import "./story-scrollytelling.css";
 @import "./story-scenes.css";
 @import "./story-part-two.css";
 @import "./intro-flowers.css";
 
-/* The WebP wrapper must not create a box of its own, so existing `img` layout rules keep applying. */
+/* The AVIF/WebP wrapper must not create a box of its own, so existing `img` layout rules keep applying. */
 picture { display: contents; }
+/* Under display: contents every <source> would become a grid/flex item (with its gap) of the photo frame. The frames
+   were laid out with one source; the AVIF twin added a second, which must not take part in layout. */
+picture > source ~ source { display: none; }
+
+/* Sections off screen hold their idle loops (useIdleZones) and resume where they stopped. */
+[data-idle-zone][data-offscreen],
+[data-idle-zone][data-offscreen] *,
+[data-idle-zone][data-offscreen] *::before,
+[data-idle-zone][data-offscreen] *::after { animation-play-state: paused !important; }
 
 :root {
   color-scheme: light;
@@ -1209,13 +1219,15 @@ a:focus-visible {
   }
 }
 
+/* The sideways flutter moves the absolutely placed petal with `translate` rather than `margin-left`: the same path
+   on screen, but the compositor can run it instead of a style and layout pass for every petal on every frame. */
 @keyframes petal-flutter {
   from {
-    margin-left: calc(var(--petal-drift) * -0.25);
+    translate: calc(var(--petal-drift) * -0.25) 0;
   }
 
   to {
-    margin-left: calc(var(--petal-drift) * 0.45);
+    translate: calc(var(--petal-drift) * 0.45) 0;
   }
 }
 

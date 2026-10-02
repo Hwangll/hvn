@@ -31,6 +31,37 @@ export const partTwoMotion = {
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 
+type NumberSetter = (value: number) => void;
+
+/**
+ * Most scroll frames leave most props where they were: the scenes off stage are clamped, and settled copy stays put.
+ * Rounding to an invisible step and skipping repeats keeps those frames from re-rendering transform strings and
+ * dirtying styles for nothing. GSAP renders the whole transform on every x/y/rotation/scale call, so each skipped
+ * component is one less transform string per prop per frame.
+ */
+function memoNumber(set: NumberSetter, step: number): NumberSetter {
+  const inverse = 1 / step;
+  let last = Number.NaN;
+  return (value) => {
+    const rounded = Math.round(value * inverse) / inverse;
+    if (rounded === last) return;
+    last = rounded;
+    set(rounded);
+  };
+}
+
+function memoString(set: (value: string) => void): (value: string) => void {
+  let last: string | undefined;
+  return (value) => {
+    if (value === last) return;
+    last = value;
+    set(value);
+  };
+}
+
+const quickNumber = (target: Element | Element[] | NodeListOf<Element>, property: string, step: number, unit?: string) =>
+  memoNumber(gsap.quickSetter(target, property, unit) as NumberSetter, step);
+
 interface SceneEffect {
   parallax: number;
   drift: number;
@@ -62,7 +93,8 @@ interface SceneEffect {
 
 function readEffect(element: HTMLElement, index: number): SceneEffect {
   const num = (name: string) => Number(element.dataset[name] ?? 0) || 0;
-  const setter = (property: string, unit?: string) => gsap.quickSetter(element, property, unit) as (value: number) => void;
+  // Sub-pixel and sub-hundredth steps are invisible; they only cost style work.
+  const setter = (property: string, unit?: string, step = 0.01) => quickNumber(element, property, step, unit);
   return {
     parallax: num("parallax"),
     drift: num("drift"),
@@ -85,10 +117,10 @@ function readEffect(element: HTMLElement, index: number): SceneEffect {
     x: setter("x", "px"),
     y: setter("y", "px"),
     rotation: setter("rotation", "deg"),
-    scale: setter("scale"),
-    opacity: setter("opacity"),
-    sheenX: element.dataset.sheen !== undefined ? setter("--sheen-x", "%") : undefined,
-    develop: element.dataset.develop !== undefined ? setter("--develop") : undefined,
+    scale: setter("scale", undefined, 0.0001),
+    opacity: setter("opacity", undefined, 0.001),
+    sheenX: element.dataset.sheen !== undefined ? setter("--sheen-x", "%", 0.1) : undefined,
+    develop: element.dataset.develop !== undefined ? setter("--develop", undefined, 0.001) : undefined,
   };
 }
 
@@ -120,13 +152,27 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
     const route = part.querySelector<HTMLElement>(".memory-journey-route");
     const effectElements = hosts.map((host) => Array.from(host.querySelectorAll<HTMLElement>(EFFECT_SELECTOR)));
     const revealElements = steps.map((step) => Array.from(step.querySelectorAll<HTMLElement>("[data-step-reveal]")));
+    // `--reveal` is registered as non-inherited, so word-mode copy hands it to each word, title word and ink mark
+    // itself, and only while that piece is actually moving: a paragraph mid-reveal restyles the half-dozen words in
+    // its ink window instead of all of them. The CSS formulas stay the source of truth; these mirror them only to know
+    // when a piece's value changes (lead = its index, base/span = the formula's word count and window).
+    const wordPieces = revealElements.map((elements) => elements.map((element) => {
+      if (element.dataset.stepReveal !== "words") return [];
+      const read = (target: HTMLElement | null, name: string) => Number(target?.style.getPropertyValue(name)) || 0;
+      const words = read(element, "--words") || 1;
+      const pieces: { element: HTMLElement; lead: number; base: number; span: number }[] = [];
+      element.querySelectorAll<HTMLElement>(".story-word").forEach((word) => pieces.push({ element: word, lead: read(word, "--i"), base: words + 6, span: 6 }));
+      element.querySelectorAll<HTMLElement>(".story-title-word > span").forEach((inner) => pieces.push({ element: inner, lead: read(inner.parentElement, "--i"), base: words + 2, span: 2 }));
+      element.querySelectorAll<HTMLElement>(".story-ink-mark").forEach((mark) => pieces.push({ element: mark, lead: read(mark, "--mi"), base: words + 6, span: read(mark, "--mn") + 5 }));
+      return pieces;
+    }));
     if (!steps.length) return;
 
     // quickSetter avoids allocating tweens or reading layout on every scroll frame.
     // Restore the original inline styles as these setters also touch elements outside scope.
     const animated = [
       ...moods, ...panels, ...depths, ...threads.flatMap((paths) => Array.from(paths)), ...(statement ? [statement] : []), ...(route ? [route] : []),
-      ...(stack ? [stack] : []), ...effectElements.flat(), ...revealElements.flat(),
+      ...(stack ? [stack] : []), ...effectElements.flat(), ...revealElements.flat(), ...wordPieces.flat(2).map((piece) => piece.element),
     ];
     const originalStyles = animated.map((element) => element.getAttribute("style"));
     // Register transform ownership with the GSAP context before using quickSetters.
@@ -138,24 +184,25 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
       gsap.set(threads.flatMap((paths) => Array.from(paths)), { strokeDashoffset: 0 });
     }
     // Fully faded skies are also hidden (and their idle loops paused via CSS), so only the skies in view cost anything.
-    const moodSetters = Array.from(moods, (mood) => gsap.quickSetter(mood, "opacity"));
+    const moodSetters = Array.from(moods, (mood) => quickNumber(mood, "opacity", 0.001));
     const moodHidden = Array.from(moods, () => false);
     let nightHidden = false;
     const panelHidden = panels.map(() => false);
     // The route's rule and traveler glide with the dissolve instead of jumping at the scrollama step.
-    const routeSetter = route ? (gsap.quickSetter(route, "--route-scroll") as (value: number) => void) : undefined;
+    const routeSetter = route ? quickNumber(route, "--route-scroll", 0.0001) : undefined;
     const panelSetters = panels.map((panel) => ({
-      alpha: gsap.quickSetter(panel, "opacity"),
-      visibility: gsap.quickSetter(panel, "visibility"),
-      y: gsap.quickSetter(panel, "y", "px"),
-      scaleX: gsap.quickSetter(panel, "scaleX"),
-      scaleY: gsap.quickSetter(panel, "scaleY"),
+      alpha: quickNumber(panel, "opacity", 0.0001),
+      visibility: memoString(gsap.quickSetter(panel, "visibility") as (value: string) => void),
+      y: quickNumber(panel, "y", 0.01, "px"),
+      scaleX: quickNumber(panel, "scaleX", 0.00001),
+      scaleY: quickNumber(panel, "scaleY", 0.00001),
     }));
+    // These four are registered as non-inherited in CSS, so a change restyles the stack (and its light leak), not every prop.
     const stackSetters = stack && !reducedMotion ? {
-      leak: gsap.quickSetter(stack, "--leak") as (value: number) => void,
-      leakX: gsap.quickSetter(stack, "--leak-x") as (value: number) => void,
-      blur: gsap.quickSetter(stack, "--vblur", "px") as (value: number) => void,
-      skew: gsap.quickSetter(stack, "--vskew", "deg") as (value: number) => void,
+      leak: quickNumber(stack, "--leak", 0.001),
+      leakX: quickNumber(stack, "--leak-x", 0.1),
+      blur: quickNumber(stack, "--vblur", 0.01, "px"),
+      skew: quickNumber(stack, "--vskew", 0.001, "deg"),
     } : null;
     // Scroll speed reads as a little motion blur on the stage; a ticker eases it back to stillness once the reader stops.
     let velocity = 0;
@@ -169,20 +216,34 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
       stackSetters?.skew(v * 0.5);
     };
     if (stackSetters && !mobile) gsap.ticker.add(tickSpeed);
-    const threadSetters = threads.map((paths) => gsap.quickSetter(paths, "strokeDashoffset"));
-    const depthSetters = Array.from(depths, (depth) => gsap.quickSetter(depth, "y", "px"));
+    const threadSetters = threads.map((paths) => quickNumber(paths, "strokeDashoffset", 0.0001));
+    const depthSetters = Array.from(depths, (depth) => quickNumber(depth, "y", 0.01, "px"));
     const depthRates = Array.from(depths, (depth) => Number(depth.dataset.waterDepth));
-    const statementSetter = statement ? gsap.quickSetter(statement, "opacity") : undefined;
+    const statementSetter = statement ? quickNumber(statement, "opacity", 0.001) : undefined;
     const effects = reducedMotion ? [] : effectElements.map((elements) => elements.map(readEffect));
     // Keep photos and captions sharp throughout the dissolve.
     if (panels.length) gsap.set(panels, { filter: "none" });
+    const skip: NumberSetter = () => {};
     const reveals = revealElements.map((elements) => elements.map((element) => ({
       // Word-mode copy keeps its own opacity and lets CSS cascade the words from `--reveal`.
       words: element.dataset.stepReveal === "words",
-      reveal: gsap.quickSetter(element, "--reveal") as (value: number) => void,
-      opacity: gsap.quickSetter(element, "opacity") as (value: number) => void,
-      y: gsap.quickSetter(element, "y", "px") as (value: number) => void,
-      filter: gsap.quickSetter(element, "filter") as (value: string) => void,
+      // `--reveal` inherits into the whole block, so only write it where something reads it: words and the quote's
+      // stroke. An eyebrow or an album would restyle every descendant on every frame of its reveal for nothing.
+      reveal: element.dataset.stepReveal === "words" || element.querySelector(".story-quote-stroke") ? quickNumber(element, "--reveal", 0.001) : skip,
+      opacity: quickNumber(element, "opacity", 0.001),
+      y: quickNumber(element, "y", 0.01, "px"),
+      filter: memoString(gsap.quickSetter(element, "filter") as (value: string) => void),
+    })));
+    const pieceSetters = wordPieces.map((elements) => elements.map((pieces) => pieces.map((piece) => {
+      const set = gsap.quickSetter(piece.element, "--reveal") as NumberSetter;
+      let shown = Number.NaN;
+      return (reveal: number) => {
+        // Skip pieces whose own value would not move: the words outside the ink window are fully dry or not yet written.
+        const value = Math.round(clampProgress((reveal * piece.base - piece.lead) / piece.span) * 1000);
+        if (value === shown) return;
+        shown = value;
+        set(Math.round(reveal * 10000) / 10000);
+      };
     })));
     let boundaries: number[] = [];
     let starts: number[] = [];
@@ -193,6 +254,10 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
     let revealTops: number[][] = [];
     let travel = 1;
     let viewport = window.innerHeight;
+    // The progress each host's props were last painted at; a host whose progress has not moved needs no work.
+    let paintedAt: string[] = [];
+    // Part II keeps Part I's per-scene thread in the DOM but hidden; drawing an invisible thread is pure style work.
+    let threadShown: boolean[] = [];
     const driver = { progress: 0 };
     let mounted = true;
     const paint = () => {
@@ -245,6 +310,7 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
             ? smooth(clampProgress((position - (starts[0] - viewport * partTwoMotion.entrance)) / (viewport * (partTwoMotion.entrance - partTwoMotion.settle))))
             : (blend[i - 1] ?? 0);
         const leaving = sequential ? 0 : (blend[i] ?? 0);
+        let visible = true;
         if (!sequential) {
           const set = panelSetters[i];
           // Complementary weights keep the stage present throughout the reversible handoff.
@@ -263,7 +329,12 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
             panels[i].classList.toggle("is-hidden", hidden);
           }
           if (leaving > handoff && leaving < 1) handoff = leaving;
+          visible = !hidden;
         }
+        // A fully faded panel is invisible, and a host at the progress it was last painted at would get the same values.
+        const key = `${local}|${entered}|${leaving}`;
+        if (!visible || paintedAt[i] === key) return;
+        paintedAt[i] = key;
         const amplitude = sequential ? SEQUENTIAL_AMPLITUDE : { drift: 1, parallax: 1, rise: 1, sink: 1 };
         // Phone canvas size, rather than browser chrome/viewport height, sets its travel.
         const sceneHeight = sequential ? hostHeights[i] : viewport;
@@ -330,6 +401,7 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
         stackSetters.leakX(-70 + handoff * 240);
       }
       threadSetters.forEach((set, i) => {
+        if (!threadShown[i]) return;
         const draw = clampProgress((position - starts[i] + viewport * 0.8) / (heights[i] + viewport * 0.1));
         set(1 - draw);
       });
@@ -341,6 +413,7 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
           set.reveal(eased);
           if (set.words) {
             set.opacity(1); set.y((1 - eased) * (mobile ? 0 : 4)); set.filter("none");
+            for (const setPiece of pieceSetters[i][k]) setPiece(eased);
             return;
           }
           set.opacity(eased);
@@ -354,7 +427,11 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
         statementSetter?.(clampProgress((sunsetLocal - 0.62) / 0.3));
       }
     };
+    // Where the part sat when the engine last measured it; an image load that leaves this unchanged needs no refresh.
+    const readLayout = () => `${part.offsetHeight}|${Math.round(part.getBoundingClientRect().top + window.scrollY)}|${window.innerWidth}x${window.innerHeight}`;
+    let measuredLayout = "";
     const measure = (trigger: ScrollTrigger) => {
+      measuredLayout = readLayout();
       viewport = window.innerHeight;
       travel = Math.max(1, trigger.end - trigger.start);
       starts = steps.map((step) => step.getBoundingClientRect().top + window.scrollY - trigger.start);
@@ -369,6 +446,8 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
       lastTime = 0;
       revealTops = revealElements.map((elements) => elements.map((element) => element.getBoundingClientRect().top + window.scrollY - trigger.start));
       boundaries = starts.slice(1).map((start) => start - viewport * partTwoMotion.entrance);
+      paintedAt = [];
+      threadShown = threads.map((paths) => paths.length > 0 && getComputedStyle(paths[0]).visibility !== "hidden");
       paint();
     };
     gsap.to(driver, {
@@ -376,20 +455,31 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
       scrollTrigger: { trigger: root, start: "top top", end: "bottom bottom", scrub: true, onRefresh: measure },
     });
 
+    // A resize or a font swap always re-measures. Photos fire `load` here as they stream in while the reader scrolls,
+    // but nearly all of them sit in fixed-ratio frames: those only re-measure the engine if the part actually moved.
     let refreshFrame = 0;
-    const refresh = () => {
+    let forceRefresh = false;
+    const scheduleRefresh = (force: boolean) => {
+      forceRefresh ||= force;
       cancelAnimationFrame(refreshFrame);
-      refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh());
+      refreshFrame = requestAnimationFrame(() => {
+        const forced = forceRefresh;
+        forceRefresh = false;
+        if (!forced && readLayout() === measuredLayout) return;
+        ScrollTrigger.refresh();
+      });
     };
+    const refresh = () => scheduleRefresh(true);
+    const refreshIfMoved = () => scheduleRefresh(false);
     const observer = new ResizeObserver(refresh);
     observer.observe(part);
-    root.addEventListener("load", refresh, true);
+    root.addEventListener("load", refreshIfMoved, true);
     void document.fonts?.ready.then(() => { if (mounted) refresh(); });
     return () => {
       mounted = false;
       gsap.ticker.remove(tickSpeed);
       observer.disconnect();
-      root.removeEventListener("load", refresh, true);
+      root.removeEventListener("load", refreshIfMoved, true);
       cancelAnimationFrame(refreshFrame);
       moods.forEach((mood) => mood.classList.remove("is-hidden"));
       nightMood?.classList.remove("is-hidden");

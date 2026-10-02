@@ -499,6 +499,13 @@
   margin: 0;
 }
 
+/*
+ * The reading reveal (0 → 1) the scroll engine writes on each block of copy. It is non-inherited on purpose: a
+ * paragraph mid-reveal would otherwise restyle every one of its words on every scroll frame. The engine hands the
+ * value to the words, title words and ink marks that are moving; anything else that reads it inherits it explicitly.
+ */
+@property --reveal { syntax: "<number>"; inherits: false; initial-value: 1; }
+
 .story-word,
 .story-title-word,
 .story-title-word > span {

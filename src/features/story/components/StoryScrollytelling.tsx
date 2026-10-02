@@ -91,7 +91,7 @@ export function StoryScrollytelling({
               <StoryPartTransition onInView={setNavigationPartId} part={part} />
             )}
 
-            <section className="story-scrollytelling" aria-label={`${part.eyebrow}: ${part.title}`}>
+            <section className="story-scrollytelling" aria-label={`${part.eyebrow}: ${part.title}`} data-idle-zone>
               {isMobile || (reducedMotion && part.id === "together-offline") ? (
                 <MobileChapterJourney
                   items={partItems}

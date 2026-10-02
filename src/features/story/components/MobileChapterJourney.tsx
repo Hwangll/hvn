@@ -40,7 +40,8 @@ export function MobileChapterJourney({
             </p>
             <span>{chapter.year}</span>
           </header>
-          <div className="mobile-scene-canvas">
+          {/* The canvas is its own idle zone: it scrolls away well before the reader leaves the chapter's copy. */}
+          <div className="mobile-scene-canvas" data-idle-zone>
             <ChapterScene chapter={chapter} isActive={chapter.id === activeId} reducedMotion={reducedMotion} />
           </div>
           <StoryStep

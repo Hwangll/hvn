@@ -13,7 +13,7 @@ export function StoryIntro({ reducedMotion }: StoryIntroProps) {
   const words = introCopy.title.split(" ");
 
   return (
-    <section className="story-intro" aria-labelledby="story-title">
+    <section className="story-intro" aria-labelledby="story-title" data-idle-zone>
       <header className="diary-masthead">
         <a href="#top" aria-label="Hát Và Nờ — đầu trang">h<span>&</span>n<span className="diary-brand-dot">.</span></a>
         <span>MỘT CUỐN NHẬT KÝ CỦA HAI NGƯỜI</span>
@@ -71,7 +71,8 @@ export function StoryIntro({ reducedMotion }: StoryIntroProps) {
           <span className="diary-photo-note" aria-hidden="true">những ngày mình thương</span>
           {heroPhotos.map((photo, index) => (
             <figure data-memory-reveal data-memory-order={index + 1} className={`booth-photo booth-photo-${index + 1}`} key={photo.src}>
-              <StoryPicture src={photo.src} alt={photo.alt} />
+              {/* The first booth photo is the page's largest paint on phones; fetch it ahead of the other photos. */}
+              <StoryPicture src={photo.src} alt={photo.alt} fetchPriority={index === 0 ? "high" : undefined} />
               <figcaption>{photo.caption}</figcaption>
             </figure>
           ))}

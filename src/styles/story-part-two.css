@@ -480,6 +480,7 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   display: block; width: min(100%, 15rem); height: 0.8rem; margin-top: 0.7rem; overflow: visible;
   fill: none; stroke: var(--ink-accent, #a8ddeb); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85;
 }
+.story-quote-stroke, .story-quote-stroke path { --reveal: inherit; }
 .story-quote-stroke path { stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--reveal, 1)); }
 .story-part-2 #sunset .story-step-quote { color: #f6dccb; font-size: clamp(1.4rem, 2.5vw, 2.3rem); }
 .story-part-2 .story-step .photo-gallery { display: grid; max-width: 28rem; margin-top: 2rem; }
@@ -518,10 +519,17 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 /* usePartTwoScroll marks panels that have fully left; their idle loops pause and resume where they stopped. */
 .offline-scene-panel.is-hidden *, .offline-scene-panel.is-hidden *::before, .offline-scene-panel.is-hidden *::after { animation-play-state: paused !important; }
 .story-part-2 .offline-scene-panel { will-change: opacity, transform; transform-origin: 50% 56%; }
+/* The stack's film effects change on every scroll frame. Registered as non-inherited, a change restyles the stack
+   (and its light leak, which inherits them explicitly) instead of every prop of all five scenes beneath it. */
+@property --vblur { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --vskew { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@property --leak { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --leak-x { syntax: "<number>"; inherits: false; initial-value: -70; }
 /* Scroll speed blurs the whole stage a touch (`--vblur`/`--vskew` from the engine's ticker); it settles the moment the reader stops. */
 .story-part-2 .offline-scene-stack { position: relative; filter: blur(var(--vblur, 0px)); transform: skewY(var(--vskew, 0deg)); }
 /* A warm light leak crosses the stage during each scene handoff, like light catching a strip of film. */
 .story-part-2 .offline-scene-stack::after {
+  --leak: inherit; --leak-x: inherit;
   content: ''; position: absolute; inset: -12%; z-index: 20; pointer-events: none;
   opacity: var(--leak, 0);
   background: linear-gradient(104deg, transparent 34%, #ffd6a83d 44%, #fff1dcb3 50%, #f6b1c04d 56%, transparent 66%);
@@ -1383,8 +1391,10 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   .story-part-2 .together-scene .memory-photo.is-portrait figcaption { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 0.78rem; }
   .aurora-night-two, .aurora-park-two, .aurora-sunset-one, .part-transition-sky .aurora-three, .ending-sky .aurora-two { display: none; }
   .water-caustics, .water-specks, .park-shadows, .cafe-motes, .offline-pointer-glow { display: none; }
-  /* Touch readers get a paragraph-level fade, with every word held in place. */
-  .story-part-2 .story-word { opacity: calc(0.72 + var(--reveal, 1) * 0.28); transform: none; }
+  /* Touch readers get a paragraph-level fade, with every word held in place. The fade sits on the paragraph itself,
+     so one element restyles per frame rather than each of its words. */
+  .story-part-2 .story-word { opacity: 1; transform: none; }
+  .story-part-2 .story-step-body p[data-step-reveal="words"] { opacity: calc(0.72 + var(--reveal, 1) * 0.28) !important; }
   .story-part-2 .together-scene .memory-photo::after { display: none; }
   .story-part-2 .story-part-transition.is-revealed .part-transition-numeral { animation: numeral-in-mobile 1.2s var(--offline-ease) both; }
   .story-part-2 .together-scene .memory-photo, .story-part-2 .aquarium-fish, .story-part-2 .aquarium-jelly, .story-part-2 .aquarium-bubble,

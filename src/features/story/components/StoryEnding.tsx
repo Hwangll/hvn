@@ -49,7 +49,7 @@ export function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separateP
   }, []);
 
   return (
-    <section className={`story-ending ${revealed ? "is-revealed" : ""}`} aria-labelledby="ending-title" ref={sectionRef}>
+    <section className={`story-ending ${revealed ? "is-revealed" : ""}`} aria-labelledby="ending-title" ref={sectionRef} data-idle-zone>
       <svg className="ending-descent" viewBox="0 0 120 240" aria-hidden="true">
         <path className="descent-thread" d="M60 0 C60 60 40 80 52 120 C64 160 44 190 60 228" pathLength={1} />
         <circle className="descent-knot" cx="60" cy="230" r="3.5" />

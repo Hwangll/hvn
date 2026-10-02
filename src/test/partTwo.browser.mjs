@@ -78,8 +78,9 @@ try {
     await jump('aquarium', offset);
     const alpha = await page.locator('[data-offline-panel]').evaluateAll(elements => elements.map(el => Number(getComputedStyle(el).opacity)));
     assert.ok(Math.abs(alpha.reduce((sum, value) => sum + value, 0) - 1) < 0.01, 'dissolve must not dip into an empty stage');
+    // The café stop has no photo; its bill is the scene's anchor instead.
     const photoAlpha = await page.locator('[data-offline-panel]').evaluateAll(elements => elements.reduce((sum, panel) =>
-      sum + Number(getComputedStyle(panel).opacity) * Number(getComputedStyle(panel.querySelector('.memory-photo')).opacity), 0));
+      sum + Number(getComputedStyle(panel).opacity) * Number(getComputedStyle(panel.querySelector('.memory-photo, .cafe-receipt')).opacity), 0));
     assert.ok(photoAlpha > 0.75, 'photos must remain a readable anchor during the handoff');
     blends.push({ offset, alpha, layout: await layoutState() });
   }

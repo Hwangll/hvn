@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { createStoryScrollItems, storyParts, type StoryScrollItem } from "../data/story";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import type { StoryPage } from "../../../app/storyPage";
@@ -10,12 +10,11 @@ import { MoodSetup } from "../../intro/components/MoodSetup";
 import { PartTwoAtmosphere } from "./PartTwoAtmosphere";
 import { PartOneAtmosphere } from "./PartOneAtmosphere";
 import { useMemoryReveals } from "../../../shared/hooks/useMemoryReveals";
+import { useIdleZones } from "../../../shared/hooks/useIdleZones";
 import { useMediaQuery } from "../../../shared/hooks/useMediaQuery";
 import { StoryPartOneEnding } from "./StoryPartOneEnding";
-
-const KeepsakePlayground = lazy(() =>
-  import("../../memories/components/KeepsakePlayground").then((module) => ({ default: module.KeepsakePlayground })),
-);
+// The box's copy and controls render with the page; its three.js scene loads itself once the box is near.
+import { KeepsakePlayground } from "../../memories/components/KeepsakePlayground";
 
 interface StoryExperienceProps {
   onReturnToIntro: () => void;
@@ -28,6 +27,7 @@ interface StoryExperienceProps {
 export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion, soundEnabled }: StoryExperienceProps) {
   const mobile = useMediaQuery("(max-width: 900px)");
   const revealScope = useMemoryReveals(reducedMotion, mobile);
+  useIdleZones(revealScope);
   const pageParts = useMemo(
     () => storyParts.filter((part) => part.id === (page === "part-two" ? "together-offline" : "before-meeting")),
     [page],
@@ -47,14 +47,12 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
   }, []);
 
   const keepsakePlayground = (
-    <Suspense fallback={<div className="keepsake-loading">Đang mở hộp kỷ vật...</div>}>
-      <KeepsakePlayground
-        partId={pageParts[0]?.id}
-        visitedStoryIds={visitedStoryIds}
-        playCue={playCue}
-        reducedMotion={reducedMotion}
-      />
-    </Suspense>
+    <KeepsakePlayground
+      partId={pageParts[0]?.id}
+      visitedStoryIds={visitedStoryIds}
+      playCue={playCue}
+      reducedMotion={reducedMotion}
+    />
   );
 
   return (

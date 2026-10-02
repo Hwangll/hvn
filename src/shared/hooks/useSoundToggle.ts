@@ -1,7 +1,16 @@
 import { Howl } from "howler";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const BACKGROUND_TRACK = "/audio/tinh-minh-la-ky.mp4";
+// The song's audio track alone; the original file also carried a video track three times its size.
+const BACKGROUND_TRACK = "/audio/tinh-minh-la-ky.m4a";
+
+/**
+ * Sound effects ship as AAC (a few kB each) with the original WAV kept as the fallback for browsers without AAC;
+ * Howler plays the first source the browser can decode.
+ */
+export function audioSources(path: string): string[] {
+  return /\.wav$/i.test(path) ? [path.replace(/\.wav$/i, ".m4a"), path] : [path];
+}
 export type SoundCue =
   | "dissolve"
   | "galleryClose"
@@ -49,7 +58,7 @@ export function useSoundToggle() {
     }
 
     const { src, volume } = soundCueFiles[cue];
-    const audio = new Howl({ src: [src], preload: true, volume });
+    const audio = new Howl({ src: audioSources(src), preload: true, volume });
     cueAudioRef.current = { ...cueAudioRef.current, [cue]: audio };
 
     return audio;
