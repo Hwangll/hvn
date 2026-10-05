@@ -84,6 +84,9 @@
 @media (prefers-reduced-motion: reduce) {
   .photo-lightbox, .photo-lightbox figure, .photo-lightbox figure img,
   .story-secret-paper, .story-page-part-one .memory-scene * { animation: none !important; }
+  /* The stage fades chapters in with GSAP. If reduced motion turns on mid-fade, index.css's blanket 0.01ms transition would
+     turn the tween's revert into a transition that only starts on the next frame, keeping the half-faded pose until then. */
+  .story-page-part-one .memory-canvas-scene { opacity: 1 !important; transform: none !important; transition: none !important; }
   .story-page-part-one .match-badge { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) !important; }
   .story-page-part-one .add-friend-btn .label-add { opacity: 0 !important; }
   .story-page-part-one .add-friend-btn .label-sent, .story-page-part-one .staying-calendar li { opacity: 1 !important; }
