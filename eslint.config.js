@@ -5,7 +5,8 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "coverage"] },
+  // .claude holds agent worktrees: whole copies of the repo, their own builds included.
+  { ignores: ["dist", "coverage", ".claude"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
