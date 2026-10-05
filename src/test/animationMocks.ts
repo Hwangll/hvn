@@ -1,5 +1,4 @@
 import { vi } from "vitest";
-import type { ReactNode } from "react";
 
 vi.mock("scrollama", () => ({
   default: () => ({
@@ -54,8 +53,4 @@ vi.mock("howler", () => ({
       unload: vi.fn(),
     };
   }),
-}));
-
-vi.mock("react-parallax-tilt", () => ({
-  default: ({ children }: { children: ReactNode }) => children,
 }));

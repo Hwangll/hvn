@@ -167,6 +167,22 @@ Build command: `npm run build`, publish directory: `dist`. Header cache nằm tr
 - **Animation ngoài màn hình tạm dừng**: section nào có vòng lặp CSS chạy mãi (sao, ánh kim, polaroid trôi…) thì gắn `data-idle-zone`; `useIdleZones` tạm dừng chúng khi section ra khỏi màn hình và chạy tiếp khi quay lại.
 - **Cache khi deploy**: `vercel.json` (Vercel) và `public/_headers` (Netlify) đặt cache vĩnh viễn cho `/assets/*` (tên file có hash) và cache một tuần cho ảnh, âm thanh.
 
+## Bó Hoa 3D Ở Phòng Kỷ Vật
+
+- **Dựng bằng code, không tải mô hình**: `src/features/memories/model/flowers/`. Bó hướng dương có năm bông (một bông còn non). Mỗi cánh, lá bắc và lá có hình riêng: dài ngắn, độ cong, độ xoắn, răng ở chóp, màu. Chúng được gộp theo vật liệu nên cả bó chỉ khoảng mười draw call; giấy gói và nơ (`wrap.ts`) dùng chung cho hai bó. Bó cẩm tú cầu vẫn giữ cách dựng cũ (`hydrangea.ts`).
+- **Bề mặt vẽ bằng canvas** (`textures.ts`), mỗi lần dựng một lần: gân cánh, đĩa nhụy xếp theo xoắn Fibonacci, gân lá, thớ giấy kraft và nếp nhăn. Mỗi loại thành một map màu và một normal map.
+- **Vật liệu** (`three/bouquet/plantMaterial.ts`) là `MeshPhysicalMaterial` thêm hai thứ:
+  - gió bằng simplex noise (`windStrength`, `windSpeed`); mỗi cánh và mỗi lá rung riêng nhưng cả bông vẫn đung đưa liền khối;
+  - tán xạ dưới bề mặt giả lập cho cánh và lá mỏng, không dùng transmission.
+
+  Các ô PBR chuẩn (`map`, `normalMap`, `roughnessMap`, `aoMap`) dùng như bình thường, thêm `thicknessMap`.
+- **Sân khấu** (`three/bouquet/stage.ts`):
+  - hai preset đèn studio, Golden hour và Moonlight, chuyển mượt khi đổi phần;
+  - bóng tiếp xúc dưới chân bó;
+  - hậu kỳ gồm tone mapping AgX kèm look, DOF nhẹ, bloom ngưỡng cao, vignette và grain;
+  - camera xoay và zoom trong giới hạn;
+  - tự hạ chất lượng khi máy không theo kịp.
+
 ## Quyết Định Kỹ Thuật
 
 - Nội dung tách khỏi component để dễ đổi câu chuyện.

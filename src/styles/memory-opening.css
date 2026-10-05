@@ -169,10 +169,18 @@
   transform: translate(-50%, -50%); filter: blur(22px);
   animation: room-halo-breathe 7s ease-in-out infinite alternate; transition: background 1s var(--room-ease);
 }
-.memory-bouquet-frame { position: relative; z-index: 2; display: grid; place-items: center; width: 100%; min-height: 440px; isolation: isolate; transition: filter 0.52s var(--room-ease), transform 0.52s var(--room-ease); }
-.memory-flower-3d { position: relative; z-index: 2; display: grid; place-items: center; width: 100%; height: 440px; filter: drop-shadow(0 30px 34px #00000073) drop-shadow(0 0 40px color-mix(in oklch, var(--room-glow) 18%, transparent)); pointer-events: none; transition: filter 1s var(--room-ease); }
-.memory-flower-3d canvas { display: block; width: 100%; height: 100%; pointer-events: none; }
+.memory-bouquet-frame { position: relative; z-index: 2; display: grid; place-items: center; width: 100%; min-height: 440px; isolation: isolate; transition: transform 0.52s var(--room-ease); }
+/* The canvas is transparent over the room and casts its own shadows; a CSS shadow around it would make it a cut-out. */
+.memory-flower-3d { position: relative; z-index: 2; display: grid; place-items: center; width: 100%; height: 440px; }
+.memory-flower-3d canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; opacity: 0; transition: opacity 0.9s var(--room-ease); }
+.memory-flower-3d canvas:active { cursor: grabbing; }
+.memory-flower-3d.is-ready canvas { opacity: 1; }
 .memory-flower-3d.is-fallback { padding: 2rem; }
+.bouquet-loader { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 0.95rem; color: var(--room-muted); pointer-events: none; animation: room-rise 0.6s var(--room-ease) both; }
+.bouquet-loader-line { position: relative; width: 4.5rem; height: 1px; overflow: hidden; background: var(--room-line); }
+.bouquet-loader-line::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--room-accent), transparent); transform: translateX(-100%); animation: bouquet-loader-sweep 1.7s var(--room-ease) infinite; }
+.bouquet-loader-label { font-size: 0.52rem; font-weight: 500; letter-spacing: 0.34em; text-transform: uppercase; }
+@keyframes bouquet-loader-sweep { to { transform: translateX(100%); } }
 .memory-plinth { position: relative; z-index: 3; display: grid; justify-items: center; gap: 0.9rem; width: 74%; margin-top: -2.6rem; pointer-events: none; }
 .memory-plinth-disc {
   width: 100%; height: 2.2rem; border-radius: 50%;
@@ -192,7 +200,6 @@
 .memory-artifact-hint svg { transition: transform 0.4s var(--room-ease); }
 .memory-artifact:hover .memory-artifact-hint { color: var(--room-paper); }
 .memory-artifact:hover .memory-artifact-hint svg { transform: translateX(0.3rem); }
-.memory-artifact:hover .memory-bouquet-frame { transform: translateY(-0.3rem); filter: saturate(1.06) brightness(1.05); }
 .memory-artifact:hover .memory-halo { animation-play-state: paused; transform: translate(-50%, -50%) scale(1.1); }
 .memory-artifact:hover .memory-light-cone { opacity: 0.8; }
 
@@ -260,7 +267,7 @@
 
 /* Leaving: Phần I dims the room into the story; Phần II blooms blue and hops to its own page. */
 .memory-intro.is-focusing .memory-copy, .memory-intro.is-focusing .memory-cta-panel { opacity: 0.3; filter: blur(5px); transform: translateY(0.35rem); }
-.memory-intro.is-focusing .memory-bouquet-frame { transform: scale(1.05); filter: saturate(1.08) brightness(1.1); }
+.memory-intro.is-focusing .memory-bouquet-frame { transform: scale(1.05); }
 .memory-intro.is-focusing .memory-halo { transform: translate(-50%, -50%) scale(1.25); }
 .memory-leave-veil { position: fixed; inset: 0; z-index: 30; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 46%, #a8ddeb, #0f5c7a 30%, #0a1422 70%); }
 .memory-intro.is-leaving .memory-leave-veil { pointer-events: auto; animation: room-leave-bloom 0.8s var(--room-ease) forwards; }

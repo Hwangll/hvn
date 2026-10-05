@@ -1,7 +1,6 @@
 import { ArrowLeft, ArrowRight, BookOpen, HeartHandshake, MoveHorizontal } from "lucide-react";
 import { Fragment, lazy, Suspense, type CSSProperties, useCallback, useMemo, useRef, useState } from "react";
-import Tilt from "react-parallax-tilt";
-import { IntroFlowerFallback } from "../../memories/components/IntroFlowerFallback";
+import { BouquetLoader } from "../../memories/components/BouquetLoader";
 import { Meteors } from "../../../shared/components/motion/Meteors";
 import { createStoryScrollItems, storyParts } from "../../story/data/story";
 import { usePointerParallax } from "../../../shared/hooks/usePointerParallax";
@@ -156,21 +155,12 @@ function MemoryArtifact({ activePart, onEnterStory, onEnterPartTwo, reducedMotio
     >
       <span className="memory-light-cone" aria-hidden="true" />
       <span className="memory-halo" aria-hidden="true" />
-      <Tilt
-        tiltEnable={!reducedMotion}
-        tiltMaxAngleX={4}
-        tiltMaxAngleY={6}
-        glareEnable={false}
-        perspective={1400}
-        scale={1.015}
-        transitionSpeed={1100}
-      >
-        <span className="memory-bouquet-frame">
-          <Suspense fallback={<span className="memory-flower-3d is-fallback"><IntroFlowerFallback variant={variant} /></span>}>
-            <MemoryFlower3D variant={variant} reducedMotion={reducedMotion} />
-          </Suspense>
-        </span>
-      </Tilt>
+      {/* The bouquet turns in 3D on its own camera; tilting the canvas as a flat card would only make it read as a picture. */}
+      <span className="memory-bouquet-frame">
+        <Suspense fallback={<span className="memory-flower-3d"><BouquetLoader /></span>}>
+          <MemoryFlower3D variant={variant} reducedMotion={reducedMotion} />
+        </Suspense>
+      </span>
       <span className="memory-plinth" aria-hidden="true">
         <span className="memory-plinth-disc" />
         <span className="memory-plinth-label" key={activePart}>
