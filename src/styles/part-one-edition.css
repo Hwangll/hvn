@@ -112,13 +112,13 @@ html:has(.app-part-one), body:has(.app-part-one) { background: #fff4f6; }
 .story-page-part-one .intro-title span.intro-title-word,
 .story-page-part-one .intro-title span:nth-last-child(-n + 2) { color: var(--rose-ink); }
 /* The last word carries a rose gradient; the painted box is grown so Vietnamese marks under the baseline are not cut,
-   and further on the right, where the italic horn of "ờ" reaches past the glyph's advance. */
+   and further on the right, where the synthesized italic pushes the horn of "ờ" past the glyph's advance. */
 .story-page-part-one .intro-title .intro-title-word.is-accent {
   font-style: italic; color: var(--rose-accent);
   background: linear-gradient(100deg, #d64f7a 0%, #ff9fb8 38%, #f08a72 52%, #d64f7a 68%, #d64f7a 100%);
   background-size: 260% 100%; background-position: 100% 0;
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  padding: 0.26em 0.24em 0.32em 0.08em; margin: -0.26em -0.24em -0.32em -0.08em;
+  padding: 0.26em 0.32em 0.32em 0.08em; margin: -0.26em -0.32em -0.32em -0.08em;
 }
 @media (prefers-reduced-motion: no-preference) {
   .story-page-part-one .intro-title .intro-title-word.is-accent.is-animated { animation: paper-arrive 900ms var(--ease-out) calc(120ms + var(--word-index) * 120ms) both, title-shimmer 7s ease-in-out 1.8s infinite; }
@@ -168,14 +168,6 @@ html:has(.app-part-one), body:has(.app-part-one) { background: #fff4f6; }
 .app-part-one .sound-toggle[aria-pressed="true"] { color: #fff5f8; background: var(--rose-accent); border-color: transparent; }
 .app-part-one .sound-toggle[aria-pressed="true"] small { color: #fff5f8cc; }
 .app-part-one .sound-toggle[aria-pressed="true"] svg { color: currentColor; }
-/* While the memory room is open the toggle sits on the dark room, not on rose paper: the room's glass and candle gold. */
-.app-part-one:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle { color: #f5ecdd; background: #ffffff0f; border-color: #ffffff1f; box-shadow: 0 12px 40px #00000066, inset 0 1px 0 #ffffff12; }
-.app-part-one:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle small { color: #f5ecdd99; }
-.app-part-one:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle svg { color: #e2c17f; }
-.app-part-one:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle:hover { background: #ffffff1a; border-color: #ffffff33; }
-.app-part-one:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle[aria-pressed="true"] { color: #16141f; background: #e2c17f; border-color: transparent; }
-.app-part-one:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle[aria-pressed="true"] small { color: #16141fcc; }
-.app-part-one:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle[aria-pressed="true"] svg { color: currentColor; }
 
 /* ---------- 4. Mood setup and the keepsake box ---------- */
 .story-page-part-one .mood-setup::before { background: #ffb7c8; opacity: 0.45; filter: blur(48px); }
@@ -332,7 +324,7 @@ html:has(.app-part-one), body:has(.app-part-one) { background: #fff4f6; }
 
 /* ---------- 9. Photo viewer (portalled to <body>) ---------- */
 :root:has(.app-part-one) .photo-lightbox { z-index: 100; padding: clamp(0.75rem, 3vw, 2rem); }
-:root:has(.app-part-one) .photo-lightbox-backdrop { background: #2a1a2699; backdrop-filter: blur(12px); }
+:root:has(.app-part-one) .photo-lightbox-backdrop { background: #2a1a26d9; backdrop-filter: blur(12px); }
 :root:has(.app-part-one) .photo-lightbox figure { width: fit-content; max-width: min(92vw, 52rem); padding: 0.8rem 0.8rem 1rem; border: 0; border-radius: 3px; background: var(--paper-grain), linear-gradient(165deg, #fffaf6, #f6ece6); background-blend-mode: soft-light, normal; box-shadow: 0 40px 100px #0d040a80, 0 0 0 1px #00000014; }
 :root:has(.app-part-one) .photo-lightbox figure img { width: auto; max-width: 100%; max-height: 68svh; margin-inline: auto; background: #f1e6e3; }
 :root:has(.app-part-one) .photo-lightbox figcaption { color: #4a3242; font: 600 clamp(1.05rem, 1.6vw, 1.3rem)/1.4 var(--hand); }
@@ -345,8 +337,6 @@ html:has(.app-part-one), body:has(.app-part-one) { background: #fff4f6; }
 
 /* ---------- 10. Small screens ---------- */
 @media (max-width: 900px) {
-  /* On phones the blossom sits on the card's top corner; in its desktop spot it covered the heading. */
-  .story-page-part-one .keepsake-flower-one { top: -0.5rem; left: auto; right: 5%; transform: rotate(-15deg) scale(1.05); }
   .story-page-part-one .story-part-navigation { top: 0.75rem; max-width: calc(100vw - 1.5rem); }
   .story-page-part-one .story-part-navigation a { min-width: 0; padding: 0.65rem 0.85rem; }
   .story-page-part-one .mobile-chapter-block { border-bottom-color: var(--rose-border); }
