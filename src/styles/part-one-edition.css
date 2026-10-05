@@ -111,13 +111,14 @@ html:has(.app-part-one), body:has(.app-part-one) { background: #fff4f6; }
 .story-page-part-one .intro-title span,
 .story-page-part-one .intro-title span.intro-title-word,
 .story-page-part-one .intro-title span:nth-last-child(-n + 2) { color: var(--rose-ink); }
-/* The last word carries a rose gradient; the painted box is grown so Vietnamese marks under the baseline are not cut. */
+/* The last word carries a rose gradient; the painted box is grown so Vietnamese marks under the baseline are not cut,
+   and further on the right, where the synthesized italic pushes the horn of "ờ" past the glyph's advance. */
 .story-page-part-one .intro-title .intro-title-word.is-accent {
   font-style: italic; color: var(--rose-accent);
   background: linear-gradient(100deg, #d64f7a 0%, #ff9fb8 38%, #f08a72 52%, #d64f7a 68%, #d64f7a 100%);
   background-size: 260% 100%; background-position: 100% 0;
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  padding: 0.26em 0.08em 0.32em; margin: -0.26em -0.08em -0.32em;
+  padding: 0.26em 0.32em 0.32em 0.08em; margin: -0.26em -0.32em -0.32em -0.08em;
 }
 @media (prefers-reduced-motion: no-preference) {
   .story-page-part-one .intro-title .intro-title-word.is-accent.is-animated { animation: paper-arrive 900ms var(--ease-out) calc(120ms + var(--word-index) * 120ms) both, title-shimmer 7s ease-in-out 1.8s infinite; }
