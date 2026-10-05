@@ -1,5 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
+import { m } from "motion/react";
 import type { StoryScrollItem } from "../data/story";
+import { springs } from "../../../shared/motion/springs";
 import { jumpToStoryTarget } from "../utils/jumpToStoryTarget";
 
 interface PartOneChapterIndexProps {
@@ -25,6 +27,8 @@ export function PartOneChapterIndex({ items, activeId, compact = false }: PartOn
               event.preventDefault();
               jumpToStoryTarget(item.id);
             }}>
+              {/* The current chapter's marker glides along the index as the reader moves on (shared layout, Motion). */}
+              {compact && item.id === activeId ? <m.span className="diary-index-marker" layoutId="diary-index-marker" transition={springs.settle} aria-hidden="true" /> : null}
               <span className="diary-index-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
               <span className="diary-index-name">{item.shortTitle}</span>
               {!compact ? <span className="diary-index-year">{item.year}</span> : null}

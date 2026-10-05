@@ -13,6 +13,7 @@ Website được build thành hai trang riêng:
 - Tailwind CSS v4: pipeline CSS qua `@tailwindcss/vite`.
 - Scrollama: phát hiện chapter đang active khi cuộn.
 - GSAP + ScrollTrigger + `@gsap/react`: reveal animation có cleanup khi unmount.
+- Motion (`motion/react`): chuyển động có lò xo cho chữ, highlight trượt, thẻ kỷ vật, đồng hồ đếm ngược và lightbox (xem phần Chuyển Động).
 - Three.js: scene 3D tương tác cho các kỷ vật nhỏ trong câu chuyện.
 - Lenis: smooth scrolling, tự tắt khi người dùng bật reduced motion.
 - Lucide React: icon nhẹ, nhất quán.
@@ -100,6 +101,19 @@ Phần II dùng một scroll driver duy nhất trong `usePartTwoScroll`: nền t
 
 Lenis chỉ làm smooth scroll; khi `prefers-reduced-motion: reduce`, Lenis và reveal animation không chạy, còn nội dung vẫn đọc tuyến tính và state active vẫn theo đúng vị trí cuộn.
 
+## Chuyển Động (Motion)
+
+Lớp hiệu ứng tương tác dùng Motion và các mẫu quen thuộc của Aceternity UI, Magic UI, React Bits, viết lại cho hợp tông của truyện thay vì chép nguyên khối:
+
+- `src/shared/motion/`: `MotionProvider` (`LazyMotion` + `MotionConfig reducedMotion="user"`), bộ lò xo dùng chung `springs.ts`, `useRevealOnce`, `whenIdle`.
+- `src/shared/components/motion/`: `BlurText` (chữ hiện dần từ mờ sang nét), `RollingNumber` (số lăn như đồng hồ cơ), `CircularText` (chữ chạy vòng quanh con dấu), `Meteors` (sao băng).
+- `src/shared/interactions/`: một listener `pointermove` duy nhất cho các phần tử có `data-magnetic` (nút hút nhẹ theo chuột), `data-tilt` (ảnh nghiêng 3D có vệt sáng; dùng `data-tilt="transform"` cho phần tử mà `transform` đang có animation riêng) và `data-spotlight` (thẻ có đèn rọi theo chuột); cộng với tia sáng khi bấm nút. Chỉ bật trên thiết bị có chuột.
+- `src/styles/motion-edition.css`: shimmer (`.has-shimmer`), viền sáng chạy quanh thẻ kỷ vật, sao băng, vòng chữ, và một đường cong lò xo cho transition CSS, lấy mẫu bằng `spring()` của Motion.
+- Highlight của nút kỷ vật và vạch chương ở sticky stage dùng `layoutId` nên trượt giữa các vị trí.
+- Nền nhiều lớp của Phần I (`PartOneDepth.tsx`, `src/styles/part-one-depth.css`): chữ viền khổng lồ, đốm sáng, hình vẽ nét, đồ scrapbook ló từ mép trang và cánh hoa mờ ở tiền cảnh. Mỗi loại nằm trên một mặt phẳng dài bằng trang, trượt theo `scroll(root)` với tốc độ riêng (`--k`), nên cả trường chiều sâu chỉ là năm animation chạy trên compositor. Hero, scrapbook và hoa ở hộp kỷ vật cũng tách lớp khi cuộn qua (view timeline). Muốn thêm một món, thêm một dòng vào danh sách tương ứng trong `PartOneDepth.tsx`; `top` là vị trí món đó khi nằm giữa màn hình.
+
+Một số điều rút ra khi đo trên mobile: animate cả `transform` (Motion chuyển cho WAAPI/compositor) thay vì `x`/`y`; không xoay trực tiếp `<svg>` (Chrome vẽ lại mỗi khung hình), hãy xoay phần tử HTML bọc ngoài; không đặt thứ đang chuyển động dưới `mask-image` hay lớp blur lớn; đồng hồ đếm ngược chỉ chạy khi phong bì nằm trên màn hình. Khi bật reduced motion, toàn bộ lớp này tắt.
+
 ## Cấu Trúc Chính
 
 ```text
@@ -145,6 +159,7 @@ Build command: `npm run build`, publish directory: `dist`. Header cache nằm tr
 - **CSS theo trang**: hai trang dùng chung các file CSS theo cùng thứ tự; Phần II import bản `?page=two` (`src/main-part-two.tsx`). Khi build, plugin `pageScopedCss` trong `vite.config.ts` bỏ các selector chỉ khớp được ở trang kia (`.story-part-2`, `.story-page-part-two`, `.app-part-two` và phiên bản Phần I). Style dành riêng cho một trang nên được scope bằng các class này để được tách tự động.
 - **Three.js tải khi cần**: hộp kỷ vật render chữ và nút ngay, còn scene 3D (`src/features/memories/three/keepsakeScene.ts`) chỉ tải khi hộp còn cách khoảng một màn hình. Canvas do React giữ chỗ sẵn nên layout không nhảy.
 - **Engine cuộn**: `usePartTwoScroll` bỏ qua cảnh đã mờ hẳn hoặc chưa đổi tiến độ, không ghi lại giá trị không đổi, và `--reveal` là custom property không kế thừa (`@property`), được đưa tới từng chữ đang chuyển thay vì cả đoạn văn. Các biến hiệu ứng của sân khấu Phần II (`--vblur`, `--leak`…) cũng không kế thừa.
+- **Motion tải theo nhu cầu**: phần lõi của `m` component nằm trong bundle chính; tính năng animation/layout (`domMax`) và hiệu ứng con trỏ là chunk riêng, chỉ tải khi trình duyệt rảnh nên không tranh băng thông với ảnh màn hình đầu.
 - **Animation ngoài màn hình tạm dừng**: section nào có vòng lặp CSS chạy mãi (sao, ánh kim, polaroid trôi…) thì gắn `data-idle-zone`; `useIdleZones` tạm dừng chúng khi section ra khỏi màn hình và chạy tiếp khi quay lại.
 - **Cache khi deploy**: `vercel.json` (Vercel) và `public/_headers` (Netlify) đặt cache vĩnh viễn cho `/assets/*` (tên file có hash) và cache một tuần cho ảnh, âm thanh.
 

@@ -8,5 +8,7 @@ import "./styles/story-motion.css?page=two";
 import "./styles/part-one-scenes.css?page=two";
 import "./styles/part-one-layout.css?page=two";
 import "./styles/part-one-edition.css?page=two";
+import "./styles/motion-edition.css?page=two";
+import "./styles/part-one-depth.css?page=two";
 
 mountStory();

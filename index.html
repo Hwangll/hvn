@@ -9,6 +9,20 @@
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>hvn - Hát Và Nờ</title>
+    <meta name="theme-color" content="#fff4f6" />
+    <!-- A first visit opens on the dark memory room; paint its colour from the very first frame instead of rose paper. -->
+    <script>
+      try {
+        if (sessionStorage.getItem("hvn-memory-intro-seen") !== "true") {
+          document.documentElement.classList.add("opens-in-room");
+          document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#16141f");
+        }
+      } catch (error) {}
+    </script>
+    <style>
+      html.opens-in-room:not(:has(.app-shell)), html.opens-in-room:not(:has(.app-shell)) body { background: #16141f; }
+      html.opens-in-room:not(:has(.app-shell)) body::before { display: none; }
+    </style>
   </head>
   <body>
     <noscript>Câu chuyện vẫn cần JavaScript để chạy animation, nhưng nội dung chính nằm trong HTML khi app tải.</noscript>

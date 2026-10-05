@@ -11,6 +11,7 @@
   .photo-lightbox { animation: viewer-arrive 220ms ease-out; }
   .photo-lightbox figure { animation: paper-arrive 420ms var(--ease-out); }
   .photo-lightbox figure img { animation: viewer-arrive 320ms ease-out; }
+  .photo-lightbox-ambient img { animation: viewer-arrive 700ms ease-out; }
   .story-secret-note.is-open .story-secret-paper { animation: paper-arrive 420ms var(--ease-out); transform-origin: top center; }
   .story-page-part-one .memory-canvas { transition: background-color 800ms ease, border-color 600ms ease; }
   .story-page-part-one .mood-quiet .memory-canvas { background-color: oklch(0.945 0.03 320); border-color: oklch(0.82 0.06 320); }

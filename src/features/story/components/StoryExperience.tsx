@@ -9,6 +9,7 @@ import { StoryIntro } from "../../intro/components/StoryIntro";
 import { MoodSetup } from "../../intro/components/MoodSetup";
 import { PartTwoAtmosphere } from "./PartTwoAtmosphere";
 import { PartOneAtmosphere } from "./PartOneAtmosphere";
+import { PartOneDepth } from "./PartOneDepth";
 import { useMemoryReveals } from "../../../shared/hooks/useMemoryReveals";
 import { useIdleZones } from "../../../shared/hooks/useIdleZones";
 import { useMediaQuery } from "../../../shared/hooks/useMediaQuery";
@@ -60,6 +61,7 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
       {page === "part-two"
         ? <PartTwoAtmosphere reducedMotion={reducedMotion} />
         : <PartOneAtmosphere moods={pageParts[0]?.chapters.map((chapter) => chapter.mood) ?? []} reducedMotion={reducedMotion} />}
+      {page === "part-one" ? <PartOneDepth /> : null}
       {/* Part I's page-length thread; Part II carries its own thread motif on the title page and the ending. */}
       {page === "part-one" ? <StoryConnectionPath reducedMotion={reducedMotion} /> : null}
       {page === "part-one" ? <StoryIntro reducedMotion={reducedMotion} /> : null}

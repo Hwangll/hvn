@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight, BookOpen, HeartHandshake, MoveHorizontal } from 
 import { Fragment, lazy, Suspense, type CSSProperties, useCallback, useMemo, useRef, useState } from "react";
 import Tilt from "react-parallax-tilt";
 import { IntroFlowerFallback } from "../../memories/components/IntroFlowerFallback";
+import { Meteors } from "../../../shared/components/motion/Meteors";
 import { createStoryScrollItems, storyParts } from "../../story/data/story";
 import { usePointerParallax } from "../../../shared/hooks/usePointerParallax";
 import type { ExperienceState } from "../../../app/AppShell";
@@ -88,6 +89,7 @@ export function MemoryIntro({ onEnterStory, phase, reducedMotion }: MemoryIntroP
           <i className="aurora memory-aurora memory-aurora-a" />
           <i className="aurora memory-aurora memory-aurora-b" />
         </span>
+        <Meteors className="memory-meteors" />
         <span className="memory-spotlight" />
         <span className="memory-floor-glow" />
         <span className="memory-vignette" />
@@ -229,7 +231,7 @@ function MemoryCallToAction({ activePart, onPartChange, onEnterStory, onEnterPar
           }}
         >
           <div className="memory-picker-track">
-            <article className={`memory-part-card memory-part-card-one ${activePart === 0 ? "is-active" : ""}`}>
+            <article className={`memory-part-card memory-part-card-one ${activePart === 0 ? "is-active" : ""}`} data-spotlight>
               <span className="memory-part-numeral" aria-hidden="true">I</span>
               <span className="memory-part-number">PHẦN I</span>
               <BookOpen aria-hidden="true" size={20} />
@@ -240,13 +242,13 @@ function MemoryCallToAction({ activePart, onPartChange, onEnterStory, onEnterPar
               <ol className="memory-part-stops" aria-hidden="true">
                 {stops[0].map((stop, index) => <li key={stop} style={{ "--i": index } as CSSProperties}>{stop}</li>)}
               </ol>
-              <button className="memory-primary-cta" type="button" onClick={onEnterStory}>
+              <button className="memory-primary-cta has-shimmer" type="button" data-magnetic onClick={onEnterStory}>
                 Khám phá câu chuyện
                 <ArrowRight aria-hidden="true" size={17} />
               </button>
             </article>
 
-            <article className={`memory-part-card memory-part-card-two ${activePart === 1 ? "is-active" : ""}`}>
+            <article className={`memory-part-card memory-part-card-two ${activePart === 1 ? "is-active" : ""}`} data-spotlight>
               <span className="memory-part-numeral" aria-hidden="true">II</span>
               <span className="memory-part-number">PHẦN II</span>
               <HeartHandshake aria-hidden="true" size={20} />
@@ -259,6 +261,7 @@ function MemoryCallToAction({ activePart, onPartChange, onEnterStory, onEnterPar
               </ol>
               <a
                 className="memory-secondary-cta"
+                data-magnetic
                 href={PART_TWO_URL}
                 onClick={(event) => {
                   if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;

@@ -1,5 +1,6 @@
 import { HeartHandshake, Sparkles } from "lucide-react";
 import { moodSetupPhotos } from "../../story/data/story";
+import { BlurText } from "../../../shared/components/motion/BlurText";
 import { StoryPicture } from "../../../shared/components/visuals/StoryPicture";
 
 export function MoodSetup() {
@@ -7,7 +8,7 @@ export function MoodSetup() {
     <section className="mood-setup" aria-labelledby="mood-setup-title">
       <div className="mood-setup-copy" data-memory-reveal>
         <p className="kicker">LỜI MỞ ĐẦU</p>
-        <h2 id="mood-setup-title">Trước khi mọi thứ bắt đầu</h2>
+        <BlurText id="mood-setup-title" text="Trước khi mọi thứ bắt đầu" />
         <p>
           Chưa có Bumble, chưa có Instagram, chưa có mấy đoạn var lịch sử. Chỉ có vài tấm ảnh rất xinh và một
           cảm giác kiểu: sắp có chuyện rồi đó.
@@ -20,7 +21,7 @@ export function MoodSetup() {
 
       <div className="mood-scrapbook" aria-label="Scrapbook mở đầu bằng ảnh">
         {moodSetupPhotos.map((photo, index) => (
-          <figure data-memory-reveal data-memory-order={index + 1} className={`mood-photo mood-photo-${index + 1}`} key={photo.src}>
+          <figure data-memory-reveal data-memory-order={index + 1} data-tilt className={`mood-photo mood-photo-${index + 1}`} key={photo.src}>
             <StoryPicture src={photo.src} alt={photo.alt} loading="lazy" />
             <figcaption>
               <Sparkles aria-hidden="true" size={14} />

@@ -1,0 +1,172 @@
+/* Motion edition: the touches built on Motion (motion/react) and on patterns from Aceternity UI, Magic UI and React Bits.
+   Loaded last on both pages. Every loop here sits inside an idle zone or the memory room, and stops for reduced motion. */
+
+/* A spring for plain CSS transitions: Motion's spring(0.45, 0.3) (visual duration, bounce) sampled into linear(). */
+:root {
+  --spring-lift: 750ms linear(0, 0.0556, 0.1858, 0.3475, 0.5115, 0.6602, 0.7844, 0.8811, 0.9515, 0.9987, 1.0272, 1.0416, 1.046, 1.0439, 1.0381, 1.0308, 1.0232, 1.0163, 1.0104, 1.0058, 1.0025, 1.0002, 0.9988, 0.9981, 1);
+}
+
+/* ---------- Blur Text (BlurText.tsx): each word is a box so it can rise and come into focus ---------- */
+.blur-word { display: inline-block; }
+
+/* ---------- Shimmer Button (Magic UI): a sheet of light crosses the main calls to action a few times, and on hover ---------- */
+.has-shimmer { position: relative; overflow: hidden; isolation: isolate; }
+.has-shimmer::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 32%, var(--shimmer, #ffffff59) 50%, transparent 68%);
+  translate: -110% 0;
+}
+.memory-primary-cta.has-shimmer { --shimmer: #e2c17f8c; }
+.story-page-part-two .replay-button.has-shimmer { --shimmer: #ffffffa6; }
+@media (prefers-reduced-motion: no-preference) {
+  .has-shimmer::after { animation: shimmer-sweep 6.5s var(--ease-soft) 1.6s 3; }
+  .has-shimmer:hover::after { animation: shimmer-sweep-now 0.9s var(--ease-soft); }
+}
+@keyframes shimmer-sweep { 0% { translate: -110% 0; } 18%, 100% { translate: 110% 0; } }
+@keyframes shimmer-sweep-now { from { translate: -110% 0; } to { translate: 110% 0; } }
+
+/* ---------- Magnet (pointerEffects.ts): the script owns `translate` on magnetic controls, hover lift included ---------- */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .diary-read-button[data-magnetic] { transition: background 200ms ease; }
+}
+
+/* ---------- Click Spark (clickSparks.ts): eight short rays from the click ---------- */
+.click-spark { position: fixed; z-index: 2147483000; width: 0; height: 0; pointer-events: none; }
+.click-spark i {
+  position: absolute; left: -1px; top: -9px; width: 2px; height: 9px; border-radius: 2px;
+  background: var(--spark); transform-origin: 50% 9px; rotate: var(--angle);
+  animation: click-spark-ray 480ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+@keyframes click-spark-ray {
+  from { opacity: 1; transform: translateY(-4px) scaleY(1); }
+  to { opacity: 0; transform: translateY(-20px) scaleY(0.2); }
+}
+
+/* ---------- Tilted Card and Glare Hover (pointerEffects.ts) ---------- */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  /* Photos tip in 3D inside their own frame of reference, so the vanishing point sits with them. */
+  .intro-photo-booth, .mood-scrapbook, .photo-filmstrip { perspective: 1100px; }
+  [data-tilt] { transition: translate var(--spring-lift), scale var(--spring-lift), box-shadow 380ms var(--ease-out); }
+  .photo-thumb[data-tilt] { position: relative; }
+  /* The ending's photo already floats on `transform`; its tilt joins that animation instead of replacing it. */
+  .polaroid[data-tilt="transform"] {
+    transform: perspective(1100px) rotateX(calc(var(--tilt-x, 0) * 1deg)) rotateY(calc(var(--tilt-y, 0) * 1deg));
+    animation-composition: add;
+  }
+  [data-tilt]::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 0%), #ffffff8c, #ffffff1a 34%, transparent 62%);
+    mix-blend-mode: soft-light; opacity: 0; transition: opacity 0.45s var(--ease-out);
+  }
+  [data-tilt].is-tilting::after { opacity: 1; }
+}
+
+/* ---------- Card Spotlight (Aceternity) / Magic Card (Magic UI): a soft light where the cursor is ---------- */
+[data-spotlight] { isolation: isolate; }
+[data-spotlight]::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(16rem circle at var(--spot-x, 50%) var(--spot-y, 50%), var(--spot, #ffffff2e), transparent 62%);
+  opacity: 0; transition: opacity 0.5s var(--ease-out);
+}
+[data-spotlight].is-lit::before { opacity: 1; }
+.story-page-part-one .keepsake-memory-card { --spot: #ffc2d366; }
+.story-page-part-two .keepsake-memory-card { --spot: #a8ddeb2e; }
+.memory-part-card { --spot: color-mix(in oklch, var(--card-glow) 26%, transparent); }
+
+/* ---------- Keepsake box: one gliding highlight, cards that hand over, a beam round the card ---------- */
+.keepsake-memory-card { animation: none; }
+/* The highlight is shared between the buttons, so it may cross their edges on its way, and it passes under every
+   label: no button may be a stacking context of its own, which the glass blur made each of them. */
+.keepsake-controls button { overflow: visible; }
+.story-page-part-one .keepsake-controls button,
+.story-page-part-two .keepsake-controls button { backdrop-filter: none; }
+/* For the same reason the chosen button no longer stays raised: easing back down, it would be a layer of its own and
+   the highlight leaving it would slide over its label. */
+.keepsake-controls button.is-active:not(:hover) { transform: none; }
+.keepsake-controls button > :not(.keepsake-pill) { position: relative; z-index: 1; }
+.keepsake-pill { position: absolute; inset: -1px; z-index: 0; border-radius: inherit; pointer-events: none; }
+.story-page-part-one .keepsake-controls button.is-active,
+.story-page-part-one .keepsake-controls button.is-active:hover { background: transparent; box-shadow: none; }
+.story-page-part-one .keepsake-pill { background: var(--rose-accent); box-shadow: 0 16px 40px #d64f7a40; }
+.story-page-part-two .keepsake-controls button.is-active,
+.story-page-part-two .keepsake-controls button.is-active:hover { background: transparent; box-shadow: none; }
+.story-page-part-two .keepsake-pill { background: #a8ddeb; box-shadow: 0 16px 40px #8bcbd840; }
+.keepsake-selected-name { position: relative; display: inline-grid; }
+.keepsake-selected-name > strong { display: inline-block; }
+
+/* Border Beam (Magic UI): a short light travels the card's edge. */
+@property --beam-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.keepsake-memory-card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: conic-gradient(from var(--beam-angle), transparent 0% 68%, var(--beam-from) 80%, var(--beam-to) 89%, transparent 96%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.story-page-part-one .keepsake-memory-card { --beam-from: #ffb3c8; --beam-to: #d64f7a; }
+.story-page-part-two .keepsake-memory-card { --beam-from: #a8ddeb; --beam-to: #f2c9b5; }
+@media (prefers-reduced-motion: no-preference) {
+  .keepsake-memory-card::after { animation: beam-orbit 6s linear infinite; }
+}
+@keyframes beam-orbit { to { --beam-angle: 360deg; } }
+
+/* ---------- Gliding chapter marker (PartOneChapterIndex) ---------- */
+.diary-chapter-index.is-compact a { position: relative; isolation: isolate; }
+.story-page-part-one .diary-chapter-index.is-compact a[aria-current="step"] { background: transparent; box-shadow: none; }
+.diary-index-marker { position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background: #d64f7a12; box-shadow: inset 0 -2px var(--rose-accent, var(--coral-dark)); }
+
+/* ---------- Sparkles Text (Magic UI): small stars twinkle around the hero's last name ---------- */
+.intro-title-word.is-accent { position: relative; }
+.title-sparkle {
+  position: absolute; width: 0.15em; height: 0.15em; background: currentColor; pointer-events: none; scale: 0;
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+}
+.title-sparkle-1 { top: 0.12em; right: 0.12em; }
+.title-sparkle-2 { top: 0.62em; right: -0.02em; width: 0.09em; height: 0.09em; }
+.title-sparkle-3 { bottom: 0.3em; left: 0.02em; width: 0.11em; height: 0.11em; }
+@media (prefers-reduced-motion: no-preference) {
+  .title-sparkle { animation: sparkle-twinkle 4.2s var(--ease-soft) 2s infinite; }
+  .title-sparkle-2 { animation-delay: 3.4s; }
+  .title-sparkle-3 { animation-delay: 4.8s; }
+}
+@keyframes sparkle-twinkle { 0%, 66%, 100% { scale: 0; rotate: 0deg; } 76% { scale: 1; rotate: 70deg; } 88% { scale: 0.35; rotate: 150deg; } }
+
+/* ---------- Meteors (Magic UI, Aceternity): a shooting star now and then on the night skies ---------- */
+.meteors { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.meteors i {
+  position: absolute; top: var(--top); left: var(--left); width: 2px; height: 2px; border-radius: 50%;
+  background: var(--meteor, #f2f8ff); box-shadow: 0 0 6px 1px color-mix(in oklch, var(--meteor, #f2f8ff) 70%, transparent);
+  rotate: 145deg; opacity: 0; will-change: transform, opacity;
+}
+.meteors i::before {
+  content: ""; position: absolute; top: 50%; right: 50%; width: 7rem; height: 1px; translate: 0 -50%;
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--meteor, #f2f8ff) 75%, transparent));
+}
+.memory-meteors { --meteor: #ffe9c7; }
+@media (prefers-reduced-motion: no-preference) {
+  .meteors i { animation: meteor-fall var(--duration) linear var(--delay) infinite; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .meteors { display: none; }
+}
+@keyframes meteor-fall {
+  0% { opacity: 0; transform: translateX(0); }
+  2% { opacity: 1; }
+  9%, 100% { opacity: 0; transform: translateX(38rem); }
+}
+
+/* ---------- Sealed envelope: the date turns round the wax, and the countdown rolls (Circular Text, Number Ticker) ---------- */
+.envelope-seal-ring {
+  position: absolute; left: 50%; top: 58%; z-index: 5; width: 7.6rem; height: 7.6rem; margin: -3.8rem 0 0 -3.8rem;
+  pointer-events: none; opacity: 0.82;
+}
+.envelope-seal-ring svg { display: block; width: 100%; height: 100%; overflow: visible; fill: #ffdcbd; font: 600 7.2px/1 var(--body); text-transform: uppercase; }
+@media (prefers-reduced-motion: no-preference) {
+  .envelope-seal-ring { animation: seal-ring-turn 36s linear infinite; }
+}
+@keyframes seal-ring-turn { to { rotate: 360deg; } }
+.rolling-number { display: inline-flex; }
+/* Each digit rolls inside its own window: an invisible 0 sizes it, and the faces are laid over that. */
+.rolling-digit { position: relative; display: inline-block; overflow: hidden; }
+.rolling-digit-sizer { visibility: hidden; user-select: none; }
+.rolling-digit-face { position: absolute; inset: 0; text-align: center; }

@@ -38,13 +38,21 @@ export function StoryIntro({ reducedMotion }: StoryIntroProps) {
                   style={{ "--word-index": index } as CSSProperties}
                 >
                   {word}
+                  {/* A few sparks twinkle around the last name (Sparkles Text, Magic UI). */}
+                  {index === words.length - 1 && !reducedMotion ? (
+                    <>
+                      <i className="title-sparkle title-sparkle-1" />
+                      <i className="title-sparkle title-sparkle-2" />
+                      <i className="title-sparkle title-sparkle-3" />
+                    </>
+                  ) : null}
                 </span>
               </Fragment>
             ))}
           </h1>
           <p className="intro-subtitle" data-memory-reveal data-memory-order="2">{introCopy.subtitle}</p>
           <div className="intro-actions" data-memory-reveal data-memory-order="3">
-            <a className="diary-read-button" href="#first-meeting" onClick={(event) => {
+            <a className="diary-read-button" href="#first-meeting" data-magnetic onClick={(event) => {
               event.preventDefault();
               jumpToStoryTarget("first-meeting");
             }}>
@@ -70,7 +78,7 @@ export function StoryIntro({ reducedMotion }: StoryIntroProps) {
           </span>
           <span className="diary-photo-note" aria-hidden="true">những ngày mình thương</span>
           {heroPhotos.map((photo, index) => (
-            <figure data-memory-reveal data-memory-order={index + 1} className={`booth-photo booth-photo-${index + 1}`} key={photo.src}>
+            <figure data-memory-reveal data-memory-order={index + 1} data-tilt className={`booth-photo booth-photo-${index + 1}`} key={photo.src}>
               {/* The first booth photo is the page's largest paint on phones; fetch it ahead of the other photos. */}
               <StoryPicture src={photo.src} alt={photo.alt} fetchPriority={index === 0 ? "high" : undefined} />
               <figcaption>{photo.caption}</figcaption>

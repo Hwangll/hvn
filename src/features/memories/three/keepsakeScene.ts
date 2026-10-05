@@ -177,8 +177,24 @@ export function mountKeepsakeScene(
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(container);
 
+  // The table holds every keepsake of both parts, but a reader only unlocks them chapter by chapter: early on the
+  // one or two unlocked pieces stood crowded at the left edge, half cut off. The whole arrangement glides along the
+  // table so what is unlocked sits in the middle, and settles back to the authored layout once a row is complete.
+  let arrangementShift = Number.NaN;
   const animate = (time: number) => {
     const elapsed = time * 0.001;
+    let left = Infinity;
+    let right = -Infinity;
+    for (const object of keepsakeObjects) {
+      if (!unlockedIdsRef.current.includes(object.userData.id)) continue;
+      left = Math.min(left, object.position.x);
+      right = Math.max(right, object.position.x);
+    }
+    if (left <= right) {
+      const target = (-(left + right) / 2) * displayGroup.scale.x;
+      arrangementShift = Number.isNaN(arrangementShift) ? target : arrangementShift + (target - arrangementShift) * 0.035;
+      displayGroup.position.x = arrangementShift;
+    }
     // Raycast only after the pointer moved; hovering is the only reader of the result.
     if (pointerDirty) {
       raycaster.setFromCamera(pointer, camera);

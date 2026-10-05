@@ -1,6 +1,9 @@
 import { Flower2, LockKeyhole, Sparkles } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 import { useCallback, useMemo, useState } from "react";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
+import { BlurText } from "../../../shared/components/motion/BlurText";
+import { springs } from "../../../shared/motion/springs";
 import { useThreeKeepsakes } from "../hooks/useThreeKeepsakes";
 import { BlossomSprig } from "../../../shared/components/visuals/BlossomSprig";
 import { keepsakeIcons, keepsakeSoundCues, keepsakes, type KeepsakeId, type KeepsakeItem } from "../model/keepsakes";
@@ -51,24 +54,46 @@ export function KeepsakePlayground({ partId, visitedStoryIds, playCue, reducedMo
       <BlossomSprig className="keepsake-flower keepsake-flower-two" variant={partId === "together-offline" ? "blue" : "cream"} />
       <div className="keepsake-copy" data-memory-reveal>
         <p className="kicker">HỘP KỶ VẬT CỦA CHÚNG MÌNH</p>
-        <h2 id="keepsake-title">Chạm vào mấy món kỷ vật nhỏ xíu này</h2>
-        <p>{selectedItem.hint}</p>
+        <BlurText id="keepsake-title" text="Chạm vào mấy món kỷ vật nhỏ xíu này" />
+        {/* The new hint fades in where the old one was, so the lines below never jump. */}
+        <m.p key={selectedItem.id} initial={{ opacity: 0, transform: "translateY(6px)" }} animate={{ opacity: 1, transform: "translateY(0px)" }} transition={{ duration: 0.35, ease: "easeOut" }}>
+          {selectedItem.hint}
+        </m.p>
         <div className="keepsake-selected" aria-live="polite">
           <Sparkles aria-hidden="true" size={18} />
           <span className="keepsake-selected-pulse" aria-hidden="true" />
-          Đang chọn: <strong>{selectedItem.label}</strong>
+          Đang chọn:{" "}
+          {/* The name rolls over to the next one (Word Rotate, Magic UI). */}
+          <span className="keepsake-selected-name">
+            <AnimatePresence mode="popLayout" initial={false}>
+              <m.strong key={selectedItem.id} initial={{ transform: "translateY(90%)", opacity: 0 }} animate={{ transform: "translateY(0%)", opacity: 1 }} exit={{ transform: "translateY(-90%)", opacity: 0 }} transition={springs.settle}>
+                {selectedItem.label}
+              </m.strong>
+            </AnimatePresence>
+          </span>
         </div>
       </div>
 
       <div className="keepsake-stage" data-memory-reveal>
-        <div className="keepsake-memory-card" key={selectedItem.id}>
-          <span>{String(visibleItems.findIndex((item) => item.id === selectedItem.id) + 1).padStart(2, "0")}</span>
-          <strong>{selectedItem.label}</strong>
-          <p>{selectedItem.memoryCaption}</p>
-          <i aria-hidden="true" />
-          <i aria-hidden="true" />
-          <i aria-hidden="true" />
-        </div>
+        {/* One card leaves as the next arrives; a light runs round its edge and follows the cursor across it. */}
+        <AnimatePresence mode="popLayout" initial={false}>
+          <m.div
+            className="keepsake-memory-card"
+            key={selectedItem.id}
+            data-spotlight
+            initial={{ opacity: 0, transform: "translateY(16px)", filter: "blur(6px)" }}
+            animate={{ opacity: 1, transform: "translateY(0px)", filter: "blur(0px)", transitionEnd: { filter: "none", transform: "none" } }}
+            exit={{ opacity: 0, transform: "translateY(-12px)", filter: "blur(4px)" }}
+            transition={springs.settle}
+          >
+            <span>{String(visibleItems.findIndex((item) => item.id === selectedItem.id) + 1).padStart(2, "0")}</span>
+            <strong>{selectedItem.label}</strong>
+            <p>{selectedItem.memoryCaption}</p>
+            <i aria-hidden="true" />
+            <i aria-hidden="true" />
+            <i aria-hidden="true" />
+          </m.div>
+        </AnimatePresence>
         <div
           className="keepsake-canvas"
           ref={containerRef}
@@ -122,6 +147,8 @@ function KeepsakeButton({
       disabled={isLocked}
       onClick={onSelect}
     >
+      {/* One highlight for the whole row, gliding to whichever keepsake is chosen (shared layout, Motion). */}
+      {isActive ? <m.span className="keepsake-pill" layoutId="keepsake-pill" transition={springs.settle} aria-hidden="true" /> : null}
       <Icon aria-hidden="true" size={15} />
       <span>{item.label}</span>
       {isLocked ? <small>{unlockLabel}</small> : null}

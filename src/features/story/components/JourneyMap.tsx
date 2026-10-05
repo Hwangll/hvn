@@ -1,9 +1,20 @@
-import type { CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { journeyMapCopy, journeyMapStops } from "../data/story";
 import { jumpToStoryTarget } from "../utils/jumpToStoryTarget";
+import { useRevealOnce } from "../../../shared/motion/useRevealOnce";
+import { BlurText } from "../../../shared/components/motion/BlurText";
 
 /** The route across the city, in the order the five stops happened. */
 const ROUTE = "M76 416 C82 392 96 358 108 330 C138 258 84 170 72 96 C80 132 104 178 160 212 C198 228 238 202 268 172";
+/**
+ * The journey's timing: the line and its light leave 0.6s after the map comes into view and take 3.2s on an ease-in-out
+ * curve. ARRIVALS is when the light reaches each stop, as a share of that run (measured along ROUTE: the stops sit at
+ * 0, 15, 55, 80 and 100% of its length), so every pin lands exactly as the light passes it.
+ */
+const TRAVEL_DELAY = 0.6;
+const TRAVEL_DURATION = 3.2;
+const ARRIVALS = [0, 0.279, 0.528, 0.681, 0.98];
+const arrival = (index: number) => `${(TRAVEL_DELAY + TRAVEL_DURATION * (ARRIVALS[index] ?? 1)).toFixed(2)}s`;
 
 /**
  * A stylised map of Hà Nội carrying the five places Part II actually happened. The map itself holds only
@@ -11,11 +22,22 @@ const ROUTE = "M76 416 C82 392 96 358 108 330 C138 258 84 170 72 96 C80 132 104 
  * real link back to its chapter. The route draws itself once the ending scrolls into view.
  */
 export function JourneyMap() {
+  // The route draws when the map itself comes into view, not when the (long) ending first does, so the reader sees it
+  // happen; a small light runs ahead of the line from the first stop to the last.
+  const figureRef = useRef<HTMLElement | null>(null);
+  const travelRef = useRef<SVGAnimateMotionElement | null>(null);
+  const drawn = useRevealOnce(figureRef, 0.35);
+
+  useEffect(() => {
+    if (!drawn || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    travelRef.current?.beginElementAt?.(TRAVEL_DELAY);
+  }, [drawn]);
+
   return (
-    <figure className="journey-map">
+    <figure className={`journey-map ${drawn ? "is-drawn" : ""}`} ref={figureRef}>
       <figcaption className="journey-map-heading">
         <span>{journeyMapCopy.eyebrow}</span>
-        <strong>{journeyMapCopy.title}</strong>
+        <BlurText as="strong" text={journeyMapCopy.title} />
       </figcaption>
 
       <div className="journey-map-body">
@@ -46,8 +68,13 @@ export function JourneyMap() {
           <path className="journey-map-shadow" d={ROUTE} pathLength={1} />
           <path className="journey-map-thread" d={ROUTE} pathLength={1} />
 
+          {/* SMIL carries the light along the route; CSS fades it in and out on the same clock (.journey-map-traveler). */}
+          <circle className="journey-map-traveler" r="5">
+            <animateMotion ref={travelRef} begin="indefinite" dur={`${TRAVEL_DURATION}s`} fill="freeze" path={ROUTE} calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines="0.45 0 0.55 1" />
+          </circle>
+
           {journeyMapStops.map((stop, index) => (
-            <g className="journey-map-pin" key={stop.id} style={{ "--i": index } as CSSProperties}>
+            <g className="journey-map-pin" key={stop.id} style={{ "--i": index, "--at": arrival(index) } as CSSProperties}>
               <circle className="journey-map-halo" cx={stop.x} cy={stop.y} r="14" />
               <circle className="journey-map-dot" cx={stop.x} cy={stop.y} r="9" />
               <text className="journey-map-index" x={stop.x} y={stop.y + 3.6} textAnchor="middle">{index + 1}</text>
@@ -57,7 +84,7 @@ export function JourneyMap() {
 
         <ol className="journey-map-index-list">
           {journeyMapStops.map((stop, index) => (
-            <li key={stop.id} style={{ "--i": index } as CSSProperties}>
+            <li key={stop.id} style={{ "--i": index, "--at": arrival(index) } as CSSProperties}>
               <a
                 href={`#${stop.id}`}
                 onClick={(event) => {

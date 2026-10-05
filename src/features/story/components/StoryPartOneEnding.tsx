@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { partOneEndingCopy } from "../data/story";
+import { BlurText } from "../../../shared/components/motion/BlurText";
 import { BlossomSprig } from "../../../shared/components/visuals/BlossomSprig";
 import { PolaroidPhoto } from "../../../shared/components/visuals/PolaroidPhoto";
 
@@ -9,10 +10,10 @@ export function StoryPartOneEnding() {
       <div className="ending-copy" data-memory-reveal>
         <BlossomSprig className="ending-blossom" />
         <p className="kicker">hết phần i</p>
-        <h2 id="part-one-ending-title">{partOneEndingCopy.title}</h2>
+        <BlurText id="part-one-ending-title" text={partOneEndingCopy.title} stagger={0.1} />
         <p>{partOneEndingCopy.body}</p>
         <div className="ending-actions">
-          <a className="replay-button part-two-page-link" href="/part-2/">
+          <a className="replay-button part-two-page-link has-shimmer" href="/part-2/" data-magnetic>
             <span>{partOneEndingCopy.cta}</span>
             <ArrowRight aria-hidden="true" size={18} />
           </a>

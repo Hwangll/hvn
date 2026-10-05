@@ -4,8 +4,9 @@ import { endingCopy, partThreeCopy } from "../data/story";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import { splitParagraphs } from "../../../shared/utils/format";
 import { BlossomSprig } from "../../../shared/components/visuals/BlossomSprig";
+import { Meteors } from "../../../shared/components/motion/Meteors";
 import { PolaroidPhoto } from "../../../shared/components/visuals/PolaroidPhoto";
-import { useCountdown } from "../../../shared/hooks/useCountdown";
+import { useHasPassed } from "../../../shared/hooks/useCountdown";
 import { JourneyMap } from "./JourneyMap";
 import { SealedEnvelope } from "./SealedEnvelope";
 
@@ -28,7 +29,7 @@ export function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separateP
   };
 
   // Part III is a sealed envelope, so the heading tells the reader which state they are looking at.
-  const partThreeOpen = useCountdown(partThreeCopy.opensAt).isPast;
+  const partThreeOpen = useHasPassed(partThreeCopy.opensAt);
   const title = partThreeOpen ? partThreeCopy.openTitle : partThreeCopy.sealedTitle;
   // A trailing ellipsis keeps its three dots as separate glyphs so they can breathe one after another.
   const trailingDots = title.match(/(\.{3}|…)$/)?.[0];
@@ -59,6 +60,8 @@ export function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separateP
         <i className="aurora aurora-one" />
         <i className="aurora aurora-two" />
       </div>
+      {/* Beside the sky rather than in it: under the sky's fade mask each streak would repaint the whole sky. */}
+      <Meteors />
       <div className="ending-copy" data-memory-reveal>
         <BlossomSprig className="ending-blossom" />
         <p className="kicker">{partThreeOpen ? "phần iii" : "open ending"}</p>
@@ -79,20 +82,20 @@ export function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separateP
         <JourneyMap />
         <div className="ending-actions">
           {separatePartPages ? (
-            <a className="replay-button story-page-link" href="/" onClick={() => playCue?.("replay")}>
+            <a className="replay-button story-page-link has-shimmer" href="/" data-magnetic onClick={() => playCue?.("replay")}>
               <RotateCcw aria-hidden="true" size={18} />
               <span>{endingCopy.replayAllCta}</span>
             </a>
           ) : (
-            <button className="replay-button" type="button" onClick={() => replay("part-before-meeting")}>
+            <button className="replay-button has-shimmer" type="button" data-magnetic onClick={() => replay("part-before-meeting")}>
               <RotateCcw aria-hidden="true" size={18} />
               <span>{endingCopy.replayAllCta}</span>
             </button>
           )}
-          <button className="dates-replay-button" type="button" onClick={() => replay("our-dates")}>
+          <button className="dates-replay-button" type="button" data-magnetic onClick={() => replay("our-dates")}>
             <span>{endingCopy.replayDatesCta}</span>
           </button>
-          <button className="intro-return-button" type="button" onClick={returnToIntro}>
+          <button className="intro-return-button" type="button" data-magnetic onClick={returnToIntro}>
             Trở lại phòng ký ức
           </button>
         </div>

@@ -12,6 +12,32 @@ picture { display: contents; }
    were laid out with one source; the AVIF twin added a second, which must not take part in layout. */
 picture > source ~ source { display: none; }
 
+/* Moving between the two parts (and back to the memory room) cross-fades the pages instead of cutting through white. */
+@view-transition { navigation: auto; }
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: 0.7s; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
+/* Reading progress: a hairline along the top that fills with the page's scroll. It is a scroll-driven animation, so the
+   compositor runs it; browsers without scroll timelines simply never show it. */
+.reading-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 70;
+  height: 2px;
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+@supports (animation-timeline: scroll()) {
+  .reading-progress { animation: reading-progress linear both; animation-timeline: scroll(root block); }
+}
+@keyframes reading-progress { to { transform: scaleX(1); } }
+.app-part-one .reading-progress { background: linear-gradient(90deg, #f6a9bd, #d64f7a 70%, #f08a72); box-shadow: 0 0 10px #d64f7a66; }
+.app-part-two .reading-progress { background: linear-gradient(90deg, #4d8fb3, #a8ddeb 70%, #f2c9b5); box-shadow: 0 0 12px #a8ddeb80; }
+
 /* Sections off screen hold their idle loops (useIdleZones) and resume where they stopped. */
 [data-idle-zone][data-offscreen],
 [data-idle-zone][data-offscreen] *,

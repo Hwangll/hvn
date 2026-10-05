@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLenisScroll } from "../shared/hooks/useLenisScroll";
+import { usePointerDelight } from "../shared/hooks/usePointerDelight";
 import { useReducedMotion } from "../shared/hooks/useReducedMotion";
 import { useSoundToggle } from "../shared/hooks/useSoundToggle";
 import { SoundToggle } from "../shared/components/SoundToggle";
@@ -40,6 +41,14 @@ export function AppShell({ page = "part-one" }: AppShellProps) {
   const storyVisible = experienceState === "story-reveal" || experienceState === "story-ready" || (experienceState === "transitioning" && isIntroSeen);
 
   useLenisScroll(prefersReducedMotion);
+  const shellRef = useRef<HTMLDivElement | null>(null);
+  usePointerDelight(shellRef, isPartTwoPage, prefersReducedMotion);
+
+  // The browser's own chrome follows the room: dark while the memory room is open, rose paper once the story shows.
+  useEffect(() => {
+    if (isPartTwoPage) return;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", introVisible ? "#16141f" : "#fff4f6");
+  }, [introVisible, isPartTwoPage]);
 
   useEffect(() => {
     const shouldLock = experienceState === "intro" || experienceState === "focusing" || experienceState === "transitioning";
@@ -107,8 +116,10 @@ export function AppShell({ page = "part-one" }: AppShellProps) {
   }, [clearTransitionTimers, isPartTwoPage, prefersReducedMotion, scheduleTransition]);
 
   return (
-    <div className={`app-shell experience-${experienceState} ${isPartTwoPage ? "app-part-two" : "app-part-one"}`}>
+    <div className={`app-shell experience-${experienceState} ${isPartTwoPage ? "app-part-two" : "app-part-one"}`} ref={shellRef}>
       {!isPartTwoPage ? <AmbientPetals /> : null}
+      {/* A hairline of reading progress; CSS drives it from the page's own scroll (see .reading-progress). */}
+      {storyVisible ? <div className="reading-progress" aria-hidden="true" /> : null}
       <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
       {introVisible ? <MemoryIntro onEnterStory={runToStory} phase={experienceState} reducedMotion={prefersReducedMotion} /> : null}
       {storyVisible ? (
