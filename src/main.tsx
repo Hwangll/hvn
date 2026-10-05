@@ -8,6 +8,8 @@ import "./styles/part-one-scenes.css";
 import "./styles/part-one-layout.css";
 import "./styles/part-one-edition.css";
 import "./styles/motion-edition.css";
+import "./styles/depth-field.css";
 import "./styles/part-one-depth.css";
+import "./styles/part-two-depth.css";
 
 mountStory();

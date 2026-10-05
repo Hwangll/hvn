@@ -4,6 +4,7 @@ import { jumpToStoryTarget } from "../../story/utils/jumpToStoryTarget";
 import { heroPhotos, introCopy } from "../../story/data/story";
 import { BlossomSprig } from "../../../shared/components/visuals/BlossomSprig";
 import { StoryPicture } from "../../../shared/components/visuals/StoryPicture";
+import { Butterfly, Cloud } from "../../story/components/StoryArt";
 
 interface StoryIntroProps {
   reducedMotion: boolean;
@@ -84,6 +85,9 @@ export function StoryIntro({ reducedMotion }: StoryIntroProps) {
               <figcaption>{photo.caption}</figcaption>
             </figure>
           ))}
+          {/* A cloud and a butterfly drift between the photos: in front of two of them, behind the third. */}
+          <span className="story-weaver booth-weaver-cloud" aria-hidden="true" data-idle-zone><Cloud variant={1} /></span>
+          <span className="story-weaver booth-weaver-butterfly" aria-hidden="true" data-idle-zone><Butterfly theme="peach" /></span>
         </div>
       </div>
       <div className="diary-colophon">

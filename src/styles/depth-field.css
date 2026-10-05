@@ -1,0 +1,105 @@
+/* The machinery both parts' layered backgrounds share (PartOneDepth, PartTwoDepth, DreamVeil); each page's own pieces and
+   colours live in part-one-depth.css and part-two-depth.css.
+
+   A depth field is a few page-long planes behind the story and one in front of it. Each plane slides on the page's own
+   scroll timeline at its own speed (--k: the share of the scroll it gives back), so however many pieces it holds it
+   costs one compositor animation. A piece's --at is where on the page (in %) it sits as it crosses the middle of the
+   screen. Where scroll timelines are missing, useDepthParallaxFallback moves the planes from script with the same
+   numbers and marks the page [data-scroll-fallback]. Pieces that move by themselves are idle zones and rest off screen;
+   readers who prefer reduced motion get every layer standing still. */
+
+/* ---------- Planes ---------- */
+main.story-experience > :is(.depth-field, .depth-front) { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
+main.story-experience > .depth-field { z-index: 0; }
+main.story-experience > .depth-front { z-index: 3; }
+.depth-plane { position: absolute; inset: 0; }
+.depth-item { position: absolute; top: calc(var(--at) * 1%); transform: rotate(var(--tilt, 0deg)); }
+
+/* A plane that slides down while the page goes up reads as far away, one that slides up as near. */
+.depth-plane-far { --k: 0.55; }
+.depth-plane-drift { --k: 0.4; }
+.depth-plane-flight { --k: 0.22; }
+.depth-plane-near { --k: 0.12; }
+.depth-plane-front { --k: -0.5; }
+
+/* By the time a piece reaches the middle of the screen its plane has moved k × the scroll, so the piece starts that much
+   higher (or lower): (1 - k) of the way to its spot, plus k of half a screen. */
+[data-scroll-fallback] .depth-plane .depth-item { top: calc((1 - var(--k)) * var(--at) * 1% + var(--k) * 50vh); }
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .depth-plane { animation: depth-plane linear both; animation-timeline: scroll(root); }
+    .depth-plane .depth-item { top: calc((1 - var(--k)) * var(--at) * 1% + var(--k) * 50vh); }
+  }
+}
+
+/* ---------- Shared art ---------- */
+.art-cloud, .art-butterfly, .art-sprig, .art-bird, .art-floret, .art-lantern { display: block; width: 100%; height: auto; overflow: visible; }
+.art-bird { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* A flock: the wrapper crosses, each bird beats its wings on its own clock. One layer per bird, one per flock. */
+.flock { position: absolute; width: var(--span, 12rem); height: calc(var(--span, 12rem) * 0.5); }
+.flock .art-bird { position: absolute; width: var(--bird, 1.6rem); }
+
+/* ---------- The dream veil: one fixed layer above everything, faint enough to read through ---------- */
+main.story-experience > .dream-veil { position: fixed; inset: 0; z-index: 4; overflow: hidden; pointer-events: none; }
+.dream-veil > * { position: absolute; }
+.dream-haze { inset: 0; }
+.dream-dust { width: var(--size, 4px); aspect-ratio: 1; border-radius: 50%; left: var(--x); top: var(--y); opacity: 0; }
+.dream-orb { width: var(--size); aspect-ratio: 1; border-radius: 50%; left: var(--x); top: var(--y); }
+.dream-leak { top: -20vh; left: -40vw; width: 40vw; height: 140vh; rotate: 18deg; opacity: 0; }
+.dream-veil .flock { top: var(--y); left: 0; opacity: 0; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .dream-dust { animation: dust-rise var(--life, 16s) ease-in-out var(--delay, 0s) infinite; }
+  .dream-orb { animation: orb-drift var(--life, 26s) ease-in-out var(--delay, 0s) infinite alternate; }
+  .dream-leak { animation: leak-sweep 22s ease-in-out 3s infinite; }
+  .dream-veil .flock { animation: flock-pass var(--life, 34s) linear var(--delay, 0s) infinite; }
+  .flock .art-bird { animation: bird-beat var(--beat, 0.42s) ease-in-out infinite alternate; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dream-veil :is(.dream-dust, .dream-leak, .flock) { display: none; }
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes depth-plane { to { transform: translateY(calc(var(--k) * (100% - 100vh))); } }
+@keyframes sky-drift { to { translate: 0 var(--sky); } }
+@keyframes sky-path { to { translate: var(--path-x) var(--path-y); } }
+@keyframes cloud-cross { from { transform: translateX(-30vw); } to { transform: translateX(115vw); } }
+@keyframes cloud-bob { from { translate: 0 calc(var(--bob, 10px) * -1); } to { translate: 0 var(--bob, 10px); } }
+@keyframes puff { from { scale: 0.94; } to { scale: 1.06; } }
+@keyframes wing-beat { to { scale: 0.32 1; } }
+@keyframes bird-beat { to { scale: 1 0.35; } }
+@keyframes sway { from { transform: rotate(calc(var(--tilt, 0deg) - 3deg)); } to { transform: rotate(calc(var(--tilt, 0deg) + 3deg)); } }
+@keyframes turn { from { transform: rotate(var(--tilt, 0deg)); } to { transform: rotate(calc(var(--tilt, 0deg) + 360deg)); } }
+@keyframes float-loop {
+  0%, 100% { translate: 0 0; rotate: -8deg; }
+  25% { translate: var(--fx) calc(var(--fy) * -1); rotate: 7deg; }
+  50% { translate: calc(var(--fx) * 1.5) var(--fy); rotate: -5deg; }
+  75% { translate: calc(var(--fx) * 0.5) calc(var(--fy) * 1.3); rotate: 10deg; }
+}
+@keyframes twinkle { 0%, 100% { opacity: var(--dim, 0.25); } 50% { opacity: 1; } }
+@keyframes dust-rise {
+  0% { opacity: 0; translate: 0 0; }
+  20% { opacity: 0.9; }
+  80% { opacity: 0.6; }
+  100% { opacity: 0; translate: var(--dx, 2vw) -38vh; }
+}
+@keyframes orb-drift { from { translate: 0 0; } to { translate: var(--dx, 6vw) var(--dy, -5vh); } }
+@keyframes leak-sweep { 0%, 100% { opacity: 0; translate: 0 0; } 15% { opacity: 1; } 45% { opacity: 0; translate: 170vw 0; } }
+@keyframes flock-pass {
+  0% { opacity: 0; translate: -30vw 0; }
+  4% { opacity: 1; }
+  38% { opacity: 1; translate: 120vw -14vh; }
+  40%, 100% { opacity: 0; translate: 120vw -14vh; }
+}
+@keyframes flock-cross { from { translate: -25vw 0; } to { translate: 125vw -10vh; } }
+@keyframes weave-across { from { transform: translateX(-60%); } to { transform: translateX(var(--weave, 48rem)); } }
+@keyframes glow-pulse { from { opacity: var(--dim, 0.35); } to { opacity: 1; } }
+@keyframes lantern-bob { from { translate: 0 6px; rotate: -2.5deg; } to { translate: 0 -12px; rotate: 2.5deg; } }
+@keyframes lantern-rise {
+  0% { opacity: 0; translate: 0 0; rotate: -3deg; }
+  8% { opacity: 1; }
+  50% { rotate: 3deg; }
+  88% { opacity: 1; }
+  100% { opacity: 0; translate: var(--sway, 3vw) var(--rise, -240vh); rotate: -2deg; }
+}

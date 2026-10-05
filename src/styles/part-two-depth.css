@@ -1,0 +1,193 @@
+/* Part II in layers: the blue hour (the shared machinery is in depth-field.css).
+   Back to front: the fixed sky (the chapter moods, and over the first of them a full moon and three rows of night
+   clouds); a far plane of out-of-focus city lights and stars; a drift plane of night clouds and hydrangea florets; a
+   flight plane of fireflies and paper lanterns; a near plane of words in the margin and tickets and photos peeking in; the story, with clouds drifting between the title page's great numeral and its title, and lanterns rising
+   behind the ending; in front, soft lights and florets at the edges; and over everything the night's dream veil
+   (PartTwoDepth.tsx, PartTwoAtmosphere.tsx, StoryPartTransition.tsx, StoryEnding.tsx, DreamVeil.tsx).
+   Scoped to Part II, so Part I's build drops all of it. */
+
+/* ---------- Far: city lights, stars ---------- */
+.story-page-part-two .depth-light {
+  width: var(--size); aspect-ratio: 1; border-radius: 50%; opacity: 0.45;
+  background: radial-gradient(circle, var(--tone), color-mix(in oklch, var(--tone) 35%, transparent) 40%, transparent 70%);
+}
+.story-page-part-two :is(.depth-light, .depth-front-light).is-teal { --tone: #5fd0e0; }
+.story-page-part-two :is(.depth-light, .depth-front-light).is-peach { --tone: #ffb48a; }
+.story-page-part-two :is(.depth-light, .depth-front-light).is-lilac { --tone: #b9a2f2; }
+.story-page-part-two .depth-star {
+  width: var(--size); aspect-ratio: 1; background: #eef5ff; opacity: 0.75;
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+}
+
+/* ---------- Drift: night clouds, hydrangea florets ---------- */
+.story-page-part-two .depth-cloud { width: var(--size); opacity: 0.55; }
+.story-page-part-two .art-cloud-body { fill: #2d4c75; }
+.story-page-part-two .art-cloud-shade { fill: #10233d; }
+.story-page-part-two :is(.depth-floret, .depth-front-floret) { width: var(--size); }
+.story-page-part-two .depth-floret { opacity: 0.85; }
+.story-page-part-two .art-floret-petal { fill: #8fb8f0; }
+.story-page-part-two .art-floret-petal.is-light { fill: #c7dbff; }
+.story-page-part-two .art-floret-eye { fill: #f4e9ff; }
+
+/* ---------- Flight: fireflies and paper lanterns ---------- */
+.story-page-part-two :is(.depth-firefly, .transition-firefly, .ending-firefly) {
+  width: var(--size, 7px); aspect-ratio: 1; border-radius: 50%; --dim: 0.3;
+  background: radial-gradient(circle, #fffbd6, #f1f08c 40%, transparent 72%); box-shadow: 0 0 10px 3px #e9f27a59;
+}
+.story-page-part-two :is(.depth-lantern, .ending-lantern) { width: var(--size); }
+/* The glow sits behind the paper inside the lantern's own layer. */
+.story-page-part-two :is(.depth-lantern, .ending-lantern)::before {
+  content: ""; position: absolute; inset: -70% -80%; z-index: -1; border-radius: 50%;
+  background: radial-gradient(circle, #ffb46b5c, #ff9a5a1f 40%, transparent 66%);
+}
+.story-page-part-two .art-lantern-paper { fill: #ffcf96; }
+.story-page-part-two .art-lantern-rib { fill: none; stroke: #e8945a; stroke-width: 1.2; opacity: 0.7; }
+.story-page-part-two .art-lantern-rim { fill: none; stroke: #c26a36; stroke-width: 2; stroke-linecap: round; }
+.story-page-part-two .art-lantern-flame { fill: #fff4c8; }
+
+/* ---------- Near: words in the margin; tickets, photos and tape in the night's tones ---------- */
+/* Faint enough to stay behind the story, clear enough to read: a thin lit outline over a breath of fill. */
+.story-page-part-two .depth-word {
+  color: #a8ddeb14; font: 400 var(--size)/0.9 var(--memory-display); letter-spacing: -0.04em; white-space: nowrap;
+  -webkit-text-stroke: 1px #b9e6f28c; text-shadow: 0 0 24px #a8ddeb38;
+}
+/* Below this width the margin beside the chapters is too slim to hold a word whole. */
+@media (max-width: 1399px) { .story-page-part-two .depth-word { display: none; } }
+.story-page-part-two .depth-keepsake { width: var(--size); filter: drop-shadow(0 10px 16px #02091680); }
+.story-page-part-two .depth-keepsake::before,
+.story-page-part-two .depth-keepsake::after { content: ""; position: absolute; }
+.story-page-part-two .depth-tape {
+  height: calc(var(--size) * 0.24); filter: none; opacity: 0.6;
+  background: repeating-linear-gradient(-45deg, #8bcbd880 0 7px, #c5e6ef66 7px 14px);
+  clip-path: polygon(0 0, 100% 0, 97% 25%, 100% 50%, 97% 75%, 100% 100%, 0 100%, 3% 75%, 0 50%, 3% 25%);
+}
+.story-page-part-two .depth-polaroid { aspect-ratio: 5 / 6; background: #efece4; opacity: 0.85; }
+.story-page-part-two .depth-polaroid::before {
+  inset: 7% 7% 22%;
+  background: radial-gradient(circle at 70% 30%, #fff6dc 0 9%, transparent 10%), linear-gradient(170deg, #1d3d63, #155467 55%, #0f2a45);
+}
+.story-page-part-two .depth-ticket { aspect-ratio: 5 / 2; opacity: 0.85; }
+.story-page-part-two .depth-ticket::before {
+  inset: 0; background: #d9ebf5;
+  mask: radial-gradient(circle at 0 50%, transparent 9px, #000 10px) left / 51% 100% no-repeat, radial-gradient(circle at 100% 50%, transparent 9px, #000 10px) right / 51% 100% no-repeat;
+}
+.story-page-part-two .depth-ticket::after {
+  inset: 0 0 0 68%; display: grid; place-items: center; content: "2026"; border-left: 1.5px dashed #2f465766;
+  color: #2f4657; font: 600 calc(var(--size) * 0.085)/1 var(--body); letter-spacing: 0.12em; opacity: 0.8;
+}
+
+/* ---------- In front: so close they are out of focus ---------- */
+.story-page-part-two .depth-front-light {
+  width: var(--size); aspect-ratio: 1; border-radius: 50%; opacity: 0.4;
+  background: radial-gradient(circle, var(--tone), transparent 68%); filter: blur(calc(var(--size) * 0.03));
+}
+.story-page-part-two .depth-front-floret { opacity: 0.6; filter: blur(calc(var(--size) * 0.04)); }
+
+/* ---------- The first sky: a full moon and night clouds ---------- */
+/* The moon climbs out of the frame while the reader leaves the title page (--path-end: the scroll it takes), so the
+   chapters' own skies, the first with its crescent, never share the screen with it. */
+.story-page-part-two .sky-moon {
+  position: absolute; left: 9vw; top: 13vh; width: clamp(56px, 6.5vw, 104px); aspect-ratio: 1;
+  --path-x: 3vw; --path-y: -36vh; --path-end: 120vh;
+}
+.story-page-part-two .sky-moon > i { position: absolute; border-radius: 50%; }
+.story-page-part-two .sky-moon-halo { inset: -170%; background: radial-gradient(circle, #dce9ff3d, #a9c8ff14 38%, transparent 66%); }
+.story-page-part-two .sky-moon-disc {
+  inset: 0; background: radial-gradient(circle at 38% 34%, #fffdf3, #eef2f8 46%, #c6d3e4); box-shadow: 0 0 44px 10px #e6efff3d;
+}
+.story-page-part-two .sky-moon-disc::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 62% 40%, #b4c3d77a 0 8%, transparent 9%), radial-gradient(circle at 40% 66%, #b4c3d766 0 6%, transparent 7%),
+    radial-gradient(circle at 30% 30%, #c6d1e166 0 5%, transparent 6%);
+}
+.story-page-part-two .sky-clouds { position: absolute; inset: 0; }
+.story-page-part-two .sky-cloud { position: absolute; left: 0; height: auto; transform: translateX(var(--x, 0)); }
+.story-page-part-two .sky-clouds-far { --sky: -6vh; }
+.story-page-part-two .sky-clouds-mid { --sky: -14vh; }
+.story-page-part-two .sky-clouds-near { --sky: -26vh; }
+.story-page-part-two .sky-clouds-far .sky-cloud { opacity: 0.4; --bob: 6px; }
+.story-page-part-two .sky-clouds-mid .sky-cloud { opacity: 0.5; --bob: 10px; }
+.story-page-part-two .sky-clouds-near .sky-cloud { opacity: 0.4; filter: blur(3px); --bob: 16px; }
+
+/* ---------- Weavers: clouds between the numeral and the title, lanterns behind the ending ---------- */
+/* On the title page the numeral sits at z 0 and the words at z 2: clouds at z 1 pass between them, fireflies at z 3
+   wander over both. In the ending, lanterns rise between its sky and its words; fireflies drift over the envelope. */
+.story-page-part-two .story-weaver { position: absolute; pointer-events: none; }
+.story-page-part-two .transition-weaver-cloud { z-index: 1; left: 0; opacity: 0.6; --weave: 100vw; }
+.story-page-part-two .transition-weaver-cloud.is-one { top: 40%; width: clamp(12rem, 20vw, 20rem); }
+.story-page-part-two .transition-weaver-cloud.is-two { top: 60%; width: clamp(9rem, 14vw, 14rem); }
+.story-page-part-two .transition-firefly { z-index: 3; }
+.story-page-part-two .transition-firefly.is-a { left: 28%; top: 44%; --fx: 44px; --fy: 30px; --loop: 9s; }
+.story-page-part-two .transition-firefly.is-b { left: 68%; top: 36%; --fx: -38px; --fy: 34px; --loop: 11s; --size: 6px; }
+.story-page-part-two .transition-firefly.is-c { left: 56%; top: 72%; --fx: 30px; --fy: -28px; --loop: 10s; --size: 8px; }
+.story-page-part-two .ending-lanterns { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.story-page-part-two .ending-lantern { position: absolute; bottom: -6%; --rise: -230vh; }
+.story-page-part-two .ending-firefly { z-index: 2; }
+.story-page-part-two .ending-firefly.is-a { left: 30%; top: 9%; --fx: 40px; --fy: 26px; --loop: 10s; }
+.story-page-part-two .ending-firefly.is-b { left: 70%; top: 14%; --fx: -34px; --fy: 30px; --loop: 12s; --size: 6px; }
+.story-page-part-two .ending-firefly.is-c { left: 62%; top: 36%; --fx: 28px; --fy: -30px; --loop: 9s; --size: 8px; }
+
+/* ---------- The night's dream veil: star dust, a cool light leak, dark-misted corners ---------- */
+.story-page-part-two .dream-haze { background: radial-gradient(ellipse 120% 90% at 50% 45%, transparent 60%, #0a14224d 86%, #050b1480 100%); }
+.story-page-part-two .dream-dust { background: radial-gradient(circle, #ffffff, #cfe8ff 45%, transparent 72%); box-shadow: 0 0 8px 2px #a8ddeb59; }
+.story-page-part-two .dream-orb { background: radial-gradient(circle, #a8ddeb1f, #b9a2f214 45%, transparent 70%); }
+.story-page-part-two .dream-leak { background: linear-gradient(90deg, transparent, #8bd8e81f 30%, #b9a2f229 55%, transparent); }
+
+/* Narrow screens keep the pieces that fit their slim margins, fewer clouds, and nothing in front. */
+@media (max-width: 900px) {
+  .story-page-part-two :is(.depth-item[data-wide], .depth-word, .dream-veil [data-wide]) { display: none; }
+  .story-page-part-two :is(.depth-keepsake, .depth-cloud) { width: calc(var(--size) * 0.7); }
+  /* The margins are slim, so the pieces you can make out slide to the very edge and peek in rather than sit behind the
+     words: a negative margin on the side a piece is anchored to moves it outwards. */
+  .story-page-part-two :is(.depth-floret, .depth-lantern) { width: calc(var(--size) * 0.8); margin-inline: calc(var(--size) * -0.38); }
+  .story-page-part-two .depth-keepsake { margin-inline: calc(var(--size) * -0.25); }
+  .story-page-part-two .sky-cloud:nth-child(n + 2) { display: none; }
+  .story-page-part-two .sky-cloud { scale: 0.65; transform-origin: 0 0; filter: none; }
+  .story-page-part-two .sky-moon { left: 6vw; top: 9vh; }
+  .story-page-part-two .transition-weaver-cloud { opacity: 0.45; }
+}
+@media (max-width: 1100px) {
+  main.story-experience.story-page-part-two > .depth-front { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-page-part-two :is(.story-weaver, .ending-lanterns) { display: none; }
+}
+
+/* ---------- Motion that runs on its own ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .story-page-part-two .depth-star.is-twinkling { animation: twinkle 3.6s ease-in-out infinite; }
+  .story-page-part-two .depth-star.is-twinkling:nth-child(even) { animation-duration: 4.8s; animation-delay: -2s; }
+  .story-page-part-two .depth-cloud { animation: cloud-bob 9s ease-in-out infinite alternate; }
+  .story-page-part-two .depth-cloud:nth-child(even) { animation-duration: 12s; animation-delay: -5s; --bob: 14px; }
+  .story-page-part-two .depth-floret.is-turning { animation: turn 22s linear infinite; }
+  /* A firefly wanders (translate, rotate) and pulses (opacity) on one element: one layer each. */
+  .story-page-part-two :is(.depth-firefly, .transition-firefly, .ending-firefly) {
+    animation: float-loop var(--loop, 10s) ease-in-out var(--offset, 0s) infinite, glow-pulse 2.2s ease-in-out infinite alternate;
+  }
+  .story-page-part-two .depth-firefly:nth-child(even) { animation-duration: var(--loop), 3s; }
+  .story-page-part-two .depth-lantern { animation: lantern-bob 7s ease-in-out var(--offset, 0s) infinite alternate; }
+  .story-page-part-two .ending-lantern { animation: lantern-rise var(--life) linear var(--delay) infinite; }
+  .story-page-part-two .sky-cloud {
+    animation: cloud-cross var(--loop) linear var(--offset) infinite, cloud-bob 9s ease-in-out infinite alternate;
+  }
+  .story-page-part-two .sky-moon-halo { animation: glow-pulse 7s ease-in-out infinite alternate; --dim: 0.7; }
+  .story-page-part-two .transition-weaver-cloud.is-one { animation: weave-across 70s linear -20s infinite, cloud-bob 9s ease-in-out infinite alternate; }
+  .story-page-part-two .transition-weaver-cloud.is-two { animation: weave-across 90s linear -62s infinite, cloud-bob 11s ease-in-out infinite alternate; }
+}
+
+/* Phones keep the motion that reads at a glance (clouds floating, lanterns swaying, one firefly and one cloud crossing
+   the title page, three lanterns rising) and let the small loops rest: on this page they add up. */
+@media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .story-page-part-two :is(.depth-star.is-twinkling, .depth-floret.is-turning) { animation: none; }
+  .story-page-part-two .depth-firefly { animation: glow-pulse 2.2s ease-in-out infinite alternate; }
+  .story-page-part-two :is(.transition-weaver-cloud.is-two, .transition-firefly:not(.is-a), .ending-firefly:not(.is-a)) { display: none; }
+  .story-page-part-two .ending-lantern:nth-child(n + 4) { display: none; }
+}
+
+/* ---------- Motion that follows the scroll ---------- */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .story-page-part-two .sky-clouds { animation: sky-drift linear both; animation-timeline: scroll(root); }
+    .story-page-part-two .sky-moon { animation: sky-path linear both; animation-timeline: scroll(root); animation-range: 0 var(--path-end); }
+  }
+}

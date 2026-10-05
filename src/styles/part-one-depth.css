@@ -1,49 +1,61 @@
-/* Part I in layers. The fixed sky stays furthest back; above it a page-long field of giant words, soft light, doodles
-   and paper keepsakes drifts at its own speeds (PartOneDepth.tsx); the story sits on top; a few blurred petals pass in front at the
-   very edges. Inside the first sections the photos and blossoms also travel at different speeds, so the hero and the
-   scrapbook come apart into planes as they scroll by.
+/* Part I in layers: a scrapbook in a sunny garden (the shared machinery is in depth-field.css).
+   Back to front: the fixed sky (chapter-coloured washes, a sun with slow rays, three rows of drifting clouds, birds); a
+   far plane of sunbeams and soft light; a drift plane of clouds, doodles and blossoms; a flight plane of butterflies and
+   cherry twigs; a near plane of big words and paper keepsakes peeking in from the margins; the story, with a cloud and
+   a butterfly weaving between the hero's photos and the scrapbook's; in front, out-of-focus flowers and butterflies at
+   the edges; and over everything the dream veil (PartOneDepth.tsx, PartOneAtmosphere.tsx, DreamVeil.tsx).
+   Scoped to Part I, so Part II's build drops all of it. */
 
-   Every movement is a scroll-driven animation on `transform`/`translate`, and there are few of them: each kind of piece
-   shares one plane, so the whole field is five animations on the page's own scroll timeline rather than one timeline per
-   piece (which kept the main thread busy every frame). Browsers without scroll timelines keep the same layers standing
-   still, and readers who prefer reduced motion get the still version too. Scoped to Part I, so Part II's build drops it. */
-
-/* ---------- The two page-long layers: behind the story, and in front of it at the margins ---------- */
-.story-experience.story-page-part-one > :is(.part-one-depth, .part-one-foreground) { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
-.story-experience.story-page-part-one > .part-one-depth { z-index: 0; }
-.story-experience.story-page-part-one > .part-one-foreground { z-index: 3; }
-.story-page-part-one .depth-plane { position: absolute; inset: 0; }
-.story-page-part-one .depth-item { position: absolute; top: calc(var(--at) * 1%); transform: rotate(var(--tilt)); }
-
-/* How much of the scroll each plane gives back. A plane that slides down while the page goes up reads as far away, one
-   that slides up as near: words lag most, then the light, the doodles, the keepsakes; the petals overtake. */
-.story-page-part-one .depth-plane-word { --k: 0.6; }
-.story-page-part-one .depth-plane-glow { --k: 0.5; }
-.story-page-part-one .depth-plane-doodle { --k: 0.35; }
-.story-page-part-one .depth-plane-keepsake { --k: 0.15; }
-.story-page-part-one .depth-plane-petal { --k: -0.5; }
-
-/* Far: soft light, the way out-of-focus sun looks behind a window. */
+/* ---------- Far: sunbeams, soft light ---------- */
+.story-page-part-one .depth-beam {
+  width: var(--size); height: 150vh; translate: 0 -50%; opacity: 0.8;
+  background: linear-gradient(90deg, transparent, #fffbf2b3 44%, #fff4e8a6 56%, transparent);
+  filter: blur(16px);
+}
 .story-page-part-one .depth-glow {
-  width: var(--size); aspect-ratio: 1; border-radius: 50%; opacity: 0.7;
-  background: radial-gradient(circle, #ffffffe6, #ffe3eaa6 38%, transparent 70%);
+  width: var(--size); aspect-ratio: 1; border-radius: 50%; opacity: 0.75;
+  background: radial-gradient(circle, #ffffffeb, #ffe6ecab 38%, transparent 70%);
 }
 
-/* Far: line doodles in the diary's rose. */
+/* ---------- Drift: clouds, doodles, blossoms ---------- */
+.story-page-part-one .depth-cloud { width: var(--size); opacity: 0.9; }
+.story-page-part-one .art-cloud-body { fill: #fffefe; }
+.story-page-part-one .art-cloud-shade { fill: #ffc8d6; }
 .story-page-part-one .depth-doodle {
-  width: var(--size); height: var(--size); overflow: visible; opacity: 0.5;
+  width: var(--size); height: var(--size); overflow: visible; opacity: 0.55;
   fill: none; stroke: var(--rose-accent); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
 }
 .story-page-part-one .depth-doodle .is-filled { fill: var(--rose-glow); stroke: none; }
-.story-page-part-one .depth-sparkle { opacity: 0.6; }
+.story-page-part-one .depth-sparkle { opacity: 0.65; }
+.story-page-part-one :is(.depth-blossom, .depth-front-blossom) svg { display: block; width: 100%; height: auto; }
+.story-page-part-one .depth-blossom { width: var(--size); opacity: 0.9; }
+.story-page-part-one .art-petal { fill: #ffb3c7; }
+.story-page-part-one .art-petal.is-light { fill: #ffd5e0; }
+.story-page-part-one .art-blossom-heart { fill: #f4c25e; }
 
-/* Furthest: words from the story, drawn as outlines so they read as space rather than text. */
+/* ---------- Flight: cherry twigs and butterflies ---------- */
+.story-page-part-one .depth-sprig { width: var(--size); transform-origin: 0 78%; }
+.story-page-part-one .depth-sprig.is-flipped { transform-origin: 100% 78%; }
+.story-page-part-one .art-sprig-branch { fill: none; stroke: #b98089; stroke-width: 2.4; stroke-linecap: round; }
+.story-page-part-one .art-sprig-branch.is-twig { stroke-width: 1.6; }
+.story-page-part-one .art-bud { fill: #ff9fb8; }
+.story-page-part-one .depth-butterfly { width: var(--size); }
+.story-page-part-one .art-wing-upper { fill: var(--wing-a); }
+.story-page-part-one .art-wing-lower { fill: var(--wing-b); }
+.story-page-part-one .art-wing-spot { fill: #fffaf6; opacity: 0.85; }
+.story-page-part-one .art-butterfly-body { stroke: #6b3a4f; stroke-width: 2; stroke-linecap: round; }
+.story-page-part-one .art-butterfly-feelers { fill: none; stroke: #6b3a4f; stroke-width: 0.9; stroke-linecap: round; }
+.story-page-part-one .art-butterfly.is-rose { --wing-a: #ff8db1; --wing-b: #ffc3d5; }
+.story-page-part-one .art-butterfly.is-peach { --wing-a: #ffab82; --wing-b: #ffd7c0; }
+.story-page-part-one .art-butterfly.is-lilac { --wing-a: #bc9cf0; --wing-b: #e5d6ff; }
+.story-page-part-one .art-butterfly.is-gold { --wing-a: #f6c25c; --wing-b: #ffe7ae; }
+
+/* ---------- Near: big words in the open ground; paper keepsakes peeking in from the margins ---------- */
+/* Frosted letters with a rose outline: quiet behind the story, clear enough to read. */
 .story-page-part-one .depth-word {
-  color: transparent; font: 400 var(--size)/0.9 var(--memory-display); letter-spacing: -0.05em; white-space: nowrap;
-  -webkit-text-stroke: 1px #d64f7a33;
+  color: #fff8fa66; font: 400 var(--size)/0.9 var(--memory-display); letter-spacing: -0.04em; white-space: nowrap;
+  -webkit-text-stroke: 1.2px #d64f7a6b; text-shadow: 0 8px 26px #d64f7a1f;
 }
-
-/* Near the story: paper keepsakes peeking in from the margins. The shadow lives on the piece, its shape on ::before. */
 .story-page-part-one .depth-keepsake { width: var(--size); filter: drop-shadow(0 10px 16px #6b1f3a1f); }
 .story-page-part-one .depth-keepsake::before,
 .story-page-part-one .depth-keepsake::after { content: ""; position: absolute; }
@@ -79,30 +91,125 @@
   color: var(--rose-accent); font: 600 calc(var(--size) * 0.085)/1 var(--body); letter-spacing: 0.12em; opacity: 0.75;
 }
 
-/* In front: big soft petals, out of focus because they are so close. */
-.story-page-part-one .depth-petal {
-  width: var(--size); aspect-ratio: 1; border-radius: 80% 0 70% 30% / 70% 0 80% 30%; opacity: 0.5;
-  background: radial-gradient(circle at 30% 28%, #ffe4ea, #ffb7c8 48%, #f48fab);
-  filter: blur(calc(var(--size) * 0.055));
-}
+/* ---------- In front: so close they are out of focus ---------- */
+.story-page-part-one .depth-front-blossom { width: var(--size); opacity: 0.7; filter: blur(calc(var(--size) * 0.04)); }
+.story-page-part-one .depth-front-butterfly { opacity: 0.85; filter: blur(2.5px); }
 
-/* Narrow screens keep the pieces that fit their slim margins; the petals in front need wide ones. */
+/* ---------- Weavers: a cloud and a butterfly that pass between the photos themselves ---------- */
+/* In the photo booth the front photo sits at z 3, the others at 2 and 1: a weaver at 2, painted after them, drifts over
+   two photos and under the third. The scrapbook works the same way. */
+.story-page-part-one .story-weaver { position: absolute; pointer-events: none; }
+/* Weaving clouds are part see-through, so a caption they pass over stays readable. */
+.story-page-part-one .booth-weaver-cloud { z-index: 2; left: 0; top: 52%; width: clamp(9rem, 16vw, 15rem); opacity: 0.72; }
+.story-page-part-one .booth-weaver-butterfly { z-index: 2; left: 38%; top: 26%; width: clamp(2.4rem, 3.4vw, 3.2rem); --fx: 70px; --fy: 50px; }
+.story-page-part-one .mood-weaver-cloud { z-index: 3; left: 0; top: 34%; width: clamp(8rem, 14vw, 13rem); opacity: 0.62; }
+.story-page-part-one :is(.booth-weaver-cloud, .mood-weaver-cloud) { --weave: 44vw; }
+@media (max-width: 900px) { .story-page-part-one :is(.booth-weaver-cloud, .mood-weaver-cloud) { --weave: 92vw; opacity: 0.5; } }
+@media (prefers-reduced-motion: reduce) { .story-page-part-one .story-weaver { display: none; } }
+
+/* ---------- The sky's afternoon: sun, rays, clouds, birds ---------- */
+.story-page-part-one .sky-sun {
+  position: absolute; top: -22vmax; right: -16vmax; width: 64vmax; aspect-ratio: 1; border-radius: 50%; opacity: 0.85;
+  background: radial-gradient(circle, #fffbec 0%, #ffefc8 14%, #ffd8b2 30%, #ffc6cb 44%, transparent 68%);
+}
+.story-page-part-one .sky-rays {
+  position: absolute; top: -48vmax; right: -48vmax; width: 120vmax; aspect-ratio: 1; opacity: 0.75;
+  background: repeating-conic-gradient(#fff7e200 0deg, #fff7e275 2deg, #fff7e200 5deg, #fff7e200 11deg);
+  mask: radial-gradient(circle, #000 6%, #0009 26%, transparent 56%);
+}
+.story-page-part-one .sky-clouds { position: absolute; inset: 0; }
+.story-page-part-one .sky-cloud { position: absolute; left: 0; height: auto; overflow: visible; transform: translateX(var(--x, 0)); }
+.story-page-part-one .sky-clouds-far .sky-cloud { opacity: 0.5; --bob: 6px; }
+.story-page-part-one .sky-clouds-mid .sky-cloud { opacity: 0.6; --bob: 10px; }
+.story-page-part-one .sky-clouds-near .sky-cloud { opacity: 0.45; filter: blur(3px); --bob: 16px; }
+.story-page-part-one .sky-birds { position: absolute; inset: 0; color: #8a5a6e; opacity: 0.55; }
+.story-page-part-one .sky-birds .flock { top: var(--y); left: 0; translate: -25vw 0; }
+
+/* ---------- The dream veil: light in the air between the reader and the page ---------- */
+.story-page-part-one .dream-haze {
+  background: radial-gradient(ellipse 120% 90% at 50% 45%, transparent 62%, #fff5f84d 84%, #ffe3ec80 100%);
+}
+.story-page-part-one .dream-dust { background: radial-gradient(circle, #ffffff, #fff1c4 45%, transparent 72%); box-shadow: 0 0 8px 2px #ffe9b866; }
+.story-page-part-one .dream-orb { background: radial-gradient(circle, #ffffff33, #ffd6e21f 45%, transparent 70%); }
+.story-page-part-one .dream-leak { background: linear-gradient(90deg, transparent, #fff1d62e 30%, #ffd2e03d 55%, transparent); }
+.story-page-part-one .dream-veil .flock { color: #7a4a5e; filter: blur(0.6px); }
+
+/* Narrow screens keep the pieces that fit their slim margins, fewer clouds and birds, and nothing in front. */
 @media (max-width: 900px) {
-  .story-page-part-one :is(.depth-item[data-wide], .depth-word) { display: none; }
+  .story-page-part-one :is(.depth-item[data-wide], .depth-word, .dream-veil [data-wide]) { display: none; }
   .story-page-part-one .depth-doodle { width: calc(var(--size) * 0.8); height: calc(var(--size) * 0.8); }
-  .story-page-part-one .depth-keepsake { width: calc(var(--size) * 0.7); }
+  .story-page-part-one :is(.depth-keepsake, .depth-cloud, .depth-sprig) { width: calc(var(--size) * 0.7); }
+  /* Slim margins: keepsakes and sprigs slide out to the edge and peek in (the margin on their anchored side). */
+  .story-page-part-one .depth-keepsake { margin-inline: calc(var(--size) * -0.25); }
+  .story-page-part-one .depth-sprig { margin-inline: calc(var(--size) * -0.3); }
+  .story-page-part-one .depth-butterfly { width: calc(var(--size) * 0.85); }
+  .story-page-part-one .sky-cloud:nth-child(n + 2) { display: none; }
+  .story-page-part-one .sky-cloud { scale: 0.65; transform-origin: 0 0; filter: none; }
+  .story-page-part-one .sky-birds .flock:nth-child(n + 2) { display: none; }
 }
 @media (max-width: 1100px) {
-  .story-experience.story-page-part-one > .part-one-foreground { display: none; }
+  main.story-experience.story-page-part-one > .depth-front { display: none; }
 }
 
-/* ---------- Motion: the planes slide on the page's scroll; each piece is placed so it is where it belongs mid-screen ---------- */
+/* ---------- Motion that runs on its own ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* Flight (translate, rotate) and wingbeat (scale) are separate properties of one element, so each butterfly is a
+     single compositor layer; animating the wings themselves made four. */
+  .story-page-part-one :is(.depth-butterfly, .booth-weaver-butterfly) {
+    animation: float-loop var(--loop, 12s) ease-in-out var(--offset, 0s) infinite, wing-beat 0.34s ease-in-out infinite alternate;
+  }
+  .story-page-part-one .depth-butterfly:nth-child(3n) { animation-duration: var(--loop), 0.29s; }
+  .story-page-part-one .depth-butterfly:nth-child(3n + 1) { animation-duration: var(--loop), 0.4s; }
+  .story-page-part-one .depth-sprig { animation: sway 6.5s ease-in-out infinite alternate; }
+  .story-page-part-one .depth-sprig:nth-child(even) { animation-duration: 8s; animation-delay: -3s; }
+  .story-page-part-one .depth-blossom.is-turning { animation: turn 18s linear infinite; }
+  /* Clouds float: page clouds bob in place, sky clouds bob as they cross, and the hero's clouds billow puff by puff. */
+  .story-page-part-one .depth-cloud { animation: cloud-bob var(--bob-time, 8s) ease-in-out infinite alternate; }
+  .story-page-part-one .depth-cloud:nth-child(even) { --bob-time: 11s; --bob: 14px; animation-delay: -4s; }
+  .story-page-part-one .sky-cloud {
+    animation: cloud-cross var(--loop) linear var(--offset) infinite, cloud-bob 9s ease-in-out infinite alternate;
+  }
+  .story-page-part-one .is-billowing :is(.art-cloud-body, .art-cloud-shade) > * {
+    transform-box: fill-box; transform-origin: center; animation: puff 5.5s ease-in-out infinite alternate;
+  }
+  .story-page-part-one .is-billowing :is(.art-cloud-body, .art-cloud-shade) > :nth-child(2n) { animation-duration: 7s; animation-delay: -2s; }
+  .story-page-part-one .is-billowing :is(.art-cloud-body, .art-cloud-shade) > :nth-child(3n) { animation-duration: 6.2s; animation-delay: -4s; }
+  .story-page-part-one .sky-birds .flock { animation: flock-cross var(--life, 48s) linear var(--delay, 0s) infinite; }
+  .story-page-part-one .booth-weaver-cloud { animation: weave-across 46s linear -12s infinite, cloud-bob 7s ease-in-out infinite alternate; }
+  .story-page-part-one .mood-weaver-cloud { animation: weave-across 54s linear -30s infinite, cloud-bob 8s ease-in-out infinite alternate; }
+  .story-page-part-one .sky-sun { animation: sun-breathe 10s ease-in-out infinite alternate; }
+  .story-page-part-one .sky-rays { animation: rays-turn 150s linear infinite; }
+}
+
+/* ---------- Motion that follows the scroll ---------- */
+.story-page-part-one .sky-clouds-far { --sky: -8vh; }
+.story-page-part-one .sky-clouds-mid { --sky: -18vh; }
+.story-page-part-one .sky-clouds-near { --sky: -34vh; }
+.story-page-part-one :is(.sky-sun, .sky-rays) { --path-x: -6vw; --path-y: 12vh; }
+
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
-    .story-page-part-one .depth-plane { animation: depth-plane linear both; animation-timeline: scroll(root); }
-    /* A plane has moved k × the scroll by the time a piece reaches the middle of the screen, so the piece starts that
-       much higher (or lower): (1 - k) of the way to its spot, plus k of half a screen. */
-    .story-page-part-one .depth-plane .depth-item { top: calc((1 - var(--k)) * var(--at) * 1% + var(--k) * 50vh); }
+    .story-page-part-one .sky-clouds { animation: sky-drift linear both; animation-timeline: scroll(root); }
+
+    /* The sun sinks a little as the story goes on, its rays still turning. */
+    .story-page-part-one .sky-sun {
+      animation-name: sun-breathe, sky-path; animation-duration: 10s, auto; animation-timing-function: ease-in-out, linear;
+      animation-iteration-count: infinite, 1; animation-direction: alternate, normal; animation-fill-mode: none, both;
+      animation-timeline: auto, scroll(root);
+    }
+    .story-page-part-one .sky-rays {
+      animation-name: rays-turn, sky-path; animation-duration: 150s, auto; animation-timing-function: linear, linear;
+      animation-iteration-count: infinite, 1; animation-fill-mode: none, both; animation-timeline: auto, scroll(root);
+    }
+
+    /* The two aurora ribbons part as the page goes by (their own slow drift carries on). */
+    .story-page-part-one .blush-aurora {
+      animation-name: aurora-drift, sky-drift; animation-duration: 28s, auto; animation-timing-function: ease-in-out, linear;
+      animation-iteration-count: infinite, 1; animation-direction: alternate, normal; animation-fill-mode: none, both;
+      animation-timeline: auto, scroll(root);
+    }
+    .story-page-part-one .blush-aurora-one { --sky: -26vh; }
+    .story-page-part-one .blush-aurora-two { --sky: 18vh; animation-duration: 34s, auto; animation-delay: -14s, 0s; }
   }
 }
 
@@ -116,63 +223,47 @@
     .story-page-part-one .story-intro .intro-copy {
       animation: hero-depth linear both, hero-fade linear both;
       animation-timeline: --hero, --hero; animation-range: exit 0% exit 100%, exit 10% exit 90%; animation-composition: add, replace;
-      --hero-rise: 24vh;
-    }
-    .story-page-part-one .booth-photo-1 { --hero-rise: -14vh; }
-    .story-page-part-one .booth-photo-2 { --hero-rise: -28vh; }
-    .story-page-part-one .booth-photo-3 { --hero-rise: -6vh; }
-    .story-page-part-one .booth-sticker { --hero-rise: -40vh; }
-    .story-page-part-one .diary-photo-note { --hero-rise: -20vh; }
-    .story-page-part-one .intro-blossom { --hero-rise: -46vh; }
-    /* On phones the words sit right above the photos, so the planes part by half as much and never meet. */
-    @media (max-width: 900px) {
-      .story-page-part-one .story-intro .intro-copy { --hero-rise: 12vh; }
-      .story-page-part-one .booth-photo-1 { --hero-rise: -7vh; }
-      .story-page-part-one .booth-photo-2 { --hero-rise: -14vh; }
-      .story-page-part-one .booth-photo-3 { --hero-rise: -3vh; }
-      .story-page-part-one .booth-sticker { --hero-rise: -20vh; }
-      .story-page-part-one .diary-photo-note { --hero-rise: -10vh; }
-      .story-page-part-one .intro-blossom { --hero-rise: -24vh; }
     }
 
-    /* The scrapbook's photos and the keepsake box's blossoms each keep their own pace across the screen, on their
-       section's timeline. */
+    /* The scrapbook's photos and the keepsake box's blossoms each keep their own pace, on their section's timeline. */
     .story-page-part-one .mood-setup { view-timeline: --mood block; }
     .story-page-part-one .keepsake-playground { view-timeline: --keepsake block; }
     .story-page-part-one :is(.mood-photo, .keepsake-flower) {
       animation: drift linear both; animation-timeline: --mood; animation-range: cover; animation-composition: add;
     }
     .story-page-part-one .keepsake-flower { animation-timeline: --keepsake; }
-    .story-page-part-one .mood-photo-1 { --drift: 6vh; }
-    .story-page-part-one .mood-photo-2 { --drift: -9vh; }
-    .story-page-part-one .mood-photo-3 { --drift: 3vh; }
-    .story-page-part-one .keepsake-flower-one { --drift: -14vh; }
-    .story-page-part-one .keepsake-flower-two { --drift: -24vh; }
   }
 }
 
-/* The fixed sky moves too, just barely: its two ribbons part as the page goes by (their own slow drift carries on). */
-@supports (animation-timeline: scroll()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .story-page-part-one .blush-aurora {
-      animation-name: aurora-drift, sky-drift;
-      animation-duration: 28s, auto;
-      animation-timing-function: ease-in-out, linear;
-      animation-iteration-count: infinite, 1;
-      animation-direction: alternate, normal;
-      animation-fill-mode: none, both;
-      animation-timeline: auto, scroll(root);
-    }
-    .story-page-part-one .blush-aurora-one { --sky: -26vh; }
-    .story-page-part-one .blush-aurora-two { --sky: 18vh; animation-duration: 34s, auto; animation-delay: -14s, 0s; }
-  }
+/* How far each hero piece travels while the hero leaves, and each scrapbook piece while its section passes. On phones
+   the words sit right above the photos, so the planes part by half as much and never meet. */
+.story-page-part-one .story-intro .intro-copy { --hero-rise: 24vh; }
+.story-page-part-one .booth-photo-1 { --hero-rise: -14vh; }
+.story-page-part-one .booth-photo-2 { --hero-rise: -28vh; }
+.story-page-part-one .booth-photo-3 { --hero-rise: -6vh; }
+.story-page-part-one .booth-sticker { --hero-rise: -40vh; }
+.story-page-part-one .diary-photo-note { --hero-rise: -20vh; }
+.story-page-part-one .intro-blossom { --hero-rise: -46vh; }
+.story-page-part-one .mood-photo-1 { --drift: 6vh; }
+.story-page-part-one .mood-photo-2 { --drift: -9vh; }
+.story-page-part-one .mood-photo-3 { --drift: 3vh; }
+.story-page-part-one .keepsake-flower-one { --drift: -14vh; }
+.story-page-part-one .keepsake-flower-two { --drift: -24vh; }
+@media (max-width: 900px) {
+  .story-page-part-one .story-intro .intro-copy { --hero-rise: 12vh; }
+  .story-page-part-one .booth-photo-1 { --hero-rise: -7vh; }
+  .story-page-part-one .booth-photo-2 { --hero-rise: -14vh; }
+  .story-page-part-one .booth-photo-3 { --hero-rise: -3vh; }
+  .story-page-part-one .booth-sticker { --hero-rise: -20vh; }
+  .story-page-part-one .diary-photo-note { --hero-rise: -10vh; }
+  .story-page-part-one .intro-blossom { --hero-rise: -24vh; }
 }
 
-@keyframes depth-plane { to { transform: translateY(calc(var(--k) * (100% - 100vh))); } }
 @keyframes hero-depth { to { transform: translateY(var(--hero-rise)); } }
 @keyframes hero-fade { to { opacity: 0.25; } }
 @keyframes drift {
   from { transform: translateY(calc(var(--drift) * -1)); }
   to { transform: translateY(var(--drift)); }
 }
-@keyframes sky-drift { to { translate: 0 var(--sky); } }
+@keyframes sun-breathe { to { opacity: 1; scale: 1.06; } }
+@keyframes rays-turn { to { rotate: 360deg; } }

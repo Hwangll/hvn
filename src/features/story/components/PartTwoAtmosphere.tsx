@@ -1,4 +1,18 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
+import { Cloud } from "./StoryArt";
+
+/** Night clouds crossing the first sky, slower the further away; `offset` starts each one part-way across. */
+const nightClouds = {
+  far: [
+    { top: 10, size: 180, variant: 2, loop: 200, offset: -60 },
+    { top: 22, size: 220, variant: 1, loop: 180, offset: -140 },
+  ],
+  mid: [
+    { top: 44, size: 300, variant: 0, loop: 140, offset: -40 },
+    { top: 60, size: 260, variant: 2, loop: 125, offset: -95 },
+  ],
+  near: [{ top: 82, size: 460, variant: 1, loop: 95, offset: -30 }],
+} as const;
 
 interface PartTwoAtmosphereProps {
   reducedMotion?: boolean;
@@ -6,7 +20,9 @@ interface PartTwoAtmosphereProps {
 
 /**
  * The fixed sky behind Part II. Each mood is a full-bleed layer that usePartTwoScroll crossfades by scroll position;
- * the slow drifts (aurora, stars, caustics, dust) are time-based so the page breathes while the reader pauses.
+ * the slow drifts (aurora, stars, caustics, dust) are time-based so the page breathes while the reader pauses. The first
+ * sky also holds a full moon that climbs out of sight as the reader leaves the title page, and three rows of night clouds
+ * drifting across; they fade with it when the chapters move indoors and under water.
  * A soft pointer glow follows the cursor on desktop, like a torch moving across a dark page.
  */
 export function PartTwoAtmosphere({ reducedMotion = false }: PartTwoAtmosphereProps) {
@@ -45,6 +61,25 @@ export function PartTwoAtmosphere({ reducedMotion = false }: PartTwoAtmospherePr
         <div className="aurora aurora-night-one" />
         <div className="aurora aurora-night-two" />
         <div className="night-lights" data-water-depth="0.6" />
+        <div className="sky-moon" data-scroll-path><i className="sky-moon-halo" /><i className="sky-moon-disc" /></div>
+        {(["far", "mid", "near"] as const).map((row) => (
+          <div className={`sky-clouds sky-clouds-${row}`} data-scroll-drift key={row}>
+            {nightClouds[row].map((cloud) => (
+              <Cloud
+                key={`${row}-${cloud.top}`}
+                variant={cloud.variant}
+                className="sky-cloud"
+                style={{
+                  top: `${cloud.top}%`,
+                  width: `${cloud.size}px`,
+                  "--loop": `${cloud.loop}s`,
+                  "--offset": `${cloud.offset}s`,
+                  "--x": `${(-30 + (-cloud.offset / cloud.loop) * 145).toFixed(1)}vw`,
+                } as CSSProperties}
+              />
+            ))}
+          </div>
+        ))}
       </div>
       <div className="offline-mood offline-mood-park" data-offline-mood>
         <div className="sky-stars sky-stars-far" data-water-depth="0.3" />

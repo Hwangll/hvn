@@ -1,15 +1,17 @@
 import type { CSSProperties, ReactElement } from "react";
-import { Blossom, Butterfly, Cloud, Sprig, type ButterflyTheme } from "./PartOneArt";
+import { Blossom, Butterfly, Cloud, Sprig, type ButterflyTheme } from "./StoryArt";
 
 /**
- * Part I's depth of field. The page reads like a scrapbook in a sunny garden: sunbeams, soft light and giant words far
- * behind the story, clouds, doodles and blossoms drifting nearer, butterflies and cherry twigs nearer still, paper
- * keepsakes peeking in from the margins, and big out-of-focus flowers and butterflies passing in front at the edges.
+ * Part I's depth of field. The page reads like a scrapbook in a sunny garden: sunbeams and soft light far behind the
+ * story, clouds, doodles and blossoms drifting nearer, butterflies and cherry twigs nearer still, big words in the open
+ * ground between sections and paper keepsakes peeking in from the margins, and big out-of-focus flowers and butterflies
+ * passing in front at the edges.
  *
  * Each group lives on one page-long plane and each plane slides against the page at its own speed as the page scrolls
- * (part-one-depth.css, or usePartOneParallaxFallback where scroll timelines are missing), which is what reads as layers.
- * A piece's `top` is where it sits as it crosses the middle of the screen. The things that move on their own (wings,
- * flight, swaying twigs, turning blossoms) are idle zones, so they rest while off screen. All of it is decorative.
+ * (depth-field.css and part-one-depth.css, or useDepthParallaxFallback where scroll timelines are missing), which is
+ * what reads as layers. A piece's `top` is where it sits as it crosses the middle of the screen. The things that move
+ * on their own (wings, flight, swaying twigs, turning blossoms) are idle zones, so they rest while off screen. All of
+ * it is decorative.
  */
 
 type Doodle = "heart" | "sparkle" | "notes" | "airplane" | "bubble" | "ring" | "flower" | "envelope" | "swirl";
@@ -41,47 +43,41 @@ interface Flight extends Piece {
 const glows: Piece[] = [
   { top: 2, left: 58, size: 9 },
   { top: 10.5, left: 12, size: 12 },
-  { top: 17, left: 70, size: 8 },
+  { top: 17, left: 70, size: 8, wide: true },
   { top: 26, left: 38, size: 11 },
   { top: 33, left: 8, size: 9 },
   { top: 40, left: 62, size: 12 },
-  { top: 47, left: 22, size: 8 },
+  { top: 47, left: 22, size: 8, wide: true },
   { top: 55, left: 76, size: 10 },
   { top: 62, left: 34, size: 12 },
   { top: 69, left: 6, size: 9 },
   { top: 76, left: 58, size: 11 },
-  { top: 84, left: 26, size: 8 },
+  { top: 84, left: 26, size: 8, wide: true },
   { top: 91, left: 72, size: 10 },
-];
-
-const words: Array<Piece & { text: string }> = [
-  { text: "nhớ", top: 8.6, left: 30, size: 12 },
-  { text: "gặp", top: 24, left: 3, size: 13 },
-  { text: "thương", top: 96, right: 3, size: 12 },
 ];
 
 /** Long shafts of afternoon sun falling across the page. */
 const beams: Piece[] = [
   { top: 1.5, left: 38, size: 16, tilt: 30 },
-  { top: 11, left: 56, size: 13, tilt: 26 },
+  { top: 11, left: 56, size: 13, tilt: 26, wide: true },
   { top: 25, left: 18, size: 17, tilt: 32 },
   { top: 44, left: 64, size: 12, tilt: 28, wide: true },
-  { top: 60, left: 40, size: 15, tilt: 30 },
+  { top: 60, left: 40, size: 15, tilt: 30, wide: true },
   { top: 78, left: 70, size: 12, tilt: 27, wide: true },
   { top: 92, left: 28, size: 17, tilt: 31 },
 ];
 
 /* ---------- Drift plane ---------- */
-const clouds: Array<Piece & { variant: number }> = [
-  { variant: 0, top: 1.2, left: 21, size: 230 },
-  { variant: 2, top: 6.8, left: 47, size: 170 },
+const clouds: Array<Piece & { variant: number; billow?: boolean }> = [
+  { variant: 0, top: -1.1, left: 24, size: 230, billow: true },
+  { variant: 2, top: 6.8, left: 47, size: 170, billow: true },
   { variant: 1, top: 9.8, right: 3, size: 270 },
-  { variant: 2, top: 14.6, left: 40, size: 200 },
+  { variant: 2, top: 14.6, left: 40, size: 200, wide: true },
   { variant: 0, top: 23.8, right: 7, size: 290 },
   { variant: 1, top: 34, left: -2, size: 220, wide: true },
-  { variant: 2, top: 47, right: -1, size: 210 },
+  { variant: 2, top: 47, right: -1, size: 210, wide: true },
   { variant: 0, top: 61, left: -3, size: 230, wide: true },
-  { variant: 1, top: 74, right: -2, size: 250 },
+  { variant: 1, top: 74, right: -2, size: 250, wide: true },
   { variant: 2, top: 88.5, left: 12, size: 250 },
   { variant: 0, top: 97, right: 14, size: 230 },
 ];
@@ -138,31 +134,42 @@ const blossoms: Array<Piece & { spin?: boolean }> = [
 
 /* ---------- Flight plane ---------- */
 const butterflies: Flight[] = [
-  { theme: "rose", top: 2.4, left: 50, size: 34, fx: 70, fy: 28, loop: 11 },
-  { theme: "gold", top: 6.2, left: 30, size: 26, fx: -56, fy: 30, loop: 13 },
-  { theme: "lilac", top: 9.6, left: 62, size: 30, fx: 74, fy: -26, loop: 12 },
-  { theme: "peach", top: 14, left: 18, size: 26, fx: 60, fy: 22, loop: 14 },
-  { theme: "rose", top: 24.2, left: 72, size: 32, fx: -70, fy: 26, loop: 12 },
-  { theme: "gold", top: 36, right: 3, size: 24, fx: -26, fy: 34, loop: 10, wide: true },
-  { theme: "lilac", top: 60, left: 2.5, size: 24, fx: 26, fy: -30, loop: 11, wide: true },
-  { theme: "peach", top: 89.6, left: 62, size: 34, fx: -66, fy: 30, loop: 13 },
-  { theme: "rose", top: 96.5, left: 20, size: 28, fx: 60, fy: -24, loop: 12 },
+  { theme: "rose", top: 2.4, left: 46, size: 50, fx: 80, fy: 30, loop: 11 },
+  { theme: "gold", top: 6.2, left: 30, size: 40, fx: -64, fy: 34, loop: 13 },
+  { theme: "lilac", top: 9.6, left: 62, size: 46, fx: 90, fy: -30, loop: 12, wide: true },
+  { theme: "peach", top: 14, left: 18, size: 40, fx: 70, fy: 26, loop: 14, wide: true },
+  { theme: "rose", top: 24.2, left: 72, size: 48, fx: -80, fy: 30, loop: 12 },
+  { theme: "gold", top: 31, left: 50, size: 38, fx: 24, fy: 60, loop: 15, wide: true },
+  { theme: "gold", top: 36, right: 3, size: 36, fx: -26, fy: 40, loop: 10, wide: true },
+  { theme: "peach", top: 49, left: 50.5, size: 36, fx: -22, fy: 64, loop: 14, wide: true },
+  { theme: "lilac", top: 60, left: 2.5, size: 36, fx: 26, fy: -36, loop: 11, wide: true },
+  { theme: "rose", top: 72, left: 50, size: 38, fx: 24, fy: -60, loop: 13, wide: true },
+  { theme: "peach", top: 89.6, left: 62, size: 50, fx: -76, fy: 34, loop: 13 },
+  { theme: "rose", top: 96.5, left: 20, size: 44, fx: 70, fy: -28, loop: 12 },
 ];
 
 /** Cherry twigs growing in from the margins; `flip` grows them from the right. */
 const sprigs: Array<Piece & { flip?: boolean }> = [
   { top: 3.8, right: -1, size: 170, flip: true, tilt: -6 },
   { top: 8.6, left: -1, size: 150, tilt: 4 },
-  { top: 16.2, right: -1.5, size: 160, flip: true, tilt: 8 },
+  { top: 16.2, right: -1.5, size: 160, flip: true, tilt: 8, wide: true },
   { top: 26.5, left: -1.2, size: 170, tilt: -4, wide: true },
   { top: 43, right: -1.4, size: 150, flip: true, tilt: 6, wide: true },
-  { top: 57, left: -1, size: 160, tilt: 6 },
+  { top: 57, left: -1, size: 160, tilt: 6, wide: true },
   { top: 71, right: -1.2, size: 170, flip: true, tilt: -8, wide: true },
   { top: 85, left: -1.4, size: 150, tilt: -6 },
   { top: 95, right: -1, size: 160, flip: true, tilt: 4 },
 ];
 
 /* ---------- Near plane ---------- */
+/** Big words in the open ground between sections, whole and clear of the photos and cards. They ride the near plane,
+ * so they keep to the gap they rest in: "nhớ" above the scrapbook's opening words, "gặp" and "thương" either side of
+ * the gap between the keepsake box and the chapters. */
+const words: Array<Piece & { text: string }> = [
+  { text: "nhớ", top: 8.6, left: 22, size: 12 },
+  { text: "gặp", top: 24, left: 3, size: 13 },
+  { text: "thương", top: 23.5, right: 3, size: 8 },
+];
 const keepsakes: Array<Piece & { kind: Keepsake }> = [
   { kind: "tape", top: 1.4, left: -1.5, size: 130, tilt: -18, wide: true },
   { kind: "polaroid", top: 11.5, left: -2, size: 96, tilt: 9 },
@@ -247,19 +254,20 @@ function fly(flight: Flight, unit: "px" | "vw", index: number) {
 export function PartOneDepth() {
   return (
     <>
-      <div className="part-one-depth" aria-hidden="true">
+      <div className="depth-field" aria-hidden="true">
         <div className="depth-plane depth-plane-far">
           {beams.map((beam) => <span className="depth-item depth-beam" data-wide={beam.wide || undefined} style={place(beam, "vw")} key={`beam-${beam.top}`} />)}
-          {glows.map((glow) => <span className="depth-item depth-glow" style={place(glow, "vw")} key={`glow-${glow.top}`} />)}
-          {words.map((word) => (
-            <span className="depth-item depth-word" data-wide={word.wide || undefined} style={place(word, "vw")} key={word.text}>
-              {word.text}
-            </span>
-          ))}
+          {glows.map((glow) => <span className="depth-item depth-glow" data-wide={glow.wide || undefined} style={place(glow, "vw")} key={`glow-${glow.top}`} />)}
         </div>
         <div className="depth-plane depth-plane-drift">
           {clouds.map((cloud) => (
-            <span className="depth-item depth-cloud" data-wide={cloud.wide || undefined} style={place(cloud, "px")} key={`cloud-${cloud.top}`}>
+            <span
+              className={`depth-item depth-cloud ${cloud.billow ? "is-billowing" : ""}`.trim()}
+              data-wide={cloud.wide || undefined}
+              data-idle-zone
+              style={place(cloud, "px")}
+              key={`cloud-${cloud.top}`}
+            >
               <Cloud variant={cloud.variant} />
             </span>
           ))}
@@ -274,7 +282,7 @@ export function PartOneDepth() {
               {glyphs[doodle.kind]}
             </svg>
           ))}
-          {blossoms.map((blossom) => (
+          {[...blossoms].sort((a, b) => Number(Boolean(a.spin)) - Number(Boolean(b.spin))).map((blossom) => (
             <span
               className={`depth-item depth-blossom ${blossom.spin ? "is-turning" : ""}`.trim()}
               data-wide={blossom.wide || undefined}
@@ -305,6 +313,11 @@ export function PartOneDepth() {
           ))}
         </div>
         <div className="depth-plane depth-plane-near">
+          {words.map((word) => (
+            <span className="depth-item depth-word" data-wide={word.wide || undefined} style={place(word, "vw")} key={word.text}>
+              {word.text}
+            </span>
+          ))}
           {keepsakes.map((keepsake) => (
             <span
               className={`depth-item depth-keepsake depth-${keepsake.kind}`}
@@ -316,7 +329,7 @@ export function PartOneDepth() {
         </div>
       </div>
       {/* In front of the story: only ever at the very edges, so they pass the reader without covering a word. */}
-      <div className="part-one-foreground" aria-hidden="true">
+      <div className="depth-front" aria-hidden="true">
         <div className="depth-plane depth-plane-front">
           {frontBlossoms.map((blossom) => (
             <span className="depth-item depth-front-blossom" style={place(blossom, "vw")} key={`front-${blossom.top}`}>

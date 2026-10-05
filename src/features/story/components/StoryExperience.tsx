@@ -10,8 +10,11 @@ import { MoodSetup } from "../../intro/components/MoodSetup";
 import { PartTwoAtmosphere } from "./PartTwoAtmosphere";
 import { PartOneAtmosphere } from "./PartOneAtmosphere";
 import { PartOneDepth } from "./PartOneDepth";
+import { PartTwoDepth } from "./PartTwoDepth";
+import { DreamVeil } from "./DreamVeil";
 import { useMemoryReveals } from "../../../shared/hooks/useMemoryReveals";
 import { useIdleZones } from "../../../shared/hooks/useIdleZones";
+import { useDepthParallaxFallback } from "../../../shared/hooks/useDepthParallaxFallback";
 import { useMediaQuery } from "../../../shared/hooks/useMediaQuery";
 import { StoryPartOneEnding } from "./StoryPartOneEnding";
 // The box's copy and controls render with the page; its three.js scene loads itself once the box is near.
@@ -29,6 +32,7 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
   const mobile = useMediaQuery("(max-width: 900px)");
   const revealScope = useMemoryReveals(reducedMotion, mobile);
   useIdleZones(revealScope);
+  useDepthParallaxFallback(revealScope, !reducedMotion);
   const pageParts = useMemo(
     () => storyParts.filter((part) => part.id === (page === "part-two" ? "together-offline" : "before-meeting")),
     [page],
@@ -61,7 +65,7 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
       {page === "part-two"
         ? <PartTwoAtmosphere reducedMotion={reducedMotion} />
         : <PartOneAtmosphere moods={pageParts[0]?.chapters.map((chapter) => chapter.mood) ?? []} reducedMotion={reducedMotion} />}
-      {page === "part-one" ? <PartOneDepth /> : null}
+      {page === "part-one" ? <PartOneDepth /> : <PartTwoDepth />}
       {/* Part I's page-length thread; Part II carries its own thread motif on the title page and the ending. */}
       {page === "part-one" ? <StoryConnectionPath reducedMotion={reducedMotion} /> : null}
       {page === "part-one" ? <StoryIntro reducedMotion={reducedMotion} /> : null}
@@ -83,6 +87,7 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
       ) : (
         <StoryEnding onReturnToIntro={onReturnToIntro} playCue={playCue} reducedMotion={reducedMotion} separatePartPages />
       )}
+      <DreamVeil variant={page === "part-two" ? "night" : "day"} />
     </main>
   );
 }

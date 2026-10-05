@@ -2,6 +2,7 @@ import { HeartHandshake, Sparkles } from "lucide-react";
 import { moodSetupPhotos } from "../../story/data/story";
 import { BlurText } from "../../../shared/components/motion/BlurText";
 import { StoryPicture } from "../../../shared/components/visuals/StoryPicture";
+import { Cloud } from "../../story/components/StoryArt";
 
 export function MoodSetup() {
   return (
@@ -29,6 +30,8 @@ export function MoodSetup() {
             </figcaption>
           </figure>
         ))}
+        {/* A cloud drifting through the scrapbook, between its photos. */}
+        <span className="story-weaver mood-weaver-cloud" aria-hidden="true" data-idle-zone><Cloud variant={2} /></span>
       </div>
     </section>
   );

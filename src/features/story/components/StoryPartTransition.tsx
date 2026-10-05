@@ -2,6 +2,7 @@ import { ArrowDown } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { StoryPart } from "../data/story";
 import { createStoryScrollItems, partTransitionCopy } from "../data/story";
+import { Cloud } from "./StoryArt";
 
 interface StoryPartTransitionProps {
   onInView?: (partId: StoryPart["id"]) => void;
@@ -51,6 +52,12 @@ export function StoryPartTransition({ onInView, part }: StoryPartTransitionProps
         <i className="part-transition-horizon" />
       </div>
       <span className="part-transition-numeral" aria-hidden="true">{part.number === 2 ? "II" : "I"}</span>
+      {/* Night clouds drift between the great numeral and the title; fireflies wander in front of both. */}
+      <span className="story-weaver transition-weaver-cloud is-one" aria-hidden="true"><Cloud variant={0} /></span>
+      <span className="story-weaver transition-weaver-cloud is-two" aria-hidden="true"><Cloud variant={2} /></span>
+      <span className="story-weaver transition-firefly is-a" aria-hidden="true" />
+      <span className="story-weaver transition-firefly is-b" aria-hidden="true" />
+      <span className="story-weaver transition-firefly is-c" aria-hidden="true" />
       <svg className="part-transition-descent" viewBox="0 0 120 240" aria-hidden="true">
         <path className="descent-thread" d="M60 0 C60 60 40 80 52 120 C64 160 44 190 60 228" pathLength={1} />
         <circle className="descent-knot" cx="60" cy="230" r="3.5" />

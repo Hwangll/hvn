@@ -5,6 +5,16 @@ import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import { splitParagraphs } from "../../../shared/utils/format";
 import { BlossomSprig } from "../../../shared/components/visuals/BlossomSprig";
 import { Meteors } from "../../../shared/components/motion/Meteors";
+import { Lantern } from "./StoryArt";
+
+/** Paper lanterns rising behind the ending, each on its own slow clock: wishes for the chapter still sealed. */
+const endingLanterns = [
+  { left: "9%", size: 34, life: 46, delay: -6 },
+  { left: "24%", size: 24, life: 58, delay: -30 },
+  { left: "71%", size: 30, life: 52, delay: -14 },
+  { left: "86%", size: 22, life: 64, delay: -44 },
+  { left: "48%", size: 20, life: 70, delay: -58 },
+];
 import { PolaroidPhoto } from "../../../shared/components/visuals/PolaroidPhoto";
 import { useHasPassed } from "../../../shared/hooks/useCountdown";
 import { JourneyMap } from "./JourneyMap";
@@ -62,6 +72,20 @@ export function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separateP
       </div>
       {/* Beside the sky rather than in it: under the sky's fade mask each streak would repaint the whole sky. */}
       <Meteors />
+      <div className="ending-lanterns" aria-hidden="true">
+        {endingLanterns.map((lantern) => (
+          <span
+            className="ending-lantern"
+            style={{ left: lantern.left, "--size": `${lantern.size}px`, "--life": `${lantern.life}s`, "--delay": `${lantern.delay}s` } as CSSProperties}
+            key={lantern.left}
+          >
+            <Lantern />
+          </span>
+        ))}
+      </div>
+      <span className="story-weaver ending-firefly is-a" aria-hidden="true" />
+      <span className="story-weaver ending-firefly is-b" aria-hidden="true" />
+      <span className="story-weaver ending-firefly is-c" aria-hidden="true" />
       <div className="ending-copy" data-memory-reveal>
         <BlossomSprig className="ending-blossom" />
         <p className="kicker">{partThreeOpen ? "phần iii" : "open ending"}</p>

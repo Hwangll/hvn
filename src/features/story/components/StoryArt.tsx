@@ -1,8 +1,9 @@
 import type { CSSProperties, ReactElement } from "react";
 
 /**
- * The little painted things that fill Part I's sky and margins: clouds, blossoms, a cherry sprig and butterflies. They are
- * inline SVG so the stylesheet can colour and animate their parts (part-one-depth.css); all of them are decorative.
+ * The little painted things that fill the story's skies and margins: clouds, blossoms, cherry twigs, butterflies and birds
+ * for Part I's afternoon; hydrangea florets and paper lanterns for Part II's night (clouds are shared, recoloured by each
+ * page). They are inline SVG so the stylesheets can colour and animate their parts; all of them are decorative.
  */
 
 interface ArtProps {
@@ -88,17 +89,17 @@ export function Sprig({ flip = false, className = "", style }: ArtProps & { flip
   return (
     <svg className={`art-sprig ${className}`.trim()} viewBox="0 0 160 90" style={style} aria-hidden="true" focusable="false">
       <g transform={flip ? "matrix(-1 0 0 1 160 0)" : undefined}>
-      <path className="art-sprig-branch" d="M0 70C30 64 52 52 74 40c18-10 38-14 66-18" />
-      <path className="art-sprig-branch is-twig" d="M62 46c8 10 20 16 34 18" />
-      <path className="art-sprig-branch is-twig" d="M104 30c8-10 16-16 28-20" />
-      {flowers.map(([x, y, scale]) => (
-        <g key={`${x}-${y}`}>
-          {petals(x, y, scale)}
-          <circle className="art-blossom-heart" cx={x} cy={y} r={2.4 * scale} />
-        </g>
-      ))}
-      <circle className="art-bud" cx="146" cy="24" r="2.6" />
-      <circle className="art-bud" cx="110" cy="66" r="2.2" />
+        <path className="art-sprig-branch" d="M0 70C30 64 52 52 74 40c18-10 38-14 66-18" />
+        <path className="art-sprig-branch is-twig" d="M62 46c8 10 20 16 34 18" />
+        <path className="art-sprig-branch is-twig" d="M104 30c8-10 16-16 28-20" />
+        {flowers.map(([x, y, scale]) => (
+          <g key={`${x}-${y}`}>
+            {petals(x, y, scale)}
+            <circle className="art-blossom-heart" cx={x} cy={y} r={2.4 * scale} />
+          </g>
+        ))}
+        <circle className="art-bud" cx="146" cy="24" r="2.6" />
+        <circle className="art-bud" cx="110" cy="66" r="2.2" />
       </g>
     </svg>
   );
@@ -122,6 +123,44 @@ export function Butterfly({ theme, className = "", style }: ArtProps & { theme: 
       </g>
       <path className="art-butterfly-body" d="M24 13v18" />
       <path className="art-butterfly-feelers" d="M24 14c-1-5-3-7.5-5.5-8.5M24 14c1-5 3-7.5 5.5-8.5" />
+    </svg>
+  );
+}
+
+/** A bird far off: two arcs of wing that the stylesheet beats; nothing more is visible at that distance. */
+export function Bird({ className = "", style }: ArtProps) {
+  return (
+    <svg className={`art-bird ${className}`.trim()} viewBox="0 0 40 16" style={style} aria-hidden="true" focusable="false">
+      <path d="M2 10c6-6 12-6 18 1 6-7 12-7 18-1" />
+    </svg>
+  );
+}
+
+/** One floret of a hydrangea head: four rounded petals and a pale eye, Part II's flower. */
+export function Floret({ className = "", style }: ArtProps) {
+  return (
+    <svg className={`art-floret ${className}`.trim()} viewBox="0 0 32 32" style={style} aria-hidden="true" focusable="false">
+      {[0, 90, 180, 270].map((turn, index) => (
+        <path
+          key={turn}
+          className={index % 2 ? "art-floret-petal is-light" : "art-floret-petal"}
+          d="M16 15c-4.5-1-7.5-5-6-9.5 1.2-3.4 5-4 6-1.5 1-2.5 4.8-1.9 6 1.5 1.5 4.5-1.5 8.5-6 9.5z"
+          transform={`rotate(${turn} 16 16)`}
+        />
+      ))}
+      <circle className="art-floret-eye" cx="16" cy="16" r="2.2" />
+    </svg>
+  );
+}
+
+/** A paper sky lantern with a small flame; its warm glow is drawn by the stylesheet around it. */
+export function Lantern({ className = "", style }: ArtProps) {
+  return (
+    <svg className={`art-lantern ${className}`.trim()} viewBox="0 0 40 56" style={style} aria-hidden="true" focusable="false">
+      <path className="art-lantern-paper" d="M8 6h24c3 0 5 2 5 5v30c0 6-7 9-17 9S3 47 3 41V11c0-3 2-5 5-5z" />
+      <path className="art-lantern-rib" d="M14 7c-2 12-2 30 0 42M26 7c2 12 2 30 0 42" />
+      <path className="art-lantern-rim" d="M10 50h20" />
+      <ellipse className="art-lantern-flame" cx="20" cy="45" rx="3" ry="4.5" />
     </svg>
   );
 }
