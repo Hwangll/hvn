@@ -334,9 +334,10 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   display: inline-block;
   overflow: visible;
   vertical-align: bottom;
-  /* Opacity drives the reveal; never hard-clip Vietnamese or italic glyphs. */
-  padding: 0.2em 0.14em 0.18em;
-  margin: -0.2em -0.14em -0.18em;
+  /* Opacity drives the reveal; never hard-clip Vietnamese or italic glyphs. The box still spans the accent's
+     painted box below, so every word holds all of its own ink. */
+  padding: 0.26em 0.32em 0.32em 0.14em;
+  margin: -0.26em -0.32em -0.32em -0.14em;
 }
 .story-part-2 .title-word > span { display: inline-block; opacity: 0; transform: translateY(102%) rotate(0.6deg); transform-origin: left bottom; }
 .story-part-2 .title-word.is-accent > span {
@@ -349,10 +350,11 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 22px #8bcbd833);
-  /* The gradient is only painted inside this box, so Vietnamese marks below the baseline (ậ, ự, ạ)
-     would render transparent. Grow the box past the glyphs and pull the extra back off the layout. */
-  padding: 0.26em 0.08em 0.32em;
-  margin: -0.26em -0.08em -0.32em;
+  /* The gradient is only painted inside this box, so Vietnamese marks below the baseline (ậ, ự, ạ), and the horns
+     and tone marks the slant carries up to 0.3em past the last letter (ự, ỡ, ể), would render transparent. Grow the
+     box past the glyphs and pull the extra back off the layout. */
+  padding: 0.26em 0.32em 0.32em 0.08em;
+  margin: -0.26em -0.32em -0.32em -0.08em;
 }
 .story-part-2 .part-transition-title p { max-width: 46ch; color: #b6c7dd; font-weight: 400; font-size: clamp(0.95rem, 1.25vw, 1.08rem); line-height: 1.75; opacity: 0; transform: translateY(0.6rem); }
 .story-part-2 .part-transition-stops {
