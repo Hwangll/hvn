@@ -134,7 +134,42 @@ Lớp hiệu ứng tương tác dùng Motion và các mẫu quen thuộc của A
     Phần tử nào đã có animation CSS giữ `transform` thì đi qua custom property đã đăng ký (`--swing`, `--drop`, `--numeral-zoom`), đọc bằng `rotate`/`scale`/`translate` riêng.
   - Thanh tiến trình đọc có một trái tim (Phần I) hoặc ngôi sao (Phần II) lăn ở đầu thanh (`ReadingProgress.tsx`), cũng chạy bằng scroll timeline.
 
-Một số điều rút ra khi đo trên mobile: animate cả `transform` (Motion chuyển cho WAAPI/compositor) thay vì `x`/`y`; không xoay trực tiếp `<svg>` (Chrome vẽ lại mỗi khung hình), hãy xoay phần tử HTML bọc ngoài; không đặt thứ đang chuyển động dưới `mask-image` hay lớp blur lớn; đồng hồ đếm ngược chỉ chạy khi phong bì nằm trên màn hình. Khi bật reduced motion, toàn bộ lớp này tắt.
+- Phòng kỷ vật là một tiên cảnh trên biển mây (`FairyRealm.tsx`, `FairyDust.tsx`, `src/styles/memory-fairyland.css`), mỗi phần một cõi:
+  - Phần I: mặt trời lặn ngay sau bó hướng dương, tia nắng xoay chậm, hạc bay ngang trời chiều.
+  - Phần II: trăng tròn có quầng sau bó cẩm tú cầu, đèn trời bay lên từ mây.
+  - Hai bên là núi đá vôi có thông trên đỉnh, sương vờn quanh chân núi. Dưới bệ hoa có vòng sáng lan ra và bóng bệ in trên mây. Đổi phần thì mặt trời lặn xuống biển mây và trăng mọc lên.
+  - `useRealmAnchor` đo vị trí bó hoa và ghi `--realm-x` / `--realm-y`, để mặt trời và trăng luôn nằm ngay sau hoa.
+  - Mây vẽ bằng SVG một lần, mỗi hàng bông che chân hàng phía sau. Tia sáng là một canvas nhỏ được compositor phóng to.
+  - Bốn góc có hoa (`FairyCorners.tsx`, hình vẽ dùng chung ở `utils/realmShapes.ts`):
+    - hai góc trên là cành hoa có chùm hoa rủ, anh đào ở Phần I và hoa trắng ánh trăng ở Phần II;
+    - hai góc dưới là luống hoa trên mây: hướng dương, cúc cánh bướm và hoa baby ở Phần I; cẩm tú cầu, oải hương và hoa baby ở Phần II.
+
+    Mỗi góc là một SVG dựng một lần từ seed cố định, mỗi tông màu gộp thành một path. Cành đung đưa chậm, và góc to dần theo phần lề trống trên màn hình rộng.
+  - Bụi tiên (`utils/fairyDust.ts`) vẽ trên một canvas:
+    - đom đóm sáng lên tắt xuống;
+    - tiên quang bay vòng quanh bó hoa;
+    - cánh hướng dương, anh đào hoặc hoa cẩm tú cầu rơi;
+    - tia sáng bay lên từ bệ;
+    - bướm phát sáng rắc bụi;
+    - vệt bụi theo con trỏ, đom đóm né tay;
+    - chạm hay bấm vào chỗ trống thì tung một nắm.
+
+    Mở câu chuyện thì tất cả bị hút vào bó hoa.
+  - Các lớp có `data-depth` (núi, mây, sương, trăng) nghiêng nhẹ theo chuột. Trên điện thoại có ít hạt hơn, không có đuôi sáng, và sương, cánh hạc, phần lớn ngôi sao đứng yên.
+
+Một số điều rút ra khi đo trên mobile:
+
+- Animate cả `transform` (Motion chuyển cho WAAPI/compositor) thay vì `x`/`y`.
+- Không xoay hay di chuyển trực tiếp `<svg>`, vì Chrome vẽ lại nó mỗi khung hình. Hãy animate phần tử HTML bọc ngoài.
+- Không đặt thứ đang chuyển động dưới `mask-image` hay lớp blur lớn. Không đặt nó trong chữ có `background-clip: text`, vì chữ sẽ bị vẽ lại.
+- Khi bó hoa 3D hay canvas bụi chạy liên tục, mỗi animation CSS đang chạy đều tốn thời gian luồng chính ở mọi khung hình, kể cả animation chạy trên compositor. Vì vậy trên điện thoại chỉ giữ những vòng lặp nhìn thấy rõ.
+- Lớp sáng đang trôi (cực quang, quầng sáng) chỉ cần gradient mềm. `filter: blur()` trên lớp đang chuyển động bị compositor tính lại mỗi khung hình. `backdrop-filter` phía trên mây đang trôi cũng vậy, nên trên điện thoại thẻ chọn phần dùng nền đặc hơn thay cho kính mờ.
+- Nhịp sáng (chấm trạng thái) animate `opacity`/`transform` của một lớp riêng chứ không animate `box-shadow`, vì `box-shadow` phải vẽ lại mỗi khung hình.
+- Cõi không hiển thị được `visibility: hidden` sau khi mờ hẳn, nên compositor không phải vẽ và giữ các lớp của nó. Sao băng chỉ chạy ở Phần II.
+- Canvas bụi tiên vẽ tối đa khoảng 60 khung hình/giây; trên màn 120 Hz nó vẽ cách một khung.
+- Đồng hồ đếm ngược chỉ chạy khi phong bì nằm trên màn hình.
+
+Khi bật reduced motion, toàn bộ lớp này tắt.
 
 ## Cấu Trúc Chính
 

@@ -70,15 +70,6 @@
 /* Faded skies pause their drift so only the room in view costs anything. */
 .memory-intro:not(.is-part-two-selected) .memory-sky-two *,
 .memory-intro.is-part-two-selected .memory-sky-one * { animation-play-state: paused; }
-.memory-spotlight {
-  inset: -20% 18% 10%;
-  opacity: 0.55;
-  background: conic-gradient(from 174deg at 50% 0, transparent 0 41%, color-mix(in oklch, var(--room-glow) 22%, transparent) 47% 53%, transparent 59% 100%);
-  mask-image: linear-gradient(#000 30%, transparent 92%);
-  filter: blur(8px);
-  transition: background 1s var(--room-ease);
-  animation: room-spot-breathe 9s ease-in-out infinite alternate;
-}
 .memory-floor-glow {
   left: 30%; right: 30%; bottom: 6%; height: 22vh;
   background: radial-gradient(ellipse at 50% 60%, color-mix(in oklch, var(--room-glow) 28%, transparent), transparent 62%);
@@ -86,12 +77,6 @@
   transition: background 1s var(--room-ease);
 }
 .memory-vignette { inset: 0; background: radial-gradient(ellipse at 50% 50%, transparent 40%, #00000055 100%); }
-.memory-dust {
-  top: var(--dust-top); left: var(--dust-left); width: var(--dust-size, 3px); height: var(--dust-size, 3px); border-radius: 50%;
-  background: var(--room-glow); opacity: 0; box-shadow: 0 0 10px 2px color-mix(in oklch, var(--room-glow) 50%, transparent);
-  animation: room-dust var(--dust-duration, 7s) ease-in-out var(--dust-delay) infinite;
-  transition: background 1s var(--room-ease);
-}
 
 /* ---------- Masthead & footer ---------- */
 .memory-masthead,
@@ -166,7 +151,7 @@
 .memory-halo {
   --px: -0.3; position: absolute; left: 50%; top: 42%; z-index: 0; width: 24rem; height: 24rem; border-radius: 50%; pointer-events: none;
   background: radial-gradient(circle, color-mix(in oklch, var(--room-glow) 32%, transparent), color-mix(in oklch, var(--room-glow) 10%, transparent) 40%, transparent 68%);
-  transform: translate(-50%, -50%); filter: blur(22px);
+  transform: translate(-50%, -50%);
   animation: room-halo-breathe 7s ease-in-out infinite alternate; transition: background 1s var(--room-ease);
 }
 .memory-bouquet-frame { position: relative; z-index: 2; display: grid; place-items: center; width: 100%; min-height: 440px; isolation: isolate; transition: transform 0.52s var(--room-ease); }
@@ -206,7 +191,13 @@
 /* CTA panel: a status line, then the two part cards in a swipeable track. */
 .memory-cta-panel { display: grid; gap: 1.5rem; width: 100%; padding: 2.5rem 0 0; justify-items: stretch; animation: room-rise 0.9s var(--room-ease) 0.35s both; }
 .memory-status { display: inline-flex; align-items: center; gap: 0.55rem; width: fit-content; color: var(--room-muted); font-size: 0.66rem; font-weight: 400; }
-.memory-status > span { width: 6px; height: 6px; border-radius: 50%; background: var(--room-accent); box-shadow: 0 0 0 3px color-mix(in oklch, var(--room-accent) 22%, transparent), 0 0 12px 2px color-mix(in oklch, var(--room-accent) 45%, transparent); animation: room-status-pulse 2.8s ease-in-out infinite; transition: background 0.6s var(--room-ease); }
+.memory-status > span { position: relative; width: 6px; height: 6px; border-radius: 50%; background: var(--room-accent); box-shadow: 0 0 0 3px color-mix(in oklch, var(--room-accent) 22%, transparent), 0 0 12px 2px color-mix(in oklch, var(--room-accent) 45%, transparent); transition: background 0.6s var(--room-ease); }
+/* The light pulses by the opacity and scale of a glow of its own: a pulsing shadow would be repainted every frame. */
+.memory-status > span::after {
+  content: ""; position: absolute; inset: -6px; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in oklch, var(--room-accent) 34%, transparent) 30%, transparent 70%);
+  opacity: 0; transform: scale(0.5); animation: room-status-pulse 2.8s ease-in-out infinite;
+}
 .memory-part-picker { display: grid; gap: 1rem; width: 100%; padding-top: 1.1rem; border-top: 1px solid var(--room-line); }
 .memory-picker-heading { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; color: var(--room-muted); font-size: 0.54rem; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; }
 .memory-picker-heading span { display: inline-flex; align-items: center; gap: 0.45rem; }
@@ -287,9 +278,7 @@
 @keyframes room-word-up { from { opacity: 0; transform: translateY(104%) rotate(0.6deg); } to { opacity: 1; transform: none; } }
 @keyframes room-shimmer { 0%, 55% { background-position: 100% 0; } 85%, 100% { background-position: 0% 0; } }
 @keyframes room-halo-breathe { from { transform: translate(-50%, -50%) scale(0.94); opacity: 0.8; } to { transform: translate(-50%, -50%) scale(1.08); opacity: 1; } }
-@keyframes room-spot-breathe { from { opacity: 0.45; } to { opacity: 0.65; } }
-@keyframes room-status-pulse { 0%, 100% { box-shadow: 0 0 0 3px color-mix(in oklch, var(--room-accent) 22%, transparent), 0 0 12px 2px color-mix(in oklch, var(--room-accent) 45%, transparent); } 50% { box-shadow: 0 0 0 6px color-mix(in oklch, var(--room-accent) 8%, transparent), 0 0 18px 4px color-mix(in oklch, var(--room-accent) 30%, transparent); } }
-@keyframes room-dust { 0% { opacity: 0; transform: translate3d(0, 0.6rem, 0); } 25% { opacity: 0.7; } 75% { opacity: 0.4; } 100% { opacity: 0; transform: translate3d(0.5rem, -1.6rem, 0); } }
+@keyframes room-status-pulse { 50% { opacity: 1; transform: scale(1.3); } }
 @keyframes room-leave-bloom { 0% { opacity: 0; transform: scale(0.6); } 60% { opacity: 1; transform: scale(1); } 100% { opacity: 1; transform: scale(1); } }
 
 /* ---------- Tablet ---------- */
@@ -310,8 +299,6 @@
   .memory-wordmark { font-size: 1.4rem; }
   .memory-wordmark > span { font-size: 0.43rem; }
   .memory-edition { display: none; }
-  .memory-aurora { filter: blur(40px); }
-  .memory-spotlight { inset: -10% 5% 30%; }
   .memory-intro .memory-intro-stage { grid-template-columns: minmax(0, 1fr); gap: 1.4rem; min-height: 0; padding-block: 2rem 1.5rem; }
   .memory-copy { width: 100%; max-width: none; text-align: center; }
   .memory-kicker { justify-content: center; font-size: 0.53rem; }
@@ -337,7 +324,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .memory-intro *, .memory-intro *::before, .memory-intro *::after { animation: none !important; scroll-behavior: auto; transition: none !important; translate: none !important; }
-  .memory-dust { opacity: 0.35; }
   .memory-title-word > span { opacity: 1; transform: none; }
   .memory-title-word.is-accent > span { background-position: 0 0; }
   .memory-intro.is-part-two-selected .memory-sky-one, .memory-intro:not(.is-part-two-selected) .memory-sky-two { display: none; }

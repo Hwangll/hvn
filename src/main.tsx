@@ -3,6 +3,7 @@ import { mountStory } from "./app/mountStory";
 import "./styles/index.css";
 import "./styles/diary-design.css";
 import "./styles/memory-opening.css";
+import "./styles/memory-fairyland.css";
 import "./styles/story-motion.css";
 import "./styles/part-one-scenes.css";
 import "./styles/part-one-layout.css";

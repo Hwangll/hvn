@@ -5,6 +5,9 @@ import { Meteors } from "../../../shared/components/motion/Meteors";
 import { createStoryScrollItems, storyParts } from "../../story/data/story";
 import { usePointerParallax } from "../../../shared/hooks/usePointerParallax";
 import type { ExperienceState } from "../../../app/AppShell";
+import { useRealmAnchor } from "../hooks/useRealmAnchor";
+import { FairyDust } from "./FairyDust";
+import { FairyRealm } from "./FairyRealm";
 
 const MemoryFlower3D = lazy(() =>
   import("../../memories/components/MemoryFlower3D").then((module) => ({ default: module.MemoryFlower3D })),
@@ -17,15 +20,6 @@ interface MemoryIntroProps {
 }
 
 type PartIndex = 0 | 1;
-
-const dustParticles = Array.from({ length: 22 }, (_, index) => ({
-  id: `memory-dust-${index}`,
-  left: `${6 + ((index * 17) % 88)}%`,
-  top: `${8 + ((index * 23) % 80)}%`,
-  delay: `${(index % 7) * 0.9}s`,
-  duration: `${6 + (index % 5) * 1.3}s`,
-  size: `${2 + (index % 3)}px`,
-}));
 
 /** The words of each keepsake title, with the italic accent marked so they can rise one after another. */
 const heroCopy: Record<PartIndex, { kicker: string; title: string; accentFrom: number; accentTo: number; breakBefore?: number; lead: string }> = {
@@ -52,9 +46,11 @@ const PART_TWO_URL = "/part-2/";
 export function MemoryIntro({ onEnterStory, phase, reducedMotion }: MemoryIntroProps) {
   const [activePart, setActivePart] = useState<PartIndex>(0);
   const [leaving, setLeaving] = useState(false);
+  const roomRef = useRef<HTMLElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const isFocusing = phase === "focusing" || phase === "transitioning";
   usePointerParallax(stageRef, !reducedMotion && !isFocusing);
+  useRealmAnchor(roomRef);
 
   // Part II lives on its own page; a short blue bloom covers the hop so it lands on the same dark ground.
   const leaveToPartTwo = useCallback(() => {
@@ -75,30 +71,13 @@ export function MemoryIntro({ onEnterStory, phase, reducedMotion }: MemoryIntroP
   ].join(" ");
 
   return (
-    <section className={className} aria-labelledby="memory-title" data-lenis-prevent>
+    <section className={className} aria-labelledby="memory-title" data-lenis-prevent ref={roomRef}>
+      {/* A realm above the clouds for each part (FairyRealm), crossfaded by the part in hand. */}
       <div className="memory-atmosphere" aria-hidden="true">
-        <span className="memory-sky memory-sky-one">
-          <i className="star-layer star-layer-far" />
-          <i className="aurora memory-aurora memory-aurora-a" />
-          <i className="aurora memory-aurora memory-aurora-b" />
-        </span>
-        <span className="memory-sky memory-sky-two">
-          <i className="star-layer star-layer-far" />
-          <i className="star-layer star-layer-near" />
-          <i className="aurora memory-aurora memory-aurora-a" />
-          <i className="aurora memory-aurora memory-aurora-b" />
-        </span>
+        <FairyRealm />
         <Meteors className="memory-meteors" />
-        <span className="memory-spotlight" />
         <span className="memory-floor-glow" />
         <span className="memory-vignette" />
-        {dustParticles.map((particle) => (
-          <span
-            className="memory-dust"
-            key={particle.id}
-            style={{ "--dust-left": particle.left, "--dust-top": particle.top, "--dust-delay": particle.delay, "--dust-duration": particle.duration, "--dust-size": particle.size } as CSSProperties}
-          />
-        ))}
       </div>
 
       <header className="memory-masthead">
@@ -115,6 +94,7 @@ export function MemoryIntro({ onEnterStory, phase, reducedMotion }: MemoryIntroP
         <span>Hai người. Hai phần. Một câu chuyện.</span>
         <span>Được giữ lại bằng tất cả dịu dàng <span aria-hidden="true">↗</span></span>
       </footer>
+      {reducedMotion ? null : <FairyDust variant={activePart === 1 ? "night" : "dusk"} gathering={isFocusing || leaving} rootRef={roomRef} />}
       <span className="memory-leave-veil" aria-hidden="true" />
     </section>
   );
@@ -134,6 +114,8 @@ function HeroCopy({ activePart }: { activePart: PartIndex }) {
             {index > 0 && index === copy.breakBefore ? <br aria-hidden="true" /> : index > 0 ? " " : null}
             <span className={`memory-title-word ${index >= copy.accentFrom && index < copy.accentTo ? "is-accent" : ""}`} style={{ "--i": index } as CSSProperties} aria-hidden="true">
               <span>{word}</span>
+              {/* A star caught on the last word in gold; kept outside the text-clipped span so twinkling never repaints the word. */}
+              {index === copy.accentTo - 1 ? <i className="memory-title-star" /> : null}
             </span>
           </Fragment>
         ))}
@@ -157,6 +139,11 @@ function MemoryArtifact({ activePart, onEnterStory, onEnterPartTwo, reducedMotio
       <span className="memory-halo" aria-hidden="true" />
       {/* The bouquet turns in 3D on its own camera; tilting the canvas as a flat card would only make it read as a picture. */}
       <span className="memory-bouquet-frame">
+        <span className="realm-ripples" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </span>
         <Suspense fallback={<span className="memory-flower-3d"><BouquetLoader /></span>}>
           <MemoryFlower3D variant={variant} reducedMotion={reducedMotion} />
         </Suspense>
