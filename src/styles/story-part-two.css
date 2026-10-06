@@ -401,7 +401,9 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .story-part-2 .story-scrollytelling { padding-inline: clamp(1.25rem, 5vw, 6rem); }
 .story-part-2 .story-scrollytelling-desktop { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(3rem, 6vw, 7rem); max-width: 88rem; }
 .story-part-2 .story-steps { gap: 0; padding-block: 12svh 0; }
-.story-part-2 .story-step { opacity: 1; transition: none; scroll-margin-top: 8rem; }
+/* Steps neither fade nor recede here: the scroll engine reveals the copy line by line. Without a transform, a step's box
+   also stays put when it becomes the active one, so anchors, the step observer and jumps all measure the same place. */
+.story-part-2 .story-step { opacity: 1; transform: none; transition: none; scroll-margin-top: 8rem; }
 /* Copy sits mid-viewport while its scene holds, so there is a place to stay and read. */
 .story-part-2 .story-step.variant-desktop { display: flex; flex-direction: column; justify-content: center; min-height: 112svh !important; padding-block: 4svh 14svh; border-bottom: 0; }
 /* A longer hold after the last chapter, so the sunset finishes while the copy is still being read. */
