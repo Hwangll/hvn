@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { createIntroFlower, disposeIntroFlower, type IntroFlowerVariant } from "../../model/introFlowers";
+import { bouquetSources, type BouquetSource } from "../../model/bouquetSources";
+import { createIntroFlower, disposeIntroFlower, introFlowerSteps, type IntroFlowerVariant } from "../../model/introFlowers";
 import { AdaptiveQuality, startingTier, tierSettings, type QualityTier } from "./adaptiveQuality";
 import { CameraRig, type RigLimits, type RigPose } from "./cameraRig";
 import { ContactShadow } from "./contactShadow";
@@ -24,6 +25,8 @@ export interface BouquetStageOptions {
   reducedMotion: boolean;
   /** windStrength: tip travel in bouquet units; windSpeed: how quickly gusts come and go. */
   wind?: { strength?: number; speed?: number };
+  /** Where each bouquet comes from, over the defaults in model/bouquetSources. */
+  sources?: Partial<Record<IntroFlowerVariant, BouquetSource>>;
   /** The first frame is on screen. */
   onReady?: () => void;
   onContextLost?: () => void;
@@ -38,8 +41,9 @@ interface Station {
   variant: IntroFlowerVariant;
   group: THREE.Group;
   specimen: THREE.Group;
-  root: THREE.Group;
-  bouquet: THREE.Object3D;
+  /** The bouquet, once built or loaded; until then the plinth stands empty. */
+  root: THREE.Group | null;
+  bouquet: THREE.Object3D | null;
   shadow: ContactShadow;
   idlePhase: number;
   disposables: Array<THREE.BufferGeometry | THREE.Material>;
@@ -55,14 +59,12 @@ function framing(aspect: number): { limits: RigLimits; home: RigPose; scale: num
   };
 }
 
+/** A plinth, its contact shadow and room for a bouquet (see attachSpecimen). */
 function buildStation(variant: IntroFlowerVariant): Station {
   const group = new THREE.Group();
   group.name = `station-${variant}`;
   group.position.x = STATION_X[variant];
   const specimen = new THREE.Group();
-  const root = createIntroFlower(variant);
-  const bouquet = root.getObjectByName("bouquet") ?? root;
-  ContactShadow.cast(root);
   const colors = PLINTH[variant];
   const stoneGeometry = new THREE.CylinderGeometry(1.08, 1.13, 0.16, 96);
   // Honed rather than polished: seen this low, a glossy top would mirror the rim light behind the bouquet and flash grey
@@ -78,9 +80,28 @@ function buildStation(variant: IntroFlowerVariant): Station {
   inlay.position.y = PLINTH_TOP + 0.001;
   const shadow = new ContactShadow({ width: 2.2, depth: 2.2, reach: 1.1, resolution: 512, blur: 2.2, opacity: 0.92 });
   shadow.group.position.y = PLINTH_TOP + 0.002;
-  specimen.add(stone, inlay, shadow.group, root);
+  specimen.add(stone, inlay, shadow.group);
   group.add(specimen);
-  return { variant, group, specimen, root, bouquet, shadow, idlePhase: 0, disposables: [stoneGeometry, stoneMaterial, inlayGeometry, inlayMaterial] };
+  return { variant, group, specimen, root: null, bouquet: null, shadow, idlePhase: 0, disposables: [stoneGeometry, stoneMaterial, inlayGeometry, inlayMaterial] };
+}
+
+function attachSpecimen(station: Station, root: THREE.Group): void {
+  ContactShadow.cast(root);
+  station.root = root;
+  station.bouquet = root.getObjectByName("bouquet") ?? root;
+  station.specimen.add(root);
+}
+
+/**
+ * Calls back in the next quiet moment with the milliseconds it may use, so work done there never costs a frame.
+ * Without idle callbacks (Safari) that is one short slice after each frame.
+ */
+function nextSlice(callback: (budget: number) => void): void {
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback((deadline) => callback(Math.min(12, Math.max(4, deadline.timeRemaining()))), { timeout: 500 });
+    return;
+  }
+  requestAnimationFrame(() => window.setTimeout(() => callback(6), 0));
 }
 
 /** Dust hanging in the light: a few dozen soft points spread across both plinths, so a camera move reads as one. */
@@ -126,6 +147,9 @@ function buildDust(): { points: THREE.Points; speeds: Float32Array; texture: THR
  * one scene, lit for the part on show. Switching parts flies the camera to the other plinth while the light turns from
  * golden hour to moonlight. The visitor can turn and zoom within limits; left alone, the bouquet turns slowly on its own
  * and the view drifts back to its best side. Drawing stops whenever the cabinet is off screen or the tab is hidden.
+ *
+ * The bouquet on show is built (or loaded) first and shown as soon as its shaders are ready; the other one follows
+ * when the browser is idle, with its shaders compiled and textures uploaded ahead of any flight to it.
  */
 export function mountBouquetStage(container: HTMLElement, options: BouquetStageOptions): BouquetStage {
   const { reducedMotion } = options;
@@ -148,6 +172,7 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
   Object.values(stations).forEach((station) => scene.add(station.group));
   let active = stations[options.variant];
   let leaving: Station | null = null;
+  const sources: Record<IntroFlowerVariant, BouquetSource> = { ...bouquetSources, ...options.sources };
 
   const lights = new StudioLights(scene, PRESET[options.variant]);
   lights.key.shadow.radius = 4;
@@ -219,7 +244,7 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
       const resting = !rig.dragging && !rig.flying && rig.idleSeconds(now) > 3.5;
       idleWeight += ((resting ? 1 : 0) - idleWeight) * (1 - Math.exp(-seconds * 1.5));
       active.idlePhase += seconds * idleWeight * ((Math.PI * 2) / 30);
-      active.bouquet.rotation.y = 0.42 * Math.sin(active.idlePhase);
+      if (active.bouquet) active.bouquet.rotation.y = 0.42 * Math.sin(active.idlePhase);
       if (rig.idleSeconds(now) > 7 && !rig.flying) rig.relax(seconds);
       const positions = dust.points.geometry.getAttribute("position") as THREE.BufferAttribute;
       for (let index = 0; index < dust.speeds.length; index += 1) {
@@ -247,6 +272,8 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
     post.focus = camera.position.distanceTo(focusOf(active, focusPoint).setX(rig.target.x));
     post.bloomStrength = lights.bloom;
     post.exposure = lights.exposure;
+    post.look.power = lights.lookPower;
+    post.look.saturation = lights.lookSaturation;
     post.render(scene, camera, now / 1000);
   }
 
@@ -295,24 +322,140 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
   document.addEventListener("visibilitychange", onVisibilityChange);
 
   applyTier(quality.tier);
-  // Compile every program before the first frame (both plinths visible, so the second never stalls a flight), then show.
-  stations.sunflower.group.visible = true;
-  stations.hydrangea.group.visible = true;
-  const compiled: Promise<unknown> = (typeof renderer.compileAsync === "function" ? renderer.compileAsync(scene, camera) : Promise.resolve()).catch(() => undefined);
-  void compiled.then(() => {
+
+  interface Preparation {
+    done: Promise<void>;
+    /** Finishes at once a bouquet still being built in slices. */
+    hurry(): void;
+  }
+  const preparing: Partial<Record<IntroFlowerVariant, Preparation>> = {};
+  let glbLoaded = false;
+
+  function settle(variant: IntroFlowerVariant, root: THREE.Group): void {
+    if (disposed) disposeIntroFlower(root);
+    else attachSpecimen(stations[variant], root);
+  }
+
+  /**
+   * Builds or loads a station's bouquet, once. Built in code, it is made at once, or with `sliced` a few milliseconds
+   * at a time in the gaps between frames; asking again without `sliced` finishes it at once.
+   */
+  function prepare(variant: IntroFlowerVariant, sliced = false): Promise<void> {
+    const existing = preparing[variant];
+    if (existing) {
+      if (!sliced) existing.hurry();
+      return existing.done;
+    }
+    const source = sources[variant];
+    if (source.source === "glb") {
+      const done = import("./glbBouquet")
+        .then((module) => {
+          glbLoaded = true;
+          return module.loadGlbBouquet(source.url, renderer);
+        })
+        .catch((error: unknown) => {
+          console.warn(`The ${variant} bouquet could not be loaded from ${source.url}; showing the one built in code.`, error);
+          return createIntroFlower(variant);
+        })
+        .then((root) => settle(variant, root));
+      preparing[variant] = { done, hurry: () => undefined };
+      return done;
+    }
+    const steps = introFlowerSteps(variant);
+    let finished = false;
+    let resolve: () => void = () => undefined;
+    const done = new Promise<void>((settled) => {
+      resolve = settled;
+    });
+    const run = (budget: number) => {
+      const end = performance.now() + budget;
+      while (!finished) {
+        const step = steps.next();
+        if (step.done) {
+          finished = true;
+          settle(variant, step.value);
+          resolve();
+        } else if (performance.now() >= end) {
+          return;
+        }
+      }
+    };
+    const slice = (budget: number) => {
+      if (finished) return;
+      if (disposed) {
+        finished = true;
+        resolve();
+        return;
+      }
+      run(budget);
+      if (!finished) nextSlice(slice);
+    };
+    preparing[variant] = { done, hurry: () => run(Infinity) };
+    if (sliced) nextSlice(slice);
+    else run(Infinity);
+    return done;
+  }
+
+  /**
+   * Compiles a station's programs off the main thread where the browser can (it must be visible to be included; off
+   * camera it costs nothing to draw). With `upload`, its textures then go to the GPU one per quiet moment, so the first
+   * frames of a flight to it do not stall on them.
+   */
+  function warm(station: Station, upload: boolean): Promise<void> {
+    station.group.visible = true;
+    const compiling = typeof renderer.compileAsync === "function" ? renderer.compileAsync(scene, camera) : Promise.resolve();
+    return compiling.catch(() => undefined).then(() => new Promise<void>((resolve) => {
+      if (disposed) return resolve();
+      station.group.visible = station === active || station === leaving;
+      const textures = new Set<THREE.Texture>();
+      if (upload) {
+        station.root?.traverse((child) => {
+          if (!(child instanceof THREE.Mesh)) return;
+          for (const material of Array.isArray(child.material) ? child.material : [child.material]) {
+            for (const value of Object.values(material)) if (value instanceof THREE.Texture) textures.add(value);
+          }
+        });
+      }
+      const queue = [...textures];
+      const next = () => {
+        const texture = queue.pop();
+        if (disposed || !texture) return resolve();
+        renderer.initTexture(texture);
+        nextSlice(next);
+      };
+      next();
+    }));
+  }
+
+  // Everything still in flight. Disposal waits for it: three keeps polling the programs it is compiling, and releasing
+  // them mid-way would pull them from under it.
+  let work: Promise<unknown> = Promise.resolve();
+  const track = (promise: Promise<unknown>) => {
+    work = Promise.all([work, promise]);
+    return promise;
+  };
+  let backgroundTimer = 0;
+  const first = active;
+  track(prepare(first.variant).then(() => warm(first, false)).then(() => {
     if (disposed) return;
-    Object.values(stations).forEach((station) => { station.group.visible = station === active; });
     ready = true;
     last = performance.now();
     render(last);
     options.onReady?.();
     wake();
-  });
+    // Once the loader has made way, the other bouquet is built in the background, never more than a slice per frame.
+    const other = first.variant === "sunflower" ? stations.hydrangea : stations.sunflower;
+    backgroundTimer = window.setTimeout(() => {
+      track(prepare(other.variant, true).then(() => (disposed ? undefined : warm(other, true))));
+    }, 400);
+  }));
 
   return {
     setVariant(variant) {
       const next = stations[variant];
       if (next === active || disposed) return;
+      // Asked for before the idle hour came: build it now (a bouquet built in code is there before the next frame).
+      if (!next.root) track(prepare(variant));
       const previous = active;
       active = next;
       next.group.visible = true;
@@ -331,6 +474,7 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
     },
     dispose() {
       disposed = true;
+      window.clearTimeout(backgroundTimer);
       cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
       visibility?.disconnect();
@@ -342,14 +486,14 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
       canvas.removeEventListener("webglcontextlost", onContextLost);
       rig.dispose();
       canvas.remove();
-      // three keeps polling the programs it is compiling; releasing them mid-way would pull them from under it.
-      void compiled.then(() => {
+      void work.then(() => {
         post.dispose();
         Object.values(stations).forEach((station) => {
           station.shadow.dispose();
           station.disposables.forEach((item) => item.dispose());
-          disposeIntroFlower(station.root);
+          if (station.root) disposeIntroFlower(station.root);
         });
+        if (glbLoaded) void import("./glbBouquet").then((module) => module.releaseGlbLoaders());
         dust.points.geometry.dispose();
         (dust.points.material as THREE.Material).dispose();
         dust.texture?.dispose();

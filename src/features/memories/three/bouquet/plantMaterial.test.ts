@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
-import { createPlantMaterial, disposePlantMaterial, plantDepthMaterial } from "./plantMaterial";
+import { createPlantMaterial, disposePlantMaterial, isPlantMaterial, plantDepthMaterial, plantPartOfMaterial } from "./plantMaterial";
 
 describe("plant materials", () => {
   it("sways merged parts around their anchors, rigidly when asked, in both the colour and the shadow pass", () => {
@@ -21,6 +21,18 @@ describe("plant materials", () => {
       createPlantMaterial({ part: "stem" }),
     ].map((material) => material.customProgramCacheKey());
     expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("does not take a copy for a plant material, as a clone or a material read back from a glTF file would be", () => {
+    const material = createPlantMaterial({ part: "leaf" });
+    plantDepthMaterial(material);
+    const copy = material.clone();
+    copy.userData = JSON.parse(JSON.stringify({ plant: { part: "leaf", depth: plantDepthMaterial(material) } }));
+    expect(isPlantMaterial(material)).toBe(true);
+    expect(plantPartOfMaterial(material)).toBe("leaf");
+    expect(isPlantMaterial(copy)).toBe(false);
+    expect(plantDepthMaterial(copy)).toBeNull();
+    disposePlantMaterial(material);
   });
 
   it("keeps the wrap still and casts its shadow with the plain depth pass", () => {

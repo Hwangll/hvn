@@ -169,19 +169,76 @@ Build command: `npm run build`, publish directory: `dist`. Header cache nằm tr
 
 ## Bó Hoa 3D Ở Phòng Kỷ Vật
 
-- **Dựng bằng code, không tải mô hình**: `src/features/memories/model/flowers/`. Bó hướng dương có năm bông (một bông còn non). Mỗi cánh, lá bắc và lá có hình riêng: dài ngắn, độ cong, độ xoắn, răng ở chóp, màu. Chúng được gộp theo vật liệu nên cả bó chỉ khoảng mười draw call; giấy gói và nơ (`wrap.ts`) dùng chung cho hai bó. Bó cẩm tú cầu vẫn giữ cách dựng cũ (`hydrangea.ts`).
-- **Bề mặt vẽ bằng canvas** (`textures.ts`), mỗi lần dựng một lần: gân cánh, đĩa nhụy xếp theo xoắn Fibonacci, gân lá, thớ giấy kraft và nếp nhăn. Mỗi loại thành một map màu và một normal map.
+- **Dựng bằng code, không tải mô hình**: `src/features/memories/model/flowers/`. Mỗi cánh, đài, lá bắc và lá có hình riêng: dài ngắn, độ cong, độ xoắn, độ gợn mép, màu (bộ dựng chung ở `blades.ts`). Chúng được gộp theo vật liệu nên mỗi bó chỉ khoảng mười draw call; giấy gói và nơ (`wrap.ts`) dùng chung cho hai bó.
+  - Hướng dương (`sunflower.ts`): năm bông (một bông còn non), lá ráp hình tim, hoa baby.
+  - Cẩm tú cầu (`hydrangea.ts`): ba bông xanh lam, xanh da trời và tím oải hương. Mỗi bông là vài trăm hoa con 3–5 đài, gom thành từng cụm u lên và có một lớp hoa chìm, tối hơn bên dưới, nên khe giữa các hoa con trông có chiều sâu chứ không thủng. Chỗ hai bông chạm nhau, bông đứng trước giữ hoa, bông sau nhường. Kèm lá cẩm tú cầu bóng có răng cưa và bạch đàn lá tròn mọc đối chéo.
+- **Bề mặt vẽ bằng canvas** (`textures.ts`), mỗi lần dựng một lần: gân cánh, đĩa nhụy xếp theo xoắn Fibonacci, gân lá (lá cẩm tú cầu phồng lên giữa các gân), gân đài hoa, lớp phấn trên lá bạch đàn, thớ giấy kraft và nếp nhăn. Mỗi loại thành một map màu và một normal map.
 - **Vật liệu** (`three/bouquet/plantMaterial.ts`) là `MeshPhysicalMaterial` thêm hai thứ:
   - gió bằng simplex noise (`windStrength`, `windSpeed`); mỗi cánh và mỗi lá rung riêng nhưng cả bông vẫn đung đưa liền khối;
   - tán xạ dưới bề mặt giả lập cho cánh và lá mỏng, không dùng transmission.
 
   Các ô PBR chuẩn (`map`, `normalMap`, `roughnessMap`, `aoMap`) dùng như bình thường, thêm `thicknessMap`.
 - **Sân khấu** (`three/bouquet/stage.ts`):
-  - hai preset đèn studio, Golden hour và Moonlight, chuyển mượt khi đổi phần;
+  - hai preset đèn studio, Golden hour và Moonlight, chuyển mượt khi đổi phần; mỗi preset có một look màu riêng (Golden rực, Moonlight dịu);
   - bóng tiếp xúc dưới chân bó;
   - hậu kỳ gồm tone mapping AgX kèm look, DOF nhẹ, bloom ngưỡng cao, vignette và grain;
   - camera xoay và zoom trong giới hạn;
-  - tự hạ chất lượng khi máy không theo kịp.
+  - tự hạ chất lượng khi máy không theo kịp;
+  - bó đang xem được dựng trước để hiện sớm; bó còn lại dựng ngầm, mỗi lần vài mili giây vào lúc trình duyệt rảnh (`introFlowerSteps`), rồi biên dịch shader và tải texture lên GPU trước, nên chuyến bay sang không bị khựng.
+
+### Thay bằng mô hình GLB
+
+Mỗi bó có thể lấy từ một file `.glb` dựng trong Blender thay cho bản dựng bằng code. Sân khấu, gió, bóng và đèn giữ nguyên.
+
+1. **Bật nguồn GLB** trong `src/features/memories/model/bouquetSources.ts`, rồi đặt file vào `public/models/`:
+
+   ```ts
+   hydrangea: { source: "glb", url: "/models/hydrangea.glb" },
+   ```
+
+   Nếu file không tải được, trang ghi cảnh báo trong console và hiện bó dựng bằng code. Bộ nạp (`three/bouquet/glbBouquet.ts`) chỉ được tải khi có bó dùng GLB.
+
+2. **Đặt tên object trong Blender.** Từ đầu tiên khớp trong tên object (hoặc tên object cha) quyết định vật liệu và cách gió tác động:
+
+   | Tên bắt đầu bằng | Phần | Gió và ánh sáng |
+   | --- | --- | --- |
+   | `petal_`, `sepal_`, `ray_` | cánh, đài hoa | đung đưa liền khối, rung nhẹ ở chóp, ánh sáng xuyên qua |
+   | `leaf_`, `bract_` | lá, lá bắc | như cánh, rung ít hơn |
+   | `stem_`, `stalk_`, `branch_` | cành, cuống | uốn dần theo chiều cao |
+   | `seed_`, `disc_`, `center_`, `bud_` | nhụy, đĩa hạt, nụ | đung đưa liền khối, không trong mờ |
+   | `wrap_`, `paper_`, `ribbon_`, `bow_`, `tag_` | giấy gói, nơ, thẻ | đứng yên |
+
+   - Object có tên khác giữ vật liệu gốc và đứng yên.
+   - Custom property `plantPart` trên object (`petal`, `leaf`, `stem`, `seed`, `wrap`, hoặc `none` để đứng yên) được ưu tiên hơn tên.
+   - Mỗi mesh đung đưa quanh tâm của chính nó. Gộp mọi cánh của một bông thành một object (Ctrl+J) để cả bông chuyển động cùng nhau; để mỗi lá là một object riêng để lá rung độc lập. Các bản instance (Alt+D, hoặc `gltf-transform instance`) mỗi bản đung đưa riêng.
+
+3. **Vật liệu.** Dùng Principled BSDF: Base Color, Roughness, Normal Map, Alpha Clip cho lá dạng thẻ, có thể thêm Sheen và Clearcoat.
+   - Metallic luôn được đặt về 0. Transmission bị bỏ qua: trang tự giả lập ánh sáng xuyên qua cánh và lá.
+   - Tinh chỉnh thêm bằng Custom Properties trên material: `translucency` (0–1), `translucencyColor` (`"#rrggbb"`), `backTint` (màu mặt dưới, `"#rrggbb"` hoặc kiểu màu), `sway` và `flutter` (0–1).
+
+4. **Hệ trục và tỉ lệ.** Dựng ở tỉ lệ nào cũng được, không cần Apply Transform. Bó được tự canh giữa, co giãn cho cao khoảng 2,55 đơn vị và đặt đáy lên mặt bệ. Mặt trước của bó hướng về −Y trong Blender (Front view, phím 1 trên numpad).
+
+5. **Xuất** bằng File › Export › glTF 2.0:
+   - Format: **glTF Binary (.glb)**.
+   - Include: Selected Objects (hoặc Visible Objects), bật **Custom Properties**.
+   - Transform: **+Y Up**.
+   - Mesh: Apply Modifiers, UVs, Normals; bật Vertex Colors nếu có dùng.
+   - Material: Export. Không xuất animation, đèn hay camera vì trang dùng đèn riêng.
+   - Để Compression tắt; nén ở bước sau.
+
+6. **Nén bằng [glTF Transform](https://gltf-transform.dev)**:
+
+   ```bash
+   npx @gltf-transform/cli optimize bouquet.glb public/models/hydrangea.glb --compress draco --texture-compress webp --flatten false --join-named false --palette false --simplify false
+   ```
+
+   - `--join-named false` và `--palette false` giữ các object có tên tách riêng, nên bước 2 vẫn nhận ra chúng.
+   - `--flatten false` giữ cây object, để tên object cha vẫn có tác dụng.
+   - `--simplify false` giữ nguyên mép cánh mỏng.
+   - Dùng `--compress meshopt` để nén Meshopt. Dùng `--texture-compress ktx2` để có texture KTX2 nhẹ VRAM (cần cài [KTX-Software](https://github.com/KhronosGroup/KTX-Software) để có lệnh `toktx`).
+   - Nên giữ dưới khoảng 300 nghìn tam giác, texture tối đa 2048 px (1024 px cho phần nhỏ), file dưới khoảng 8 MB.
+
+   Decoder Draco và Basis (cho KTX2) lấy từ chính bản của `three`. Vite phục vụ chúng khi dev; khi build, bộ Basis nằm ở `dist/decoders/` và Draco nằm trong `dist/assets/`. Người xem chỉ tải chúng khi có bó dùng GLB cần đến.
 
 ## Quyết Định Kỹ Thuật
 

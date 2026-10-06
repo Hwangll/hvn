@@ -24,6 +24,13 @@ describe("flower geometry helpers", () => {
     expect(geometry.getAttribute("color").count).toBe(5 * 7);
   });
 
+  it("gives a row that closes to a point the normals of the surface next to it, never zero", () => {
+    // A leaf-like blade whose base and tip rows each close to a single point.
+    const geometry = gridGeometry(4, 6, (u, v, position) => position.set((u - 0.5) * Math.sin(Math.PI * v), v, 0));
+    const normal = geometry.getAttribute("normal");
+    for (let index = 0; index < normal.count; index += 1) expect(normal.getZ(index)).toBeCloseTo(1);
+  });
+
   it("tags every vertex of a part with its anchor and seed, and merges parts into one geometry", () => {
     const batch = new PartBatch();
     batch.add(gridGeometry(2, 2, (u, v, position) => position.set(u, v, 0)), { x: 1, y: 2, z: 3 }, 0.25);

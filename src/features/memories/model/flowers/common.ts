@@ -4,6 +4,20 @@ import { attachPlantShadow } from "../../three/bouquet/plantMaterial";
 
 export const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 
+/**
+ * Building a bouquet a slice at a time: every `yield` is a point where the work may pause for a frame, so a bouquet
+ * built in the background never freezes the one on show. The generator's return value is the result.
+ */
+export type BuildSteps<T = void> = Generator<void, T, void>;
+
+/** Runs all the remaining steps at once, for when the result is needed now. */
+export function finish<T>(steps: BuildSteps<T>): T {
+  for (;;) {
+    const step = steps.next();
+    if (step.done) return step.value;
+  }
+}
+
 /** Deterministic 0..1 noise so a specimen looks identical on every visit. */
 export function jitter(seed: number, salt = 0): number {
   const value = Math.sin(seed * 12.9898 + salt * 78.233) * 43758.5453;
@@ -146,6 +160,11 @@ export type GridSampler = (u: number, v: number, position: THREE.Vector3, color:
  * A surface sampled on a (columns × rows) grid: u runs across (0..1), v along (0..1) and becomes the uv (scaled by
  * `uvScale` for tiled textures), so thin edges and tips can be told apart in the shaders. Faces +Z when position grows
  * with u toward +x and v toward +y.
+ *
+ * A row may close to a point (the tip of a leaf, the pole of a dome). A vertex there can belong only to triangles of no
+ * area and so get no normal at all; it takes the normal of the nearest vertex up its column that has one. Left at zero
+ * it would turn into NaN in the shader as soon as the breeze opened its triangle, and bloom would smear that across
+ * the screen.
  */
 export function gridGeometry(columns: number, rows: number, sample: GridSampler, uvScale: [number, number] = [1, 1]): THREE.BufferGeometry {
   const count = (columns + 1) * (rows + 1);
@@ -177,6 +196,20 @@ export function gridGeometry(columns: number, rows: number, sample: GridSampler,
   geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
+  const normals = geometry.getAttribute("normal") as THREE.BufferAttribute;
+  for (let row = 0; row <= rows; row += 1) {
+    for (let column = 0; column <= columns; column += 1) {
+      const index = row * (columns + 1) + column;
+      if (Math.abs(normals.getX(index)) + Math.abs(normals.getY(index)) + Math.abs(normals.getZ(index)) > 1e-6) continue;
+      const toward = row * 2 < rows ? 1 : -1;
+      for (let other = row + toward; other >= 0 && other <= rows; other += toward) {
+        const source = other * (columns + 1) + column;
+        if (Math.abs(normals.getX(source)) + Math.abs(normals.getY(source)) + Math.abs(normals.getZ(source)) <= 1e-6) continue;
+        normals.setXYZ(index, normals.getX(source), normals.getY(source), normals.getZ(source));
+        break;
+      }
+    }
+  }
   return geometry;
 }
 
@@ -234,6 +267,20 @@ export function tubeGeometry(
   geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
   geometry.setIndex(indices);
   return geometry;
+}
+
+/** Where a stem passes a height (it must rise monotonically); a leaf asked for above the head would sprout from its neck. */
+export function pointAtHeight(curve: THREE.Curve<THREE.Vector3>, height: number): { point: THREE.Vector3; t: number } {
+  let low = 0;
+  let high = 1;
+  const point = new THREE.Vector3();
+  for (let iteration = 0; iteration < 24; iteration += 1) {
+    const t = (low + high) / 2;
+    curve.getPointAt(t, point);
+    if (point.y < height) low = t;
+    else high = t;
+  }
+  return { point: curve.getPointAt((low + high) / 2), t: (low + high) / 2 };
 }
 
 /** A frame at `origin` whose +Y points along `direction` and whose +Z leans toward `facing`. */

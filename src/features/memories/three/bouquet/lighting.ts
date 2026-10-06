@@ -18,6 +18,8 @@ export interface LightPreset {
   bloom: number;
   /** Colour of the dust drifting through the light. */
   dust: number;
+  /** The grade after tone mapping (see postprocessing): contrast as a power, and saturation. */
+  look: { power: number; saturation: number };
 }
 
 /**
@@ -34,6 +36,8 @@ export const lightPresets: Record<LightPresetName, LightPreset> = {
     exposure: 1.05,
     bloom: 0.08,
     dust: 0xffcf8f,
+    // Punchy enough to keep sunflower yellow golden instead of apricot.
+    look: { power: 1.25, saturation: 1.4 },
   },
   moonlight: {
     key: { color: 0xd3e2ff, intensity: 2.1, offset: [4, 4, 2.8] },
@@ -43,6 +47,8 @@ export const lightPresets: Record<LightPresetName, LightPreset> = {
     exposure: 1,
     bloom: 0.07,
     dust: 0xa8d4ff,
+    // Softer: blue petals saturate easily, and moonlight should feel hushed.
+    look: { power: 1.15, saturation: 1.1 },
   },
 };
 
@@ -100,7 +106,19 @@ export class StudioLights {
   readonly focus = new THREE.Vector3();
   private readonly focusGoal = new THREE.Vector3();
   private preset: LightPreset;
-  private current: { key: LiveLight; rim: LiveLight; fillSky: THREE.Color; fillGround: THREE.Color; fill: number; environment: number; exposure: number; bloom: number; dust: THREE.Color };
+  private current: {
+    key: LiveLight;
+    rim: LiveLight;
+    fillSky: THREE.Color;
+    fillGround: THREE.Color;
+    fill: number;
+    environment: number;
+    exposure: number;
+    bloom: number;
+    dust: THREE.Color;
+    lookPower: number;
+    lookSaturation: number;
+  };
   private hover = 0;
   private hoverGoal = 0;
   private readonly scratch = new THREE.Color();
@@ -119,6 +137,8 @@ export class StudioLights {
       exposure: preset.exposure,
       bloom: preset.bloom,
       dust: new THREE.Color(preset.dust),
+      lookPower: preset.look.power,
+      lookSaturation: preset.look.saturation,
     };
     this.key.castShadow = true;
     this.key.shadow.mapSize.set(2048, 2048);
@@ -145,6 +165,14 @@ export class StudioLights {
 
   get dust(): THREE.Color {
     return this.current.dust;
+  }
+
+  get lookPower(): number {
+    return this.current.lookPower;
+  }
+
+  get lookSaturation(): number {
+    return this.current.lookSaturation;
   }
 
   setPreset(name: LightPresetName, instant = false): void {
@@ -179,6 +207,8 @@ export class StudioLights {
     this.current.exposure = preset.exposure;
     this.current.bloom = preset.bloom;
     this.current.dust.setHex(preset.dust);
+    this.current.lookPower = preset.look.power;
+    this.current.lookSaturation = preset.look.saturation;
     this.apply();
   }
 
@@ -211,6 +241,8 @@ export class StudioLights {
     current.exposure = ease(current.exposure, preset.exposure);
     current.bloom = ease(current.bloom, preset.bloom);
     easeColor(current.dust, preset.dust);
+    current.lookPower = ease(current.lookPower, preset.look.power);
+    current.lookSaturation = ease(current.lookSaturation, preset.look.saturation);
     this.hover = ease(this.hover, this.hoverGoal);
     if (this.focus.distanceToSquared(this.focusGoal) > 1e-6) moving = true;
     this.focus.lerp(this.focusGoal, 1 - Math.exp(-seconds * 5));

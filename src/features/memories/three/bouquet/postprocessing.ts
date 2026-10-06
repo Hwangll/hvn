@@ -81,6 +81,11 @@ varying vec2 vUv;
 void main() {
 	vec4 color = texture2D( tColor, vUv );
 	float brightness = max( color.r, max( color.g, color.b ) );
+	// A stray NaN would spread through every blur pass into a block of garbage; it fails every comparison, so drop it.
+	if ( ! ( brightness >= 0.0 && brightness < 65504.0 ) ) {
+		gl_FragColor = vec4( 0.0 );
+		return;
+	}
 	float knee = threshold * 0.5;
 	float soft = clamp( brightness - threshold + knee, 0.0, 2.0 * knee );
 	soft = soft * soft / ( 4.0 * knee + 1e-4 );
@@ -114,14 +119,16 @@ uniform float vignette;
 uniform float grain;
 uniform float time;
 uniform vec2 aspect;
+uniform float lookPower;
+uniform float lookSaturation;
 #include <tonemapping_pars_fragment>
 #include <colorspace_pars_fragment>
 varying vec2 vUv;
 
 /**
  * three's AgX with a look graded in its log domain, close to Blender's "Punchy" (an ASC CDL: power, then saturation
- * around the result's luma). Base AgX turns a sunflower's yellow to apricot; this keeps the petals golden while bright
- * highlights still roll off toward white the way film does.
+ * around the result's luma). Base AgX turns a sunflower's yellow to apricot; the golden look keeps the petals golden
+ * while bright highlights still roll off toward white the way film does. Each light preset brings its own look.
  */
 vec3 agxLookToneMapping( vec3 color ) {
 	const mat3 inset = mat3(
@@ -136,8 +143,6 @@ vec3 agxLookToneMapping( vec3 color ) {
 	);
 	const float minEv = - 12.47393;
 	const float maxEv = 4.026069;
-	const float lookPower = 1.25;
-	const float lookSaturation = 1.4;
 	color = inset * ( LINEAR_SRGB_TO_LINEAR_REC2020 * ( color * toneMappingExposure ) );
 	color = clamp( ( log2( max( color, 1e-10 ) ) - minEv ) / ( maxEv - minEv ), 0.0, 1.0 );
 	color = pow( max( agxDefaultContrastApprox( color ), 0.0 ), vec3( lookPower ) );
@@ -196,6 +201,8 @@ export class BouquetPost {
   focus = 5.3;
   bloomStrength = 0.2;
   exposure = 1;
+  /** The grade after tone mapping: contrast as a power, and saturation (see lighting presets). */
+  look = { power: 1.25, saturation: 1.4 };
   private width = 1;
   private height = 1;
   private readonly sceneTarget: THREE.WebGLRenderTarget;
@@ -227,6 +234,7 @@ export class BouquetPost {
     this.finish = quad(finishShader, {
       tColor: { value: null }, tBloom: { value: null }, bloomStrength: { value: 0.2 }, vignette: { value: 0.22 }, grain: { value: 0.028 },
       time: { value: 0 }, aspect: { value: new THREE.Vector2(1, 1) }, toneMappingExposure: { value: 1 },
+      lookPower: { value: 1.25 }, lookSaturation: { value: 1.4 },
     });
     this.finishMaterial = this.finish.material as THREE.RawShaderMaterial;
   }
@@ -304,6 +312,8 @@ export class BouquetPost {
     uniforms.grain.value = this.effects.finish ? 0.028 : 0;
     uniforms.time.value = time;
     uniforms.toneMappingExposure.value = this.exposure;
+    uniforms.lookPower.value = this.look.power;
+    uniforms.lookSaturation.value = this.look.saturation;
     renderer.setRenderTarget(null);
     this.finish.render(renderer);
   }

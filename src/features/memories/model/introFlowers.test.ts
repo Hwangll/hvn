@@ -35,18 +35,41 @@ describe.each<IntroFlowerVariant>(["sunflower", "hydrangea"])("%s cabinet specim
   });
 });
 
-it("uses four blue petals per hydrangea floret within a small draw-call budget", () => {
-  const root = createIntroFlower("hydrangea");
-  const petals = root.getObjectByName("four-petal-blue-florets") as THREE.InstancedMesh;
-  const centers = root.getObjectByName("pale-floret-centers") as THREE.InstancedMesh;
-  expect(petals.count).toBe(centers.count * 4);
-  expect(centers.count).toBeGreaterThan(250);
-  const drawables: THREE.Object3D[] = [];
-  root.traverse((child) => {
-    if (child instanceof THREE.Mesh || child instanceof THREE.Line) drawables.push(child);
+describe("hydrangea bouquet", () => {
+  it("builds three mopheads of separate florets, each head swaying as one while its sepals shiver on their own", () => {
+    const root = createIntroFlower("hydrangea");
+    const sepals = root.getObjectByName("hydrangea-sepals") as THREE.Mesh;
+    const anchor = sepals.geometry.getAttribute("plantAnchor");
+    const heads = new Set<string>();
+    const seeds = new Set<number>();
+    for (let index = 0; index < anchor.count; index += 1) {
+      heads.add([anchor.getX(index), anchor.getY(index), anchor.getZ(index)].map((value) => value.toFixed(3)).join(","));
+      seeds.add(anchor.getW(index));
+    }
+    expect(heads.size).toBe(3);
+    expect(seeds.size).toBeGreaterThan(2500);
+    expect((sepals.material as THREE.MeshPhysicalMaterial).defines).toMatchObject({ USE_PLANT_ANCHOR: "", PLANT_RIGID: "" });
+    // One beaded centre per open floret, carried by its head's anchor like the sepals around it.
+    const centers = root.getObjectByName("hydrangea-floret-centers") as THREE.InstancedMesh;
+    expect(centers.count).toBeGreaterThan(450);
+    const centerAnchor = centers.geometry.getAttribute("plantAnchor");
+    expect(centerAnchor).toBeInstanceOf(THREE.InstancedBufferAttribute);
+    expect(centerAnchor.count).toBe(centers.count);
+    disposeIntroFlower(root);
   });
-  expect(drawables.length).toBeLessThan(30);
-  disposeIntroFlower(root);
+
+  it("merges heads, foliage, eucalyptus and wrap into a handful of draw calls", () => {
+    const root = createIntroFlower("hydrangea");
+    const drawables: THREE.Object3D[] = [];
+    root.traverse((child) => {
+      if (child instanceof THREE.Mesh || child instanceof THREE.Line) drawables.push(child);
+    });
+    expect(drawables.length).toBeLessThanOrEqual(16);
+    for (const name of ["hydrangea-cores", "hydrangea-leaves", "hydrangea-stems", "eucalyptus-leaves", "wrap-front", "wrap-collar", "wrap-bow", "wrap-tag"]) {
+      expect(root.getObjectByName(name), name).toBeDefined();
+    }
+    disposeIntroFlower(root);
+  });
 });
 
 describe("sunflower bouquet", () => {

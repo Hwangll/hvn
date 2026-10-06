@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { createPlantMaterial } from "../../three/bouquet/plantMaterial";
-import { gridGeometry, merged, mesh, randomStream, smoothstep, valueNoise } from "./common";
+import { gridGeometry, merged, mesh, randomStream, smoothstep, valueNoise, type BuildSteps } from "./common";
 import { paperMaps, tagTexture, type PaperKind, type TagPalette } from "./textures";
 
 /**
@@ -183,9 +183,12 @@ function bowGeometry(): THREE.BufferGeometry {
   return merged(parts);
 }
 
-export function addWrap(bouquet: THREE.Group, palette: WrapPalette): void {
+/** Wraps `bouquet` in paper, ribbon and tag, a slice at a time (see BuildSteps). */
+export function* buildWrap(bouquet: THREE.Group, palette: WrapPalette): BuildSteps {
   const outerPaper = paperMaps(palette.outer.kind);
+  yield;
   const innerPaper = palette.inner.kind === palette.outer.kind ? outerPaper : paperMaps(palette.inner.kind);
+  yield;
   const paper = (color: number, kind: PaperKind, maps: typeof outerPaper) => createPlantMaterial({
     part: "wrap",
     color,
@@ -198,10 +201,10 @@ export function addWrap(bouquet: THREE.Group, palette: WrapPalette): void {
     normalMap: maps.normalMap,
     normalScale: new THREE.Vector2(1.2, 1.2),
   });
-  bouquet.add(
-    mesh(merged(COLLAR.map(sheetGeometry)), paper(palette.inner.color, palette.inner.kind, innerPaper), "wrap-collar"),
-    mesh(merged(FRONT.map(sheetGeometry)), paper(palette.outer.color, palette.outer.kind, outerPaper), "wrap-front"),
-  );
+  const collar = mesh(merged(COLLAR.map(sheetGeometry)), paper(palette.inner.color, palette.inner.kind, innerPaper), "wrap-collar");
+  yield;
+  bouquet.add(collar, mesh(merged(FRONT.map(sheetGeometry)), paper(palette.outer.color, palette.outer.kind, outerPaper), "wrap-front"));
+  yield;
 
   const ribbon = createPlantMaterial({
     part: "wrap",

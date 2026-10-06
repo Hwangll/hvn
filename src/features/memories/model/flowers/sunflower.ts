@@ -1,13 +1,15 @@
 import * as THREE from "three";
 import { createPlantMaterial } from "../../three/bouquet/plantMaterial";
+import { bladeGeometry, leafGeometry, type BladeColors, type BladeSpec, type LeafSpec } from "./blades";
 import {
   PartBatch,
-  clamp01,
   frameMatrix,
+  type BuildSteps,
   gridGeometry,
   instanced,
   mesh,
   mix,
+  pointAtHeight,
   randomStream,
   smoothstep,
   tubeGeometry,
@@ -53,96 +55,6 @@ const HEADS: HeadSpec[] = [
 ];
 
 const RAY_YELLOWS = [0xffcc1f, 0xffc61a, 0xffd23a, 0xffc810, 0xfdc416, 0xffd640];
-
-interface BladeSpec {
-  length: number;
-  /** Half the widest width. */
-  width: number;
-  /** Where along the length the blade is widest (0..1). */
-  peak: number;
-  /** Width at the base, as a share of the widest. */
-  claw: number;
-  /** Width at the tip, as a share of the widest. */
-  tipWidth: number;
-  /** How rounded the tip edge is. */
-  round: number;
-  /** Small teeth at the tip of a ray: 0, 2 or 3. */
-  teeth: number;
-  toothDepth: number;
-  /** Backward bend toward the tip in radians (negative bends forward). */
-  curl: number;
-  curlPower: number;
-  /** Edges raised toward the face (share of the half width). */
-  cup: number;
-  /** Depth of the groove along the midline (share of the half width). */
-  channel: number;
-  twist: number;
-  sideBend: number;
-  ruffle: number;
-  ruffleWaves: number;
-  rufflePhase: number;
-  /** Lengthwise pleats from the veins. */
-  folds: number;
-  foldDepth: number;
-}
-
-interface BladeColors {
-  base: THREE.Color;
-  body: THREE.Color;
-  tip: THREE.Color;
-  /** Darkening at the base, where neighbours and the disc shade it (1 = none). */
-  occlusion: number;
-}
-
-/**
- * A thin blade along +Y facing +Z: a ray petal or a bract. Its midline bends back along its length, its cross-section
- * cups and pleats, it twists toward the tip and its edges ripple, all from the spec, so every blade is its own.
- */
-function bladeGeometry(spec: BladeSpec, colors: BladeColors, columns = 8, rows = 18): THREE.BufferGeometry {
-  const steps = 48;
-  const centre = new Float32Array((steps + 1) * 3);
-  const ds = spec.length / steps;
-  let y = 0;
-  let z = 0;
-  for (let index = 0; index <= steps; index += 1) {
-    centre[index * 3] = y;
-    centre[index * 3 + 1] = z;
-    centre[index * 3 + 2] = spec.curl * Math.pow(index / steps, spec.curlPower);
-    const bend = spec.curl * Math.pow((index + 0.5) / steps, spec.curlPower);
-    y += Math.cos(bend) * ds;
-    z -= Math.sin(bend) * ds;
-  }
-  const midline = (s: number): [number, number, number] => {
-    const f = clamp01(s / spec.length) * steps;
-    const index = Math.min(steps - 1, Math.floor(f));
-    const t = f - index;
-    return [mix(centre[index * 3], centre[index * 3 + 3], t), mix(centre[index * 3 + 1], centre[index * 3 + 4], t), mix(centre[index * 3 + 2], centre[index * 3 + 5], t)];
-  };
-  return gridGeometry(columns, rows, (u, v, position, color) => {
-    const across = u * 2 - 1;
-    const tooth = spec.teeth === 3 ? 0.5 - 0.5 * Math.cos(3 * Math.PI * across) : spec.teeth === 2 ? 0.5 + 0.5 * Math.cos(2 * Math.PI * across) : 0;
-    const reach = 1 - spec.round * across * across - spec.toothDepth * tooth;
-    const s = v * reach * spec.length;
-    const rise = Math.sin((Math.PI / 2) * Math.min(1, v / spec.peak));
-    const fall = smoothstep(spec.peak, 1, v);
-    const half = spec.width * (spec.claw + (1 - spec.claw) * Math.pow(rise, 0.7)) * (1 - (1 - spec.tipWidth) * Math.pow(fall, 1.5));
-    const x = across * half;
-    const edge = Math.abs(across);
-    const relief =
-      spec.cup * across * across * half
-      - spec.channel * half * Math.exp(-(across * across) / 0.03) * (1 - v * 0.7)
-      + spec.foldDepth * Math.cos(Math.PI * spec.folds * across) * Math.sin(Math.PI * Math.min(1, v * 1.15)) * (1 - Math.pow(edge, 4))
-      + spec.ruffle * Math.pow(edge, 2.5) * Math.sin(Math.PI * 2 * spec.ruffleWaves * v + spec.rufflePhase + across) * smoothstep(0.12, 0.55, v);
-    const turn = spec.twist * Math.pow(v, 1.4);
-    const tx = x * Math.cos(turn) - relief * Math.sin(turn);
-    const tz = x * Math.sin(turn) + relief * Math.cos(turn);
-    const [cy, cz, angle] = midline(s);
-    position.set(tx + spec.sideBend * spec.length * v * v, cy + tz * Math.sin(angle), cz + tz * Math.cos(angle));
-    color.copy(colors.base).lerp(colors.body, smoothstep(0, 0.3, v));
-    color.lerp(colors.tip, smoothstep(0.55, 1, v) * 0.45 + Math.pow(edge, 3) * 0.15 * smoothstep(0.2, 0.9, v));
-    color.multiplyScalar(mix(colors.occlusion, 1, smoothstep(0, 0.35, v)));
-  });
-}
 
 function rayBlade(random: RandomStream, length: number, openness: number): BladeSpec {
   const wild = random.chance(0.16);
@@ -323,84 +235,6 @@ function stemCurve(spec: HeadSpec): THREE.CatmullRomCurve3 {
   return new THREE.CatmullRomCurve3([bottom, binding, middle, behind, neck], false, "centripetal");
 }
 
-/** Where a stem passes a height (it rises monotonically); a leaf asked for above the head would sprout from its neck. */
-function pointAtHeight(curve: THREE.Curve<THREE.Vector3>, height: number): { point: THREE.Vector3; t: number } {
-  let low = 0;
-  let high = 1;
-  const point = new THREE.Vector3();
-  for (let iteration = 0; iteration < 24; iteration += 1) {
-    const t = (low + high) / 2;
-    curve.getPointAt(t, point);
-    if (point.y < height) low = t;
-    else high = t;
-  }
-  return { point: curve.getPointAt((low + high) / 2), t: (low + high) / 2 };
-}
-
-interface LeafSpec {
-  length: number;
-  width: number;
-  peak: number;
-  cordate: number;
-  teeth: number;
-  toothDepth: number;
-  curl: number;
-  curlPower: number;
-  fold: number;
-  wave: number;
-  waves: number;
-  wavePhase: number;
-  twist: number;
-  sideBend: number;
-}
-
-/**
- * A sunflower leaf along +Y facing +Z: broad and heart-based, with a long tip, a serrated margin whose teeth point to
- * the tip, a sunken midrib, halves folded slightly up, a wavy edge, and a droop that grows toward the tip.
- */
-function leafGeometry(spec: LeafSpec, colors: BladeColors): THREE.BufferGeometry {
-  const steps = 48;
-  const centre = new Float32Array((steps + 1) * 3);
-  const ds = spec.length / steps;
-  let y = 0;
-  let z = 0;
-  for (let index = 0; index <= steps; index += 1) {
-    centre[index * 3] = y;
-    centre[index * 3 + 1] = z;
-    centre[index * 3 + 2] = spec.curl * Math.pow(index / steps, spec.curlPower);
-    const bend = spec.curl * Math.pow((index + 0.5) / steps, spec.curlPower);
-    y += Math.cos(bend) * ds;
-    z -= Math.sin(bend) * ds;
-  }
-  const exponent = Math.log(0.5) / Math.log(spec.peak);
-  return gridGeometry(12, 26, (u, v, position, color) => {
-    const across = u * 2 - 1;
-    const edge = Math.abs(across);
-    const outline = Math.pow(Math.sin(Math.PI * Math.pow(v, exponent)), 0.7) + spec.cordate * Math.exp(-Math.pow((v - 0.06) / 0.07, 2));
-    const saw = (v * spec.teeth) % 1;
-    const tooth = saw < 0.78 ? saw / 0.78 : (1 - saw) / 0.22;
-    const serration = 1 - spec.toothDepth * (1 - tooth) * Math.pow(edge, 6) * smoothstep(0.04, 0.16, v) * smoothstep(1, 0.88, v);
-    const half = spec.width * outline;
-    const x = across * half * serration;
-    const relief = spec.fold * edge * half
-      - 0.12 * spec.width * Math.exp(-(across * across) / 0.004) * (1 - v * 0.8)
-      + spec.wave * edge * edge * Math.sin(Math.PI * 2 * spec.waves * v + spec.wavePhase * Math.sign(across)) * smoothstep(0.1, 0.4, v);
-    const turn = spec.twist * Math.pow(v, 1.3);
-    const tx = x * Math.cos(turn) - relief * Math.sin(turn);
-    const tz = x * Math.sin(turn) + relief * Math.cos(turn);
-    const f = v * steps;
-    const index = Math.min(steps - 1, Math.floor(f));
-    const t = f - index;
-    const cy = mix(centre[index * 3], centre[index * 3 + 3], t);
-    const cz = mix(centre[index * 3 + 1], centre[index * 3 + 4], t);
-    const angle = mix(centre[index * 3 + 2], centre[index * 3 + 5], t);
-    position.set(tx + spec.sideBend * spec.length * v * v, cy + tz * Math.sin(angle), cz + tz * Math.cos(angle));
-    color.copy(colors.base).lerp(colors.body, smoothstep(0, 0.25, v));
-    color.lerp(colors.tip, Math.pow(edge, 4) * smoothstep(0.3, 1, v) * 0.6);
-    color.multiplyScalar(mix(colors.occlusion, 1, smoothstep(0, 0.3, v)));
-  });
-}
-
 interface LeafPlacement {
   head: number;
   height: number;
@@ -439,7 +273,9 @@ function addLeaf(placement: LeafPlacement, curve: THREE.Curve<THREE.Vector3>, an
     length: placement.size * random.range(0.95, 1.05),
     width: placement.size * random.range(0.36, 0.42),
     peak: random.range(0.3, 0.38),
+    fullness: 0.7,
     cordate: random.range(0.05, 0.16),
+    acuminate: 0,
     teeth: random.range(16, 24),
     toothDepth: random.range(0.05, 0.09),
     curl: random.range(0.55, 1.05),
@@ -450,6 +286,7 @@ function addLeaf(placement: LeafPlacement, curve: THREE.Curve<THREE.Vector3>, an
     wavePhase: random.next() * Math.PI * 2,
     twist: random.signed(0.35),
     sideBend: random.signed(0.1),
+    midrib: 0.12,
   };
   const body = new THREE.Color(random.pick(LEAF_GREENS)).offsetHSL(random.signed(0.01), random.signed(0.05), random.signed(0.02));
   const colors: BladeColors = {
@@ -537,12 +374,15 @@ function addBabysBreath(stems: PartBatch): THREE.InstancedMesh {
   return blooms;
 }
 
-/** Builds the sunflower bouquet into `bouquet`; the wrap is added separately. */
-export function addSunflowerBouquet(bouquet: THREE.Group): void {
+/** Builds the sunflower bouquet into `bouquet`, a slice at a time (see BuildSteps); the wrap is added separately. */
+export function* buildSunflowerBouquet(bouquet: THREE.Group): BuildSteps {
   const batches: HeadBatches = { rays: new PartBatch(), bracts: new PartBatch(), discs: new PartBatch(), youngDiscs: new PartBatch() };
   const stems = new PartBatch();
   const leaves = new PartBatch();
-  HEADS.forEach((spec) => addHead(spec, batches));
+  for (const spec of HEADS) {
+    addHead(spec, batches);
+    yield;
+  }
   const curves = HEADS.map(stemCurve);
   const stemGreen = new THREE.Color(0x48742f);
   const neckGreen = new THREE.Color(0x6b8f3c);
@@ -553,13 +393,19 @@ export function addSunflowerBouquet(bouquet: THREE.Group): void {
     stems.add(tubeGeometry(curves[index], 56, 10, radius, tint), new THREE.Vector3(...spec.center), random.next());
   });
   LEAVES.forEach((placement) => addLeaf(placement, curves[placement.head], new THREE.Vector3(...HEADS[placement.head].center), leaves, stems));
+  yield;
   const blooms = addBabysBreath(stems);
+  yield;
 
   const petal = petalMaps();
+  yield;
   const disc = sunflowerDiscMaps(false);
+  yield;
   const youngDisc = sunflowerDiscMaps(true);
+  yield;
   const leaf = leafMaps(3);
   const stem = stemMaps();
+  yield;
   const rayMaterial = createPlantMaterial({
     part: "petal", anchored: true, rigid: true, vertexColors: true, color: 0xffffff, roughness: 0.56,
     sheen: 0.12, sheenRoughness: 0.5, sheenColor: 0xffc040, translucencyColor: 0xffc64a,
@@ -583,13 +429,12 @@ export function addSunflowerBouquet(bouquet: THREE.Group): void {
     sheen: 0.6, sheenRoughness: 0.35, sheenColor: 0xd8e8c0, normalMap: stem.normalMap, map: stem.map,
   });
 
-  bouquet.add(
-    mesh(stems.build(), stemMaterial, "sunflower-stems"),
-    mesh(leaves.build(), leafMaterial, "sunflower-leaves"),
-    mesh(batches.bracts.build(), bractMaterial, "sunflower-bracts"),
-    mesh(batches.discs.build(), discMaterial(disc), "sunflower-discs"),
-    mesh(batches.youngDiscs.build(), discMaterial(youngDisc), "sunflower-young-disc"),
-    mesh(batches.rays.build(), rayMaterial, "sunflower-rays"),
-    blooms,
-  );
+  const stemMesh = mesh(stems.build(), stemMaterial, "sunflower-stems");
+  const leafMesh = mesh(leaves.build(), leafMaterial, "sunflower-leaves");
+  const bractMesh = mesh(batches.bracts.build(), bractMaterial, "sunflower-bracts");
+  yield;
+  const discMesh = mesh(batches.discs.build(), discMaterial(disc), "sunflower-discs");
+  const youngDiscMesh = mesh(batches.youngDiscs.build(), discMaterial(youngDisc), "sunflower-young-disc");
+  const rayMesh = mesh(batches.rays.build(), rayMaterial, "sunflower-rays");
+  bouquet.add(stemMesh, leafMesh, bractMesh, discMesh, youngDiscMesh, rayMesh, blooms);
 }

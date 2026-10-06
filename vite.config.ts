@@ -112,6 +112,13 @@ function pageScopedCss(): Plugin {
   };
 }
 
+/**
+ * The Basis Universal transcoder a KTX2-textured glTF bouquet needs (see three/bouquet/glbBouquet.ts) keeps its own
+ * names, side by side in decoders/: the KTX2 loader is given the folder and asks for each file by name. Everything
+ * else, the Draco decoder included (its loader takes full URLs), is content-hashed.
+ */
+const decoderFiles = ["basis_transcoder.js", "basis_transcoder.wasm"];
+
 export default defineConfig({
   plugins: [react(), tailwindcss(), preloadCriticalFonts(), pageScopedCss()],
   build: {
@@ -125,6 +132,7 @@ export default defineConfig({
         partTwo: "part-2/index.html",
       },
       output: {
+        assetFileNames: ({ names }) => (names.some((name) => decoderFiles.includes(name)) ? "decoders/[name][extname]" : "assets/[name]-[hash][extname]"),
         // Libraries change far less often than the story, so a content edit keeps returning readers' vendor cache warm.
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;

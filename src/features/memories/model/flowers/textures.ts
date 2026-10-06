@@ -279,28 +279,53 @@ export function sunflowerDiscMaps(young = false): SurfaceMaps {
   });
 }
 
+export interface LeafVeins {
+  /** The strong pair of veins from the stalk of a sunflower leaf. */
+  basal: boolean;
+  /** Side veins on each half, where the first leaves the midrib and how far apart the rest are (shares of the length). */
+  pairs: number;
+  first: number;
+  spacing: number;
+  /** How far the side veins reach toward the margin, and how much less each one further up reaches. */
+  reach: number;
+  reachStep: number;
+  /** How far each side vein climbs toward the tip on its way out. */
+  climb: number;
+  /** Soft swelling of the blade between the sunken veins: the quilted face of a hydrangea leaf. */
+  pucker: number;
+}
+
+const SUNFLOWER_VEINS: LeafVeins = { basal: true, pairs: 7, first: 0.24, spacing: 0.095, reach: 0.42, reachStep: 0.03, climb: 0.13, pucker: 0 };
+
+/** A hydrangea leaf: no basal pair, many straight side veins running out to the teeth, the blade puckered between. */
+export const HYDRANGEA_VEINS: LeafVeins = { basal: false, pairs: 9, first: 0.1, spacing: 0.086, reach: 0.44, reachStep: 0.026, climb: 0.15, pucker: 1 };
+
 /**
- * Leaf, u across and v from the stalk to the tip: a pale midrib, the strong pair of basal veins of a sunflower leaf,
- * pinnate side veins arching toward the margin, and a net of fine veins between them. The veins are sunken in the
- * relief, so the blade between them puffs up the way a real leaf does.
+ * Leaf, u across and v from the stalk to the tip: a pale midrib, side veins arching toward the margin (with the strong
+ * basal pair of a sunflower leaf when asked), and a net of fine veins between them. The veins are sunken in the relief,
+ * so the blade between them puffs up the way a real leaf does.
  */
-export function leafMaps(seed = 1): SurfaceMaps {
+export function leafMaps(seed = 1, layout: LeafVeins = SUNFLOWER_VEINS): SurfaceMaps {
   const random = randomStream(seed * 97 + 5);
   type Vein = { points: Array<[number, number]>; width: number };
   const veins: Vein[] = [];
   veins.push({ points: Array.from({ length: 13 }, (_, index) => [0.5, index / 12] as [number, number]), width: 1 });
+  const starts: number[] = [];
   for (const side of [-1, 1]) {
-    // The basal pair: out from the stalk, then running up close to the margin.
-    veins.push({ points: Array.from({ length: 12 }, (_, index) => {
-      const t = index / 11;
-      return [0.5 + side * (0.36 * Math.sin(Math.min(1, t * 1.6) * Math.PI * 0.5) - 0.08 * t * t), 0.02 + t * 0.62] as [number, number];
-    }), width: 0.62 });
-    for (let index = 0; index < 7; index += 1) {
-      const start = 0.24 + index * 0.095 + random.signed(0.015);
-      const reach = 0.42 - index * 0.03;
+    if (layout.basal) {
+      // The basal pair: out from the stalk, then running up close to the margin.
+      veins.push({ points: Array.from({ length: 12 }, (_, index) => {
+        const t = index / 11;
+        return [0.5 + side * (0.36 * Math.sin(Math.min(1, t * 1.6) * Math.PI * 0.5) - 0.08 * t * t), 0.02 + t * 0.62] as [number, number];
+      }), width: 0.62 });
+    }
+    for (let index = 0; index < layout.pairs; index += 1) {
+      const start = layout.first + index * layout.spacing + random.signed(0.015);
+      const reach = layout.reach - index * layout.reachStep;
+      if (side === 1) starts.push(start);
       veins.push({ points: Array.from({ length: 9 }, (_, step) => {
         const t = step / 8;
-        return [0.5 + side * reach * Math.sin(t * Math.PI * 0.5), start + t * (0.13 + random.signed(0.01)) + t * t * 0.04] as [number, number];
+        return [0.5 + side * reach * Math.sin(t * Math.PI * 0.5), start + t * (layout.climb + random.signed(0.01)) + t * t * 0.04] as [number, number];
       }), width: 0.42 - index * 0.025 });
     }
   }
@@ -336,6 +361,29 @@ export function leafMaps(seed = 1): SurfaceMaps {
       }
     }
   };
+  // Between two side veins the blade swells: soft raised cushions, larger near the midrib, smaller toward the margin.
+  const pucker = (context: CanvasRenderingContext2D, width: number, height: number) => {
+    const swell = randomStream(seed * 131 + 9);
+    for (let index = 0; index + 1 < starts.length; index += 1) {
+      const gap = starts[index + 1] - starts[index];
+      for (const side of [-1, 1]) {
+        for (let cushion = 0; cushion < 3; cushion += 1) {
+          const out = (cushion + 0.5) / 3;
+          const reach = layout.reach - (index + 0.5) * layout.reachStep;
+          const u = 0.5 + side * reach * Math.sin(out * Math.PI * 0.5) * 0.92;
+          const v = starts[index] + gap * 0.5 + out * (layout.climb + 0.02) + swell.signed(0.008);
+          const r = gap * height * (0.62 - out * 0.18);
+          const x = u * width;
+          const y = (1 - v) * height;
+          const glow = context.createRadialGradient(x, y, 0, x, y, r);
+          glow.addColorStop(0, grey(0.8, 0.55 * layout.pucker));
+          glow.addColorStop(1, grey(0.8, 0));
+          context.fillStyle = glow;
+          context.fillRect(x - r, y - r, r * 2, r * 2);
+        }
+      }
+    }
+  };
   return paintPair({
     width: 512,
     height: 512,
@@ -361,11 +409,137 @@ export function leafMaps(seed = 1): SurfaceMaps {
     relief: (context, width, height) => {
       context.fillStyle = grey(0.62);
       context.fillRect(0, 0, width, height);
+      if (layout.pucker > 0) pucker(context, width, height);
       context.strokeStyle = grey(0.42);
       context.lineWidth = 1.6;
       strokeNet(context, width, height);
       drawVeins(context, width, height, (weight) => grey(0.4 - weight * 0.22), 11);
       soften(context, 1.2);
+    },
+  });
+}
+
+/**
+ * Hydrangea sepal, u across and v from the base to the tip. The geometry narrows it to a claw at the base, so veins
+ * drawn straight here fan out in 3D, forking once on the way; between them a fine crinkle, and a greenish-white eye
+ * where the sepal leaves the floret.
+ */
+export function sepalMaps(): SurfaceMaps {
+  const random = randomStream(71);
+  const veins = Array.from({ length: 11 }, (_, index) => {
+    const u = 0.5 + ((index - 5) / 5) * 0.42 + random.signed(0.015);
+    return { u, fork: index % 2 === 0 ? 0.42 + random.next() * 0.2 : 2, spread: random.signed(0.035), weight: index === 5 ? 1 : 0.5 + random.next() * 0.3, wobble: random.next() * Math.PI * 2 };
+  });
+  const crinkle = Array.from({ length: 700 }, () => [random.next(), random.next(), 2 + random.next() * 5, random.next()] as const);
+  const strokeVeins = (context: CanvasRenderingContext2D, width: number, height: number, style: (weight: number) => [string, number]) => {
+    for (const vein of veins) {
+      const [stroke, lineWidth] = style(vein.weight);
+      context.strokeStyle = stroke;
+      context.lineWidth = lineWidth;
+      const path = (branch: number) => {
+        context.beginPath();
+        for (let step = 0; step <= 20; step += 1) {
+          const v = step / 20;
+          const split = branch * vein.spread * Math.max(0, v - vein.fork) / (1 - vein.fork);
+          const x = (vein.u + split + Math.sin(v * 4 + vein.wobble) * 0.006) * width;
+          const y = (1 - v * 0.97) * height;
+          if (step === 0) context.moveTo(x, y);
+          else context.lineTo(x, y);
+        }
+        context.stroke();
+      };
+      path(0);
+      if (vein.fork < 1) {
+        context.lineWidth = lineWidth * 0.7;
+        path(1);
+      }
+    }
+  };
+  return paintPair({
+    width: 256,
+    height: 256,
+    strength: 3,
+    albedo: (context, width, height) => {
+      context.fillStyle = grey(0.96);
+      context.fillRect(0, 0, width, height);
+      for (const [u, v, size, tone] of crinkle) {
+        context.fillStyle = tone > 0.5 ? "rgba(255,255,255,0.05)" : "rgba(60,70,140,0.04)";
+        context.fillRect(u * width, v * height, size, size * 0.7);
+      }
+      strokeVeins(context, width, height, (weight) => [`rgba(70,80,160,${0.08 + weight * 0.1})`, 0.8 + weight * 1.1]);
+      const eye = context.createLinearGradient(0, height, 0, height * 0.78);
+      eye.addColorStop(0, "rgba(210,232,200,0.5)");
+      eye.addColorStop(1, "rgba(210,232,200,0)");
+      context.fillStyle = eye;
+      context.fillRect(0, 0, width, height);
+    },
+    relief: (context, width, height) => {
+      context.fillStyle = grey(0.6);
+      context.fillRect(0, 0, width, height);
+      for (const [u, v, size, tone] of crinkle) {
+        context.fillStyle = grey(0.45 + tone * 0.3, 0.45);
+        context.fillRect(u * width, v * height, size, size * 0.7);
+      }
+      strokeVeins(context, width, height, (weight) => [grey(0.6 - weight * 0.3), 1.4 + weight * 1.2]);
+      soften(context, 1.1);
+    },
+  });
+}
+
+/**
+ * Silver-dollar eucalyptus, u across and v from the stalk to the tip: a faint midvein and a few side veins at a steep
+ * angle, oil glands as fine dots, and the patchy waxy bloom that makes the leaf grey-blue.
+ */
+export function roundLeafMaps(): SurfaceMaps {
+  const random = randomStream(81);
+  const glands = Array.from({ length: 900 }, () => [random.next(), random.next(), 0.6 + random.next() * 0.9] as const);
+  const bloom = Array.from({ length: 70 }, () => [random.next(), random.next(), 8 + random.next() * 34, 0.05 + random.next() * 0.09] as const);
+  const strokeVeins = (context: CanvasRenderingContext2D, width: number, height: number, stroke: string, lineWidth: number) => {
+    context.strokeStyle = stroke;
+    context.lineCap = "round";
+    context.lineWidth = lineWidth * 1.6;
+    context.beginPath();
+    context.moveTo(width / 2, height);
+    context.lineTo(width / 2, height * 0.12);
+    context.stroke();
+    context.lineWidth = lineWidth;
+    context.beginPath();
+    for (let index = 0; index < 5; index += 1) {
+      const v = 0.12 + index * 0.15;
+      for (const side of [-1, 1]) {
+        context.moveTo(width / 2, (1 - v) * height);
+        context.quadraticCurveTo(width * (0.5 + side * 0.2), (1 - v - 0.08) * height, width * (0.5 + side * 0.4), (1 - v - 0.2) * height);
+      }
+    }
+    context.stroke();
+  };
+  return paintPair({
+    width: 256,
+    height: 256,
+    strength: 2,
+    albedo: (context, width, height) => {
+      context.fillStyle = grey(0.9);
+      context.fillRect(0, 0, width, height);
+      for (const [u, v, r, alpha] of bloom) {
+        const x = u * width;
+        const y = v * height;
+        const glow = context.createRadialGradient(x, y, 0, x, y, r);
+        glow.addColorStop(0, `rgba(250,255,252,${alpha})`);
+        glow.addColorStop(1, "rgba(250,255,252,0)");
+        context.fillStyle = glow;
+        context.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+      context.fillStyle = "rgba(50,70,60,0.12)";
+      for (const [u, v, size] of glands) context.fillRect(u * width, v * height, size, size);
+      strokeVeins(context, width, height, "rgba(235,240,220,0.22)", 1.2);
+    },
+    relief: (context, width, height) => {
+      context.fillStyle = grey(0.55);
+      context.fillRect(0, 0, width, height);
+      context.fillStyle = grey(0.42, 0.6);
+      for (const [u, v, size] of glands) context.fillRect(u * width, v * height, size, size);
+      strokeVeins(context, width, height, grey(0.42), 1.6);
+      soften(context, 1.4);
     },
   });
 }

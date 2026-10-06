@@ -85,9 +85,18 @@ interface PlantUniforms {
   plantBackTint: { value: THREE.Color };
 }
 
-interface PlantUserData {
-  plant: { part: PlantPart; uniforms: PlantUniforms; windDefines: Record<string, string>; depth: THREE.MeshDepthMaterial | null };
+interface PlantRecord {
+  part: PlantPart;
+  uniforms: PlantUniforms;
+  windDefines: Record<string, string>;
+  depth: THREE.MeshDepthMaterial | null;
 }
+
+/**
+ * What makes a material a plant material, kept beside it rather than in its userData: userData is copied as plain data
+ * by material.clone() and written into a glTF file's extras, and a copy read back must not pass for the real thing.
+ */
+const plants = new WeakMap<THREE.Material, PlantRecord>();
 
 function injectWind(shader: THREE.WebGLProgramParametersWithUniforms, uniforms: PlantUniforms): void {
   Object.assign(shader.uniforms, plantWind.uniforms, { plantSway: uniforms.plantSway, plantFlutter: uniforms.plantFlutter });
@@ -131,7 +140,7 @@ export function createPlantMaterial({
     ...(thicknessMap ? { USE_UV: "", USE_PLANT_THICKNESSMAP: "" } : {}),
     ...(backTint !== undefined ? { PLANT_BACK_TINT: "" } : {}),
   };
-  (material.userData as PlantUserData).plant = { part, uniforms, windDefines, depth: null };
+  plants.set(material, { part, uniforms, windDefines, depth: null });
   material.onBeforeCompile = (shader) => {
     injectWind(shader, uniforms);
     Object.assign(shader.uniforms, {
@@ -151,7 +160,12 @@ export function createPlantMaterial({
 }
 
 export function isPlantMaterial(material: THREE.Material): material is THREE.MeshPhysicalMaterial {
-  return Boolean((material.userData as Partial<PlantUserData>).plant);
+  return plants.has(material);
+}
+
+/** The part a plant material was made for, or null for any other material. */
+export function plantPartOfMaterial(material: THREE.Material): PlantPart | null {
+  return plants.get(material)?.part ?? null;
 }
 
 /**
@@ -159,9 +173,8 @@ export function isPlantMaterial(material: THREE.Material): material is THREE.Mes
  * material and shared by every mesh using it; released with disposePlantMaterial.
  */
 export function plantDepthMaterial(material: THREE.Material): THREE.MeshDepthMaterial | null {
-  if (!isPlantMaterial(material)) return null;
-  const plant = (material.userData as PlantUserData).plant;
-  if (plant.part === "wrap") return null;
+  const plant = plants.get(material);
+  if (!plant || plant.part === "wrap") return null;
   if (!plant.depth) {
     const depth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, side: material.side });
     depth.defines = { ...depth.defines, ...plant.windDefines };
@@ -182,10 +195,9 @@ export function attachPlantShadow<T extends THREE.Mesh>(mesh: T): T {
 }
 
 export function disposePlantMaterial(material: THREE.Material): void {
-  if (isPlantMaterial(material)) {
-    const plant = (material.userData as PlantUserData).plant;
-    plant.depth?.dispose();
-    plant.depth = null;
-    plant.uniforms.plantThicknessMap.value?.dispose();
-  }
+  const plant = plants.get(material);
+  if (!plant) return;
+  plant.depth?.dispose();
+  plant.depth = null;
+  plant.uniforms.plantThicknessMap.value?.dispose();
 }
