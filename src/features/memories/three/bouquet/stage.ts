@@ -3,7 +3,7 @@ import { bouquetSources, type BouquetSource } from "../../model/bouquetSources";
 import { createIntroFlower, disposeIntroFlower, introFlowerSteps, type IntroFlowerVariant } from "../../model/introFlowers";
 import { AdaptiveQuality, startingTier, tierSettings, type QualityTier } from "./adaptiveQuality";
 import { CameraRig, type RigLimits, type RigPose } from "./cameraRig";
-import { ContactShadow } from "./contactShadow";
+import { CONTACT_SHADOW_LAYER, ContactShadow } from "./contactShadow";
 import { StudioLights, createStudioEnvironment, type LightPresetName } from "./lighting";
 import { plantWind } from "./plantMaterial";
 import { BouquetPost } from "./postprocessing";
@@ -19,6 +19,8 @@ const PLINTH: Record<IntroFlowerVariant, { stone: number; inlay: number }> = {
 /** Bouquet-space height of the plinth's top, where the wrap stands. */
 const PLINTH_TOP = -1.16;
 const LOOK_HEIGHT = 0.1;
+/** The faces three's shadow pass draws for each side of a material (WebGLShadowMap): one-sided surfaces cast from the back. */
+const SHADOW_SIDE: Record<THREE.Side, THREE.Side> = { [THREE.FrontSide]: THREE.BackSide, [THREE.BackSide]: THREE.FrontSide, [THREE.DoubleSide]: THREE.DoubleSide };
 
 export interface BouquetStageOptions {
   variant: IntroFlowerVariant;
@@ -104,6 +106,30 @@ function nextSlice(callback: (budget: number) => void): void {
   requestAnimationFrame(() => window.setTimeout(() => callback(6), 0));
 }
 
+/**
+ * Starts compiling the programs the key light's shadow pass will draw a bouquet with: each plant's shadow twin
+ * (plantDepthMaterial), dressed for each mesh the way three's shadow pass dresses it. Left to the shadow pass, each one
+ * is compiled, and waited for, the first time its plant comes into the light's view: in the middle of a flight to it.
+ */
+function compileShadowTwins(renderer: THREE.WebGLRenderer, root: THREE.Object3D, camera: THREE.Camera, scene: THREE.Scene): void {
+  root.traverse((child) => {
+    if (!(child instanceof THREE.Mesh) || !child.castShadow || !(child.customDepthMaterial instanceof THREE.MeshDepthMaterial)) return;
+    const twin = child.customDepthMaterial;
+    const own = child.material as THREE.MeshStandardMaterial | THREE.MeshStandardMaterial[];
+    for (const material of Array.isArray(own) ? own : [own]) {
+      if (!material.visible) continue;
+      twin.side = material.shadowSide ?? SHADOW_SIDE[material.side];
+      twin.map = material.map;
+      twin.alphaMap = material.alphaMap;
+      twin.alphaTest = material.alphaToCoverage ? 0.5 : material.alphaTest;
+      twin.displacementMap = material.displacementMap;
+      child.material = twin;
+      renderer.compile(child, camera, scene);
+    }
+    child.material = own;
+  });
+}
+
 /** Dust hanging in the light: a few dozen soft points spread across both plinths, so a camera move reads as one. */
 function buildDust(): { points: THREE.Points; speeds: Float32Array; texture: THREE.Texture | null } {
   const count = 70;
@@ -176,6 +202,9 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
 
   const lights = new StudioLights(scene, PRESET[options.variant]);
   lights.key.shadow.radius = 4;
+  // The contact shadows draw the same scene with the same lights in view, so three's light setup never changes between
+  // passes: lit materials keep their programs, and each plant's shadow is drawn with the one program warm() compiles.
+  for (const light of [lights.key, lights.rim, lights.fill]) light.layers.enable(CONTACT_SHADOW_LAYER);
   const focusOf = (station: Station, out = new THREE.Vector3()) => out.set(station.group.position.x, 0.25, 0.1);
   lights.setFocus(focusOf(active), true);
 
@@ -398,32 +427,40 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
 
   /**
    * Compiles a station's programs off the main thread where the browser can (it must be visible to be included; off
-   * camera it costs nothing to draw). With `upload`, its textures then go to the GPU one per quiet moment, so the first
-   * frames of a flight to it do not stall on them.
+   * camera it costs nothing to draw): as the scene pass draws it, into the post's target, and as the shadow pass draws
+   * it. In the `background`, it then does ahead of time, a little per quiet moment, what the first frames of a flight to
+   * it would otherwise do: each new program's first use (three reads its logs and uniforms back from the GPU process, in
+   * a round trip that waits for everything queued before it) and each texture's upload.
    */
-  function warm(station: Station, upload: boolean): Promise<void> {
+  function warm(station: Station, background: boolean): Promise<void> {
     station.group.visible = true;
-    const compiling = typeof renderer.compileAsync === "function" ? renderer.compileAsync(scene, camera) : Promise.resolve();
+    const compiling = post.inScenePass(() => {
+      if (station.root) compileShadowTwins(renderer, station.root, camera, scene);
+      return typeof renderer.compileAsync === "function" ? renderer.compileAsync(scene, camera) : Promise.resolve();
+    });
     return compiling.catch(() => undefined).then(() => new Promise<void>((resolve) => {
       if (disposed) return resolve();
       station.group.visible = station === active || station === leaving;
-      const textures = new Set<THREE.Texture>();
-      if (upload) {
+      const chores: Array<() => void> = [];
+      if (background) {
+        // Programs already in use answer at once; only the new ones make the round trip.
+        for (const program of renderer.info.programs ?? []) chores.push(() => program.getUniforms());
+        const textures = new Set<THREE.Texture>();
         station.root?.traverse((child) => {
           if (!(child instanceof THREE.Mesh)) return;
           for (const material of Array.isArray(child.material) ? child.material : [child.material]) {
             for (const value of Object.values(material)) if (value instanceof THREE.Texture) textures.add(value);
           }
         });
+        for (const texture of textures) chores.push(() => renderer.initTexture(texture));
       }
-      const queue = [...textures];
-      const next = () => {
-        const texture = queue.pop();
-        if (disposed || !texture) return resolve();
-        renderer.initTexture(texture);
-        nextSlice(next);
+      const run = (budget: number) => {
+        const end = performance.now() + budget;
+        while (!disposed && chores.length && performance.now() < end) chores.shift()?.();
+        if (disposed || !chores.length) resolve();
+        else nextSlice(run);
       };
-      next();
+      run(0);
     }));
   }
 

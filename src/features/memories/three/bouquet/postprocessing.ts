@@ -254,6 +254,21 @@ export class BouquetPost {
     uniforms.aspect.value.set(this.width / longest, this.height / longest);
   }
 
+  /**
+   * Runs `work` with the scene pass's target bound, so the programs compiled in it are the ones the scene pass draws
+   * with: three compiles a material differently for this linear target than for the canvas.
+   */
+  inScenePass<T>(work: () => T): T {
+    const renderer = this.renderer;
+    const previous = renderer.getRenderTarget();
+    renderer.setRenderTarget(this.sceneTarget);
+    try {
+      return work();
+    } finally {
+      renderer.setRenderTarget(previous);
+    }
+  }
+
   render(scene: THREE.Scene, camera: THREE.PerspectiveCamera, time: number): void {
     const renderer = this.renderer;
     renderer.setRenderTarget(this.sceneTarget);

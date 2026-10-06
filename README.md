@@ -238,7 +238,11 @@ Build command: `npm run build`, publish directory: `dist`. Header cache nằm tr
   - hậu kỳ gồm tone mapping AgX kèm look, DOF nhẹ, bloom ngưỡng cao, vignette và grain;
   - camera xoay và zoom trong giới hạn;
   - tự hạ chất lượng khi máy không theo kịp;
-  - bó đang xem được dựng trước để hiện sớm; bó còn lại dựng ngầm, mỗi lần vài mili giây vào lúc trình duyệt rảnh (`introFlowerSteps`), rồi biên dịch shader và tải texture lên GPU trước, nên chuyến bay sang không bị khựng.
+  - bó đang xem được dựng trước để hiện sớm; bó còn lại dựng ngầm, mỗi lần vài mili giây vào lúc trình duyệt rảnh (`introFlowerSteps`), rồi biên dịch shader và tải texture lên GPU trước (`warm()`), nên chuyến bay sang không bị khựng. Để việc làm trước này có tác dụng:
+    - shader phải được biên dịch đúng như lúc vẽ thật. Cảnh được vẽ vào render target tuyến tính của hậu kỳ, nên `warm()` biên dịch khi target đó đang gắn (`BouquetPost.inScenePass`). Biên dịch cho canvas sẽ ra biến thể khác (sRGB), và three phải biên dịch lại ngay giữa chuyến bay;
+    - bóng có gió của cây (`plantDepthMaterial`) cũng được biên dịch trước (`compileShadowTwins`), dựng y như lượt vẽ bóng của three dựng nó;
+    - đèn nằm cả trên layer của bóng tiếp xúc. three vẽ bóng trước khi nạp đèn của khung hình, nên nếu lượt bóng tiếp xúc không thấy đèn, lượt vẽ bóng ngay sau nó dùng trạng thái không đèn và phải biên dịch thêm biến thể;
+    - lần dùng đầu của mỗi shader phải đọc log và uniform từ GPU process, một vòng hỏi-đáp phải đợi mọi lệnh đang xếp hàng. Việc này cũng làm trước, mỗi lúc rảnh một ít.
 
 ### Thay bằng mô hình GLB
 

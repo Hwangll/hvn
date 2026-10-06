@@ -3,7 +3,7 @@ import { FullScreenQuad } from "three/examples/jsm/postprocessing/Pass.js";
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
 
-/** Meshes on this layer cast contact shadows; the shadow camera sees nothing else. */
+/** Meshes on this layer cast contact shadows; the shadow camera draws nothing else (the stage's lights are on it too). */
 export const CONTACT_SHADOW_LAYER = 3;
 
 interface ContactShadowOptions {
@@ -78,9 +78,12 @@ export class ContactShadow {
     const previousTarget = renderer.getRenderTarget();
     const previousAlpha = renderer.getClearAlpha();
     const previousShadows = renderer.shadowMap.autoUpdate;
+    // The lights are in this camera's view too; the key light's shadow map is the main pass's to draw.
+    const pendingShadows = renderer.shadowMap.needsUpdate;
     scene.background = null;
     scene.overrideMaterial = this.depthMaterial;
     renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = false;
     renderer.setRenderTarget(this.target);
     renderer.setClearAlpha(0);
     renderer.clear();
@@ -90,6 +93,7 @@ export class ContactShadow {
     this.blurPass(renderer, this.blur);
     this.blurPass(renderer, this.blur * 0.4);
     renderer.shadowMap.autoUpdate = previousShadows;
+    renderer.shadowMap.needsUpdate = pendingShadows;
     renderer.setRenderTarget(previousTarget);
     renderer.setClearAlpha(previousAlpha);
   }
