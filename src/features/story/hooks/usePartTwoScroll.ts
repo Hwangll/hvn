@@ -181,7 +181,9 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
       gsap.set([...panels, ...depths, ...effectElements.flat(), ...revealElements.flat()], { x: "+=0" });
     } else {
       gsap.set(revealElements.flat(), { opacity: 1, "--reveal": 1 });
-      gsap.set(threads.flatMap((paths) => Array.from(paths)), { strokeDashoffset: 0 });
+      // Part I's chapters carry no per-scene thread; an empty target would only earn a console warning.
+      const threadPaths = threads.flatMap((paths) => Array.from(paths));
+      if (threadPaths.length) gsap.set(threadPaths, { strokeDashoffset: 0 });
     }
     // Fully faded skies are also hidden (and their idle loops paused via CSS), so only the skies in view cost anything.
     const moodSetters = Array.from(moods, (mood) => quickNumber(mood, "opacity", 0.001));

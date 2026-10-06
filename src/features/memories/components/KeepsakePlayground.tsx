@@ -84,7 +84,8 @@ export function KeepsakePlayground({ partId, visitedStoryIds, playCue, reducedMo
             initial={{ opacity: 0, transform: "translateY(16px)", filter: "blur(6px)" }}
             animate={{ opacity: 1, transform: "translateY(0px)", filter: "blur(0px)", transitionEnd: { filter: "none", transform: "none" } }}
             exit={{ opacity: 0, transform: "translateY(-12px)", filter: "blur(4px)" }}
-            transition={springs.settle}
+            // The blur eases rather than springs: a spring's overshoot would ask for a negative blur.
+            transition={{ ...springs.settle, filter: { duration: 0.4, ease: "easeOut" } }}
           >
             <span>{String(visibleItems.findIndex((item) => item.id === selectedItem.id) + 1).padStart(2, "0")}</span>
             <strong>{selectedItem.label}</strong>

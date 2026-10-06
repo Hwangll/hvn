@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { createStoryScrollItems, storyParts, type StoryScrollItem } from "../data/story";
+import { createStoryScrollItems, scrollRibbonCopy, storyParts, type StoryScrollItem } from "../data/story";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import type { StoryPage } from "../../../app/storyPage";
 import { StoryScrollytelling } from "./StoryScrollytelling";
@@ -12,7 +12,11 @@ import { PartOneAtmosphere } from "./PartOneAtmosphere";
 import { PartOneDepth } from "./PartOneDepth";
 import { PartTwoDepth } from "./PartTwoDepth";
 import { DreamVeil } from "./DreamVeil";
+import { ScrollRibbon } from "./ScrollRibbon";
+import { ScrollWind } from "./ScrollWind";
 import { useMemoryReveals } from "../../../shared/hooks/useMemoryReveals";
+import { useScrollChoreography } from "../hooks/useScrollChoreography";
+import { useDepthInertia } from "../hooks/useDepthInertia";
 import { useIdleZones } from "../../../shared/hooks/useIdleZones";
 import { useDepthParallaxFallback } from "../../../shared/hooks/useDepthParallaxFallback";
 import { useMediaQuery } from "../../../shared/hooks/useMediaQuery";
@@ -33,11 +37,16 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
   const revealScope = useMemoryReveals(reducedMotion, mobile);
   useIdleZones(revealScope);
   useDepthParallaxFallback(revealScope, !reducedMotion);
+  // Touch scrolling carries its own momentum; the layers' lag is for the wheel and trackpad, and phones keep the frames.
+  useDepthInertia(revealScope, !reducedMotion && !mobile);
+  useScrollChoreography(revealScope, page, mobile, reducedMotion);
   const pageParts = useMemo(
     () => storyParts.filter((part) => part.id === (page === "part-two" ? "together-offline" : "before-meeting")),
     [page],
   );
   const pageItems = useMemo(() => createStoryScrollItems(pageParts), [pageParts]);
+  /** The page's chapters by name, for the ribbon that runs past once they have all been read. */
+  const chapterNames = useMemo(() => pageItems.map((item) => item.shortTitle.toLocaleLowerCase("vi")), [pageItems]);
   const [visitedStoryIds, setVisitedStoryIds] = useState<ReadonlySet<string>>(
     () => new Set(pageItems[0] ? [pageItems[0].id] : []),
   );
@@ -68,9 +77,14 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
       {page === "part-one" ? <PartOneDepth /> : <PartTwoDepth />}
       {/* Part I's page-length thread; Part II carries its own thread motif on the title page and the ending. */}
       {page === "part-one" ? <StoryConnectionPath reducedMotion={reducedMotion} /> : null}
-      {page === "part-one" ? <StoryIntro reducedMotion={reducedMotion} /> : null}
-      {page === "part-one" ? <MoodSetup /> : null}
-      {page === "part-one" ? keepsakePlayground : null}
+      {page === "part-one" ? (
+        <>
+          <StoryIntro reducedMotion={reducedMotion} />
+          <ScrollRibbon tone="rose" placement="opening" {...scrollRibbonCopy.partOneOpening} reducedMotion={reducedMotion} />
+          <MoodSetup />
+          {keepsakePlayground}
+        </>
+      ) : null}
       <StoryScrollytelling
         navigationParts={storyParts}
         parts={pageParts}
@@ -81,13 +95,24 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
         soundEnabled={soundEnabled}
         visitedStoryIds={visitedStoryIds}
       />
-      {page === "part-two" ? keepsakePlayground : null}
+      {page === "part-two" ? (
+        <>
+          <ScrollRibbon tone="night" placement="stops" front={chapterNames} back={scrollRibbonCopy.partTwoStops.back} reducedMotion={reducedMotion} />
+          {keepsakePlayground}
+          <ScrollRibbon tone="night" placement="closing" {...scrollRibbonCopy.partTwoClosing} reducedMotion={reducedMotion} />
+        </>
+      ) : null}
       {page === "part-one" ? (
-        <StoryPartOneEnding />
+        <>
+          <ScrollRibbon tone="rose" placement="recap" front={chapterNames} back={scrollRibbonCopy.partOneRecap.back} reducedMotion={reducedMotion} />
+          <StoryPartOneEnding />
+        </>
       ) : (
         <StoryEnding onReturnToIntro={onReturnToIntro} playCue={playCue} reducedMotion={reducedMotion} separatePartPages />
       )}
       <DreamVeil variant={page === "part-two" ? "night" : "day"} />
+      {/* Petals by day, glints by night, blowing past the reader while the page scrolls. */}
+      {reducedMotion ? null : <ScrollWind variant={page === "part-two" ? "night" : "day"} mobile={mobile} />}
     </main>
   );
 }

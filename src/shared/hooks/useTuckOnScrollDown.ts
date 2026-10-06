@@ -13,24 +13,19 @@ export function useTuckOnScrollDown(threshold = 160): boolean {
     }
 
     let last = window.scrollY;
-    let frame = 0;
+    // The position is read in the scroll event itself (at most once a frame), not in an animation frame: there it would
+    // come right after the scroll engine's style writes and make the browser recalculate them early, every frame.
+    // Setting the same state again is a no-op, so the chrome only re-renders when it actually tucks or comes back.
     const onScroll = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        const y = window.scrollY;
-        const delta = y - last;
-        if (Math.abs(delta) < 6) return;
-        setTucked(delta > 0 && y > threshold);
-        last = y;
-      });
+      const y = window.scrollY;
+      const delta = y - last;
+      if (Math.abs(delta) < 6) return;
+      setTucked(delta > 0 && y > threshold);
+      last = y;
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.cancelAnimationFrame(frame);
-    };
+    return () => window.removeEventListener("scroll", onScroll);
   }, [threshold]);
 
   return tucked;

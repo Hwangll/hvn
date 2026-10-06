@@ -22,7 +22,8 @@ export function MoodSetup() {
 
       <div className="mood-scrapbook" aria-label="Scrapbook mở đầu bằng ảnh">
         {moodSetupPhotos.map((photo, index) => (
-          <figure data-memory-reveal data-memory-order={index + 1} data-tilt className={`mood-photo mood-photo-${index + 1}`} key={photo.src}>
+          // The scroll tosses each photo onto the page (useScrollChoreography), so they skip the plain reveal.
+          <figure data-tilt className={`mood-photo mood-photo-${index + 1}`} key={photo.src}>
             <StoryPicture src={photo.src} alt={photo.alt} loading="lazy" />
             <figcaption>
               <Sparkles aria-hidden="true" size={14} />

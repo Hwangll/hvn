@@ -163,10 +163,9 @@ const sprigs: Array<Piece & { flip?: boolean }> = [
 
 /* ---------- Near plane ---------- */
 /** Big words in the open ground between sections, whole and clear of the photos and cards. They ride the near plane,
- * so they keep to the gap they rest in: "nhớ" above the scrapbook's opening words, "gặp" and "thương" either side of
- * the gap between the keepsake box and the chapters. */
+ * so they keep to the gap they rest in: "gặp" and "thương" either side of the gap between the keepsake box and the
+ * chapters. (The gap above the scrapbook carries its words on a ribbon instead: ScrollRibbon.) */
 const words: Array<Piece & { text: string }> = [
-  { text: "nhớ", top: 8.6, left: 22, size: 12 },
   { text: "gặp", top: 24, left: 3, size: 13 },
   { text: "thương", top: 23.5, right: 3, size: 8 },
 ];

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { StoryPart, StoryPartId, StoryScrollItem } from "../data/story";
 import { createStoryScrollItems } from "../data/story";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
@@ -12,6 +12,21 @@ import { StoryPartNavigation } from "./StoryPartNavigation";
 import { StoryPartTransition } from "./StoryPartTransition";
 import { PartOneChapterIndex } from "./PartOneChapterIndex";
 import { StoryStep } from "./StoryStep";
+
+/**
+ * A part's title as words of single letters, so the scroll can flip them up one after another (useScrollChoreography).
+ * Each word stays one unbreakable box and the heading keeps the whole title as its accessible name.
+ */
+function headingLetters(title: string) {
+  return title.normalize("NFC").split(" ").map((word, wordIndex) => (
+    <Fragment key={`${word}-${wordIndex}`}>
+      {wordIndex > 0 ? " " : null}
+      <span className="heading-word" aria-hidden="true">
+        {Array.from(word, (letter, index) => <span className="heading-letter" key={index}>{letter}</span>)}
+      </span>
+    </Fragment>
+  ));
+}
 
 interface StoryScrollytellingProps {
   navigationParts?: readonly StoryPart[];
@@ -83,7 +98,7 @@ export function StoryScrollytelling({
             {partIndex === 0 && !startWithTransition ? (
               <header className="story-part-heading" id={`part-${part.id}`} data-memory-reveal>
                 <span>{part.eyebrow}</span>
-                <h2>{part.title}</h2>
+                <h2 aria-label={part.title}>{headingLetters(part.title)}</h2>
                 <p>{part.subtitle}</p>
                 {part.number === 1 ? <PartOneChapterIndex items={partItems} /> : null}
               </header>

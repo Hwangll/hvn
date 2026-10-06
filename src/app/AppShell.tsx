@@ -5,6 +5,7 @@ import { useReducedMotion } from "../shared/hooks/useReducedMotion";
 import { useSoundToggle } from "../shared/hooks/useSoundToggle";
 import { SoundToggle } from "../shared/components/SoundToggle";
 import { AmbientPetals } from "../shared/components/AmbientPetals";
+import { ReadingProgress } from "../shared/components/ReadingProgress";
 import { MemoryIntro } from "../features/intro/components/MemoryIntro";
 import { MemoryTransitionOverlay } from "../features/intro/components/MemoryTransitionOverlay";
 import { StoryExperience } from "../features/story/components/StoryExperience";
@@ -118,8 +119,8 @@ export function AppShell({ page = "part-one" }: AppShellProps) {
   return (
     <div className={`app-shell experience-${experienceState} ${isPartTwoPage ? "app-part-two" : "app-part-one"}`} ref={shellRef}>
       {!isPartTwoPage ? <AmbientPetals /> : null}
-      {/* A hairline of reading progress; CSS drives it from the page's own scroll (see .reading-progress). */}
-      {storyVisible ? <div className="reading-progress" aria-hidden="true" /> : null}
+      {/* A hairline of reading progress with a heart rolling at its tip; CSS drives both from the page's own scroll. */}
+      {storyVisible ? <ReadingProgress variant={isPartTwoPage ? "night" : "day"} /> : null}
       <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
       {introVisible ? <MemoryIntro onEnterStory={runToStory} phase={experienceState} reducedMotion={prefersReducedMotion} /> : null}
       {storyVisible ? (

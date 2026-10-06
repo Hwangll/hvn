@@ -225,17 +225,16 @@
       animation-timeline: --hero, --hero; animation-range: exit 0% exit 100%, exit 10% exit 90%; animation-composition: add, replace;
     }
 
-    /* The scrapbook's photos and the keepsake box's blossoms each keep their own pace, on their section's timeline. */
-    .story-page-part-one .mood-setup { view-timeline: --mood block; }
+    /* The keepsake box's blossoms keep their own pace on their section's timeline. (The scrapbook's photos are tossed
+       in and drift from script in every browser: useScrollChoreography.) */
     .story-page-part-one .keepsake-playground { view-timeline: --keepsake block; }
-    .story-page-part-one :is(.mood-photo, .keepsake-flower) {
-      animation: drift linear both; animation-timeline: --mood; animation-range: cover; animation-composition: add;
+    .story-page-part-one .keepsake-flower {
+      animation: drift linear both; animation-timeline: --keepsake; animation-range: cover; animation-composition: add;
     }
-    .story-page-part-one .keepsake-flower { animation-timeline: --keepsake; }
   }
 }
 
-/* How far each hero piece travels while the hero leaves, and each scrapbook piece while its section passes. On phones
+/* How far each hero piece travels while the hero leaves, and each keepsake blossom while its section passes. On phones
    the words sit right above the photos, so the planes part by half as much and never meet. */
 .story-page-part-one .story-intro .intro-copy { --hero-rise: 24vh; }
 .story-page-part-one .booth-photo-1 { --hero-rise: -14vh; }
@@ -244,9 +243,6 @@
 .story-page-part-one .booth-sticker { --hero-rise: -40vh; }
 .story-page-part-one .diary-photo-note { --hero-rise: -20vh; }
 .story-page-part-one .intro-blossom { --hero-rise: -46vh; }
-.story-page-part-one .mood-photo-1 { --drift: 6vh; }
-.story-page-part-one .mood-photo-2 { --drift: -9vh; }
-.story-page-part-one .mood-photo-3 { --drift: 3vh; }
 .story-page-part-one .keepsake-flower-one { --drift: -14vh; }
 .story-page-part-one .keepsake-flower-two { --drift: -24vh; }
 @media (max-width: 900px) {

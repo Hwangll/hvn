@@ -1,0 +1,113 @@
+/* Scroll life: the motion that answers the reader's scroll around the chapters (ScrollWind, ScrollRibbon,
+   useDepthInertia, useScrollChoreography, ReadingProgress). The scripts move `transform` and a few custom properties;
+   this sheet gives the custom properties somewhere to go and dresses the new pieces. Loaded on both pages, after
+   everything else; reduced motion leaves every piece here standing still. */
+
+/* Read by the individual transform properties of elements whose `transform` belongs to a CSS animation. */
+@property --swing { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --drop { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --numeral-zoom { syntax: "<number>"; inherits: false; initial-value: 0; }
+
+/* ---------- The wind (ScrollWind): one fixed canvas over the story, under nothing but the pointer ---------- */
+main.story-experience > .scroll-wind { position: fixed; inset: 0; z-index: 4; width: 100%; height: 100%; pointer-events: none; }
+
+/* ---------- Ribbons across the gaps between sections (ScrollRibbon) ---------- */
+/* No room of its own: it straddles the edge between two sections, over their padding, and only the page's sides clip it. */
+main.story-experience > .scroll-ribbon {
+  z-index: 3; height: 9rem; margin-block: -4.5rem; overflow-x: clip; overflow-y: visible; pointer-events: none;
+}
+.scroll-ribbon-band {
+  position: absolute; top: 50%; left: -4vw; right: -4vw; display: flex; align-items: center; overflow: hidden;
+  padding-block: 0.8rem; translate: 0 -50%; rotate: var(--band-tilt, 0deg);
+}
+/* The two bands cross in the middle of the screen, the front one leaning up to the right. */
+.scroll-ribbon-band.is-front { z-index: 1; --band-tilt: -2.2deg; }
+.scroll-ribbon-band.is-back { --band-tilt: 1.7deg; translate: 0 -34%; }
+.scroll-ribbon-track { display: flex; flex: none; will-change: transform; }
+.scroll-ribbon-run { display: flex; flex: none; align-items: center; gap: 1.4rem; padding-inline-end: 1.4rem; }
+.scroll-ribbon-word { white-space: nowrap; font: italic 400 clamp(1.15rem, 1.8vw, 1.6rem)/1.1 var(--memory-display); letter-spacing: -0.01em; }
+.scroll-ribbon-band.is-back .scroll-ribbon-word { font-size: clamp(0.95rem, 1.35vw, 1.2rem); font-style: normal; letter-spacing: 0.02em; }
+.scroll-ribbon-mark {
+  flex: none; width: 0.62rem; height: 0.62rem; background: var(--mark, currentColor);
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+}
+
+/* By day: washi tape over cream paper, in the diary's rose inks. */
+.story-page-part-one .scroll-ribbon-band.is-front {
+  color: #8f2a52; --mark: #e0577f;
+  background:
+    linear-gradient(180deg, #ffffff47, transparent 45%, #a8335c0d),
+    repeating-linear-gradient(-55deg, #ffc1d1 0 11px, #ffcdd9 11px 22px);
+  border-block: 1px dashed #ffffffc4;
+  box-shadow: 0 18px 34px -20px #8a2c5073;
+}
+.story-page-part-one .scroll-ribbon-band.is-back {
+  color: #c4597f; --mark: #f29bb5;
+  background: #fff8f3f2; border-block: 1px solid #f5d3dd; box-shadow: 0 12px 26px -20px #8a2c5059;
+}
+
+/* By night: a strip of film, its sprocket holes along both edges, over a band of pale sea glass. */
+.story-page-part-two .scroll-ribbon-band.is-front {
+  padding-block: 1.25rem; color: #eaf4ff; --mark: #f2c9b5;
+  background:
+    linear-gradient(90deg, #dcecff40 0 9px, transparent 9px) 0 0.32rem / 22px 0.4rem repeat-x,
+    linear-gradient(90deg, #dcecff40 0 9px, transparent 9px) 0 calc(100% - 0.32rem) / 22px 0.4rem repeat-x,
+    linear-gradient(180deg, #0f2033, #08131f);
+  box-shadow: 0 22px 44px -18px #01060dd9, 0 0 0 1px #a8ddeb1f;
+}
+.story-page-part-two .scroll-ribbon-band.is-back {
+  color: #a8ddebd9; --mark: #a8ddeb;
+  background: linear-gradient(180deg, #a8ddeb1f, #a8ddeb0f); border-block: 1px solid #a8ddeb38;
+}
+
+/* Nudged clear of the words either side of each gap: the hero's colophon, the last chapter's photos, the stage. */
+.story-page-part-one .scroll-ribbon.at-opening { translate: 0 5.6rem; }
+.story-page-part-one .scroll-ribbon.at-recap { translate: 0 4.2rem; }
+.story-page-part-two .scroll-ribbon.at-stops { translate: 0 3.4rem; }
+
+@media (max-width: 900px) {
+  main.story-experience > .scroll-ribbon { height: 7rem; margin-block: -3.5rem; }
+  /* On a phone the scrapbook's opening words follow the colophon closely, and the keepsake box's title the last scene. */
+  .story-page-part-one .scroll-ribbon.at-opening { translate: 0 1.6rem; }
+  .story-page-part-two .scroll-ribbon.at-stops { translate: 0 -0.6rem; }
+  .scroll-ribbon-band { padding-block: 0.6rem; }
+  .scroll-ribbon-run { gap: 1rem; padding-inline-end: 1rem; }
+  .story-page-part-two .scroll-ribbon-band.is-front { padding-block: 1rem; }
+}
+
+/* ---------- Reading progress: a heart (or a star) rolling along the hairline's tip ---------- */
+.reading-rider-track { position: fixed; inset: 0 0 auto; z-index: 71; height: 0; display: none; container-type: inline-size; pointer-events: none; }
+.reading-rider { position: absolute; top: -2px; left: 0; width: 16px; height: 16px; translate: -8px 0; overflow: visible; }
+.reading-rider.is-day { fill: #e0577f; filter: drop-shadow(0 0 4px #d64f7a99); }
+.reading-rider.is-night { fill: #eaf7fb; filter: drop-shadow(0 0 5px #a8ddebcc); }
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reading-rider-track { display: block; }
+    .reading-rider { animation: reading-ride linear both; animation-timeline: scroll(root block); }
+  }
+}
+/* About as many turns as a 16px wheel makes crossing a laptop screen. */
+@keyframes reading-ride {
+  from { translate: -8px 0; rotate: 0deg; }
+  to { translate: calc(100cqw - 8px) 0; rotate: 7200deg; }
+}
+
+/* ---------- Part I's title, letter by letter (StoryScrollytelling) ---------- */
+/* The heading's own label style is for its eyebrow span; the title's letters keep the title's type. */
+.story-page-part-one .story-part-heading h2 :is(.heading-word, .heading-letter) { color: inherit; font: inherit; letter-spacing: inherit; }
+.story-page-part-one .story-part-heading .heading-word { display: inline-block; white-space: nowrap; }
+.story-page-part-one .story-part-heading .heading-letter { display: inline-block; }
+
+/* ---------- A keepsake photo developing: a sheet of light crosses it as it settles ---------- */
+.story-part-1 .story-step-keepsake { position: relative; overflow: hidden; }
+.story-part-1 .story-step-keepsake::after {
+  content: ""; position: absolute; inset: -10% -70%; pointer-events: none; mix-blend-mode: soft-light;
+  background: linear-gradient(105deg, transparent 42%, #ffffffd9 50%, transparent 58%);
+  translate: var(--sheen, -130%) 0;
+}
+
+/* ---------- The endings' photo drops in and rocks to rest (the float animation keeps `transform`) ---------- */
+:where(.story-ending) .polaroid { rotate: calc(var(--swing) * 1deg); scale: calc(1 + var(--drop) * 0.16); }
+
+/* ---------- Part II's great numeral swells past the reader as the title page leaves ---------- */
+.story-part-2 .part-transition-numeral { scale: calc(1 + var(--numeral-zoom) * 0.42); translate: 0 calc(var(--numeral-zoom) * -8vh); }

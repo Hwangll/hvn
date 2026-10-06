@@ -11,5 +11,6 @@ import "./styles/motion-edition.css";
 import "./styles/depth-field.css";
 import "./styles/part-one-depth.css";
 import "./styles/part-two-depth.css";
+import "./styles/scroll-life.css";
 
 mountStory();

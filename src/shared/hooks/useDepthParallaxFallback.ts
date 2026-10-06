@@ -14,8 +14,8 @@ const lengthOf = (element: Element, name: string) => {
  * frame, transforms only. The stylesheets stay the source of every number, read once and again on resize: each plane's
  * --k, the drifting sky parts' --sky ([data-scroll-drift]), the travelling ones' --path-x / --path-y ([data-scroll-path],
  * over the whole page or, given --path-end, over that much scroll),
- * and on Part I the hero's --hero-rise and the scrapbook's --drift. [data-scroll-fallback] tells the stylesheets to lay
- * the planes out for moving.
+ * and on Part I the hero's --hero-rise and the keepsake box's blossoms' --drift. [data-scroll-fallback] tells the
+ * stylesheets to lay the planes out for moving.
  */
 export function useDepthParallaxFallback(rootRef: RefObject<HTMLElement | null>, enabled: boolean) {
   useEffect(() => {
@@ -70,8 +70,8 @@ export function useDepthParallaxFallback(rootRef: RefObject<HTMLElement | null>,
           });
         }
       }
-      for (const element of root.querySelectorAll<HTMLElement>(".mood-photo, .keepsake-flower")) {
-        const section = element.closest<HTMLElement>(".mood-setup, .keepsake-playground");
+      for (const element of root.querySelectorAll<HTMLElement>(".keepsake-flower")) {
+        const section = element.closest<HTMLElement>(".keepsake-playground");
         if (!section) continue;
         const drift = lengthOf(element, "--drift");
         const top = section.getBoundingClientRect().top + window.scrollY;

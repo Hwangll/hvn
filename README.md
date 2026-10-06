@@ -116,6 +116,24 @@ Lớp hiệu ứng tương tác dùng Motion và các mẫu quen thuộc của A
   - Lớp mộng ảo trên cùng (`DreamVeil.tsx`): bụi sáng bay lên, quả cầu sáng mờ, vệt sáng loé chậm và viền sương; ban ngày thỉnh thoảng có một đàn chim bay ngang trước nội dung. Không nhận chuột, đủ mờ để đọc xuyên qua.
   - Hình vẽ dùng chung (mây, hoa, cành, bướm, chim, hoa cẩm tú cầu, đèn trời) nằm trong `StoryArt.tsx`. Mỗi con bướm hay đom đóm chỉ là một layer (bay bằng `translate`/`rotate`, vỗ cánh hay nhấp nháy bằng `scale`/`opacity` trên cùng phần tử). Trên điện thoại số lượng ít hơn, các vòng lặp nhỏ được nghỉ, và những món nhìn rõ (hoa, cành, đèn trời, kỷ vật) dạt ra sát mép màn hình để không nằm sau chữ.
 
+- Lớp chuyển động theo cú cuộn (`src/styles/scroll-life.css`). Tất cả đọc chung một nguồn tốc độ cuộn (`src/shared/motion/scrollVelocity.ts`): một listener scroll đánh thức một callback trên ticker của GSAP, và callback tự nghỉ khi trang đứng yên.
+  - Gió (`ScrollWind.tsx`, `utils/scrollWind.ts`): cánh hoa (Phần I) hoặc đốm sáng, sao bốn cánh, hoa cẩm tú cầu (Phần II) bay ngang qua người đọc khi trang chạy, cuộn càng nhanh càng nhiều. Món gần to, mờ và nhanh hơn món xa. Trang dừng thì cánh hoa rơi chậm, đốm sáng bay lên. Tất cả vẽ trên một canvas cố định, chỉ dựng khi người đọc bắt đầu cuộn. Phần kết và trang tiêu đề Phần II tung một nắm lên không (`windBurst`).
+  - Dải chữ (`ScrollRibbon.tsx`): hai băng chữ bắt chéo qua khe giữa các phần, như băng dính washi (Phần I) hay dải phim (Phần II). Chữ chạy chậm theo chiều vừa cuộn, nhanh lên khi cuộn và hơi nghiêng theo (chỉ trên máy có chuột). Dải không chiếm chỗ trong layout và chỉ chạy khi đang trên màn hình. Vị trí từng dải chỉnh trong CSS (`.at-opening`, `.at-recap`, `.at-stops`, `.at-closing`), chữ lấy từ `scrollRibbonCopy` và tên chương.
+  - Quán tính (`useDepthInertia`): các mặt phẳng nền trễ lại một chút khi trang chạy (lớp càng gần càng trễ) rồi bắt kịp bằng lò xo. Độ trễ ghi vào `translate` nên không đụng `transform` của scroll timeline. Chỉ bật với chuột và trackpad, vì cuộn cảm ứng đã có quán tính riêng.
+  - Biên đạo theo cú cuộn (`useScrollChoreography`, GSAP ScrollTrigger; cuộn ngược thì chạy ngược):
+    - tiêu đề hero tản ra khi rời đi;
+    - ảnh scrapbook được tung lên trang rồi đáp xuống;
+    - chữ tiêu đề Phần I lật lên từng chữ cái, mục lục trượt vào;
+    - số chương lớn trôi nhanh hơn chữ;
+    - ảnh kỷ vật mỗi chương xoay về phía người đọc và "hiện hình" như ảnh chụp lấy liền, có vệt sáng lướt qua;
+    - hộp kỷ vật nghiêng lên, các nút bật vào;
+    - album chia ra như chia bài;
+    - trang tiêu đề Phần II tách lớp khi rời đi, chữ số "II" phình ra;
+    - ảnh ở phần kết rơi xuống rồi lắc lư dừng lại.
+
+    Phần tử nào đã có animation CSS giữ `transform` thì đi qua custom property đã đăng ký (`--swing`, `--drop`, `--numeral-zoom`), đọc bằng `rotate`/`scale`/`translate` riêng.
+  - Thanh tiến trình đọc có một trái tim (Phần I) hoặc ngôi sao (Phần II) lăn ở đầu thanh (`ReadingProgress.tsx`), cũng chạy bằng scroll timeline.
+
 Một số điều rút ra khi đo trên mobile: animate cả `transform` (Motion chuyển cho WAAPI/compositor) thay vì `x`/`y`; không xoay trực tiếp `<svg>` (Chrome vẽ lại mỗi khung hình), hãy xoay phần tử HTML bọc ngoài; không đặt thứ đang chuyển động dưới `mask-image` hay lớp blur lớn; đồng hồ đếm ngược chỉ chạy khi phong bì nằm trên màn hình. Khi bật reduced motion, toàn bộ lớp này tắt.
 
 ## Cấu Trúc Chính
@@ -164,6 +182,7 @@ Build command: `npm run build`, publish directory: `dist`. Header cache nằm tr
 - **Three.js tải khi cần**: hộp kỷ vật render chữ và nút ngay, còn scene 3D (`src/features/memories/three/keepsakeScene.ts`) chỉ tải khi hộp còn cách khoảng một màn hình. Canvas do React giữ chỗ sẵn nên layout không nhảy.
 - **Engine cuộn**: `usePartTwoScroll` bỏ qua cảnh đã mờ hẳn hoặc chưa đổi tiến độ, không ghi lại giá trị không đổi, và `--reveal` là custom property không kế thừa (`@property`), được đưa tới từng chữ đang chuyển thay vì cả đoạn văn. Các biến hiệu ứng của sân khấu Phần II (`--vblur`, `--leak`…) cũng không kế thừa.
 - **Motion tải theo nhu cầu**: phần lõi của `m` component nằm trong bundle chính; tính năng animation/layout (`domMax`) và hiệu ứng con trỏ là chunk riêng, chỉ tải khi trình duyệt rảnh nên không tranh băng thông với ảnh màn hình đầu.
+- **Không đọc vị trí cuộn trên ticker**: vị trí cuộn được đọc trong sự kiện scroll (`scrollVelocity.ts`, `useTuckOnScrollDown`). Nếu đọc trong requestAnimationFrame, ngay sau khi engine cuộn vừa ghi style, trình duyệt phải tính lại style thêm một lần mỗi khung hình.
 - **Animation ngoài màn hình tạm dừng**: section nào có vòng lặp CSS chạy mãi (sao, ánh kim, polaroid trôi…) thì gắn `data-idle-zone`; `useIdleZones` tạm dừng chúng khi section ra khỏi màn hình và chạy tiếp khi quay lại.
 - **Cache khi deploy**: `vercel.json` (Vercel) và `public/_headers` (Netlify) đặt cache vĩnh viễn cho `/assets/*` (tên file có hash) và cache một tuần cho ảnh, âm thanh.
 

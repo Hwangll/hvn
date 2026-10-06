@@ -676,6 +676,28 @@ export const journeyMapCopy = {
   note: "Từ chân tòa nhà ở Hà Đông, ngược lên Hồ Tây, rồi kết lại bên đường Thanh Niên.",
 };
 
+/**
+ * The ribbons that run across the gaps between sections as the page scrolls (ScrollRibbon), in words the story already
+ * uses. The ribbons after the chapters spell out the page's own chapters on their front band, taken from the chapters
+ * themselves.
+ */
+export const scrollRibbonCopy = {
+  /** Part I, between the opening page and the scrapbook. */
+  partOneOpening: {
+    front: ["những ngày mình thương", "hát & nờ", "2023 — 2026", "một cuốn nhật ký của hai người"],
+    back: ["nhớ", "gặp", "thương", "những điều mình giữ lại"],
+  },
+  /** Part I, between the last chapter and the ending. */
+  partOneRecap: { back: ["năm chương, một hành trình", "trước khi gặp nhau"] },
+  /** Part II, between the last scene and the keepsake box. */
+  partTwoStops: { back: ["năm điểm dừng trên một thành phố", "thật sự đứng cạnh nhau"] },
+  /** Part II, between the keepsake box and the ending. */
+  partTwoClosing: {
+    front: ["hà đông", "hồ tây", "đường thanh niên", "còn tiếp"],
+    back: ["hẹn", "cạnh", "mãi"],
+  },
+};
+
 /** The single Saturday that Chapter 3 covers, split across its three stops. */
 export const dayTimeline = {
   start: "10:30",

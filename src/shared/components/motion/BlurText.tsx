@@ -46,7 +46,8 @@ export function BlurText({ text, as: Tag = "h2", id, className, stagger = 0.08 }
             variants={wordVariants}
             initial={revealed ? false : "hidden"}
             animate={revealed ? "shown" : "hidden"}
-            transition={{ ...springs.arrive, delay: index * stagger }}
+            // The blur eases rather than springs: a spring's overshoot would ask for a negative blur.
+            transition={{ ...springs.arrive, delay: index * stagger, filter: { duration: 0.6, ease: "easeOut", delay: index * stagger } }}
           >
             {word}
           </m.span>
