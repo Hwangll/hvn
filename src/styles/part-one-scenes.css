@@ -1,350 +1,1400 @@
-/* Part I's little keepsakes share the diary's rose ink and quiet paper surfaces.
-   Scene placement and motion remain in story-scenes.css / story-motion.css. */
+/* Part I's vignettes: the app screens of an online beginning, kept as keepsakes on the pages of a pink paper diary.
+   One light for all five: daylight from the upper left, so highlights catch top-left edges and every shadow falls
+   down and to the right, a tight contact shadow under each object and a softer one for its height above the page.
+   Placement and entrance motion start in story-scenes.css and story-motion.css; this file finishes them.
+
+   Two habits keep every drawing whole. Reduced motion flattens each `transform` and `opacity` inside a scene
+   (story-scrollytelling.css), so resting poses use the `rotate` and `translate` properties and quiet layers are tinted
+   with alpha instead. And every loop sits under `prefers-reduced-motion: no-preference`: the global reduced-motion rule
+   would otherwise jump a pseudo-element's animation straight to its last frame. */
+
+/* ---------- 0. Size and shared tokens ---------- */
+/* The drawing reads its whole box, height included, so a short stage shrinks it instead of cropping it. */
+.story-page-part-one .memory-scene-composite { container-type: size; }
+
+/* The tơ hồng thread runs down the desktop page itself (StoryConnectionPath); inside these drawings it only crossed the
+   cards and the words. Hidden rather than faded, so a phone's scroll engine skips drawing it, and never drawn in. */
+.story-page-part-one .memory-scene-composite > .connection-thread { visibility: hidden; }
+.story-page-part-one .memory-scene-composite > .connection-thread .thread-path { animation: none; }
 
 .story-page-part-one :is(.meeting-scene, .disconnected-scene, .reconnecting-scene, .parallel-scene, .staying-scene) {
-  --scene-line: oklch(0.77 0.065 355 / 0.32);
-  --scene-shadow: 0 8px 22px oklch(0.38 0.07 350 / 0.07), 0 1px 2px oklch(0.38 0.07 350 / 0.04);
-  --scene-sheet: oklch(0.993 0.012 15);
+  --scene-fs: clamp(0.62rem, min(2.5cqi, 2.45cqb), 0.9rem);
+  --scene-rim: inset 0.06em 0.08em 0 #ffffffe6, inset -0.05em -0.07em 0.04em #b0607a1a;
+  --scene-lift-low: 0 0.05em 0.1em #6b1f3a1f, 0.16em 0.4em 0.75em -0.3em #6b1f3a2e;
+  --scene-lift: 0 0.06em 0.12em #6b1f3a1f, 0.28em 0.7em 1.2em -0.5em #6b1f3a38, 0.9em 2em 3em -1.4em #6b1f3a40;
+  --scene-sun: #fff1de;
+  --scene-haze: #ffd9e4;
+  --tape-edge: polygon(0 4%, 100% 0, 97% 26%, 100% 50%, 97% 74%, 100% 100%, 0 96%, 3% 74%, 0 50%, 3% 26%);
 }
 
+/* ---------- 1. The page under every vignette ---------- */
+/* Sunlight pooled in the upper left with two soft rays slanting out of it, the chapter's haze in the far corner and a
+   few out-of-focus specks; all of it fades out before the edges, so the stage's glass shows no seam. */
+.story-page-part-one .memory-scene::before,
+.story-page-part-one .memory-scene::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+}
+
+.story-page-part-one .memory-scene::before {
+  background:
+    radial-gradient(circle at 84% 14%, #ffffffe6 0 0.16em, #fff0 0.9em),
+    radial-gradient(circle at 91% 56%, #ffffffbf 0 0.3em, #fff0 1.5em),
+    radial-gradient(circle at 10% 68%, #ffffffb3 0 0.24em, #fff0 1.2em),
+    radial-gradient(circle at 28% 92%, #ffffffa6 0 0.12em, #fff0 0.8em),
+    conic-gradient(from 104deg at 0 0, #fff0 0deg, #ffffff6b 10deg, #fff0 21deg, #fff0 28deg, #ffffff40 34deg, #fff0 43deg),
+    radial-gradient(ellipse 62% 52% at 10% 6%, var(--scene-sun), #fff0 72%),
+    radial-gradient(ellipse 58% 48% at 94% 96%, var(--scene-haze), #fff0 72%);
+  -webkit-mask: linear-gradient(90deg, #0000, #000 8% 92%, #0000), linear-gradient(#0000, #000 8% 92%, #0000);
+  -webkit-mask-composite: source-in;
+  mask: linear-gradient(90deg, #0000, #000 8% 92%, #0000) intersect, linear-gradient(#0000, #000 8% 92%, #0000);
+}
+
+/* A little grain, so the light lies on paper rather than on glass. */
+.story-page-part-one .memory-scene::after {
+  background: var(--paper-grain);
+  opacity: 0.24;
+  -webkit-mask-image: radial-gradient(ellipse 52% 50% at 50% 48%, #000 45%, #0000);
+  mask-image: radial-gradient(ellipse 52% 50% at 50% 48%, #000 45%, #0000);
+}
+
+/* ---------- 2. Shared materials ---------- */
+/* The line under each vignette: italic ink, closed by a small hand-drawn flourish. Centred without a transform, which
+   reduced motion would flatten. */
 .story-page-part-one .memory-scene .scene-microcopy {
-  color: var(--ink-soft);
+  left: 0;
+  right: 0;
+  bottom: 1.1em;
+  width: fit-content;
+  max-width: min(86%, 26em);
+  margin-inline: auto;
+  color: var(--rose-ink-soft);
   font-family: var(--display);
   font-weight: 500;
   font-style: italic;
-  line-height: 1.6;
+  line-height: 1.55;
   text-wrap: balance;
+  transform: none;
 }
 
-/* Chat excerpts read as correspondence, with one clear outgoing ink colour. */
+.story-page-part-one .memory-scene .scene-microcopy::after {
+  display: block;
+  width: 4.6em;
+  height: 0.55em;
+  margin: 0.3em auto 0;
+  content: "";
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 11'%3E%3Cpath d='M2 7c9-6 15-6 22 0s14 6 22 0 14-6 22 0 14 5 22-1' fill='none' stroke='%23d64f7a' stroke-opacity='.5' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Messages: little glossy pebbles of paper; the outgoing ink is the diary's rose. */
 .story-page-part-one .memory-scene .message-bubble {
-  border-color: var(--scene-line);
-  border-radius: 0.8em;
-  padding: 0.65em 0.9em;
+  position: relative;
+  padding: 0.62em 0.95em 0.66em;
+  border: 1px solid #fff;
+  border-radius: 1.05em;
   font-weight: 500;
-  line-height: 1.5;
-  box-shadow: none;
+  line-height: 1.45;
+  box-shadow: var(--scene-rim), var(--scene-lift-low);
 }
 
-.story-page-part-one .memory-scene .message-bubble.chat-left {
-  border-bottom-left-radius: 0.2em;
-}
-
-.story-page-part-one .memory-scene .message-bubble.chat-right {
-  border-bottom-right-radius: 0.2em;
-}
+.story-page-part-one .memory-scene .message-bubble.chat-left { border-bottom-left-radius: 0.3em; }
+.story-page-part-one .memory-scene .message-bubble.chat-right { border-bottom-right-radius: 0.3em; }
 
 .story-page-part-one .memory-scene .message-bubble.tone-paper {
-  color: var(--ink);
-  background: var(--scene-sheet);
+  color: var(--rose-ink);
+  background: linear-gradient(172deg, #fff, #fff3f6);
 }
 
 .story-page-part-one .memory-scene .message-bubble.tone-coral {
-  border-color: var(--coral-dark);
-  color: var(--paper);
-  background: var(--coral-dark);
+  border-color: #f08fae;
+  color: #fff8fa;
+  background: linear-gradient(168deg, #ea6d93, #d64f7a 58%, #c2426c);
+  box-shadow:
+    inset 0.06em 0.08em 0 #ffffff5c,
+    inset 0 -0.14em 0.22em #8f2a4d33,
+    0 0.05em 0.1em #6b1f3a26,
+    0.16em 0.42em 0.8em -0.3em #b83d6466;
 }
 
 .story-page-part-one .memory-scene .message-bubble.tone-typing {
-  background: var(--pink-milk);
+  color: #8d84bd;
+  background: linear-gradient(172deg, #fdfcff, #efecfa);
 }
 
 .story-page-part-one .memory-scene .chat-meta {
+  color: var(--rose-faint);
+  font-size: 0.76em;
   font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.5;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
   opacity: 1;
 }
 
 .story-page-part-one .memory-scene .chat-gap {
+  gap: 0.7em;
+  margin-block: 0.35em;
+  color: var(--rose-faint);
+  font-size: 0.78em;
   font-weight: 500;
   letter-spacing: 0.02em;
-  line-height: 1.5;
+  line-height: 1.4;
   text-transform: none;
   opacity: 1;
 }
 
+.story-page-part-one .memory-scene .chat-gap i {
+  background: linear-gradient(90deg, #7d657700, #7d65775c);
+  opacity: 1;
+}
+
+.story-page-part-one .memory-scene .chat-gap i:last-child { background: linear-gradient(90deg, #7d65775c, #7d657700); }
+
+/* A phone on the page: a pearl body lit from the upper left, a glass screen with the window caught in it, the camera
+   island and an app bar. */
 .story-page-part-one .memory-scene .scene-screen {
-  border-color: var(--scene-line);
-  border-radius: 0.65em;
-  background: var(--scene-sheet);
-  box-shadow: var(--scene-shadow);
+  --screen-face: linear-gradient(180deg, #fffdfb, #fff5ef);
+  --screen-bar: #fffaf6db;
+  display: block;
+  width: min(100%, 23.5em);
+  padding: 0.45em;
+  overflow: visible;
+  border: 0;
+  border-radius: 2.4em;
+  background: linear-gradient(152deg, #fff, #f8ecf0 38%, #e9d1db);
+  box-shadow:
+    inset 0.08em 0.1em 0 #fff,
+    inset -0.08em -0.12em 0.12em #c48aa152,
+    var(--scene-lift);
 }
 
 .story-page-part-one .memory-scene .scene-screen.tone-blue {
-  background: linear-gradient(180deg, var(--scene-sheet), oklch(0.962 0.019 330));
+  --screen-face: linear-gradient(180deg, #fcfbff, #f2f0fb 64%, #ebe8f8);
+  --screen-bar: #fbfaffdb;
+  background: linear-gradient(152deg, #fff, #efedf8 38%, #d9d5eb);
+}
+
+.story-page-part-one .memory-scene .scene-screen-display {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  overflow: hidden;
+  border-radius: 1.98em;
+  background: var(--screen-face);
+  box-shadow: inset 0 0 0 1px #6b1f3a1c;
+}
+
+/* The glass: the window's light caught across the upper left of the screen, and a fainter streak lower down. */
+.story-page-part-one .memory-scene .scene-screen-display::after {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  content: "";
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(128deg, #ffffff73, #ffffff1f 20%, #fff0 32%, #fff0 66%, #ffffff2e 72%, #fff0 79%);
+}
+
+.story-page-part-one .memory-scene .scene-screen-status {
+  position: relative;
+  display: block;
+  height: 1.75em;
+}
+
+.story-page-part-one .memory-scene .scene-screen-status::before {
+  position: absolute;
+  top: 0.45em;
+  left: 50%;
+  width: 4.4em;
+  height: 1.1em;
+  translate: -50% 0;
+  content: "";
+  border-radius: 999px;
+  background: linear-gradient(180deg, #3d2a35, #22151c);
+  box-shadow: inset 0 0.05em 0.08em #ffffff2e;
+}
+
+/* Signal and battery, small at the right. */
+.story-page-part-one .memory-scene .scene-screen-status::after {
+  position: absolute;
+  top: 0.68em;
+  right: 1.45em;
+  width: 2.15em;
+  height: 0.62em;
+  content: "";
+  background:
+    linear-gradient(#5d4854, #5d4854) 0 100% / 0.16em 42% no-repeat,
+    linear-gradient(#5d4854, #5d4854) 0.25em 100% / 0.16em 68% no-repeat,
+    linear-gradient(#5d4854, #5d4854) 0.5em 100% / 0.16em 94% no-repeat,
+    linear-gradient(#5d4854, #5d4854) 100% 50% / 1.05em 100% no-repeat;
 }
 
 .story-page-part-one .memory-scene .scene-screen-bar {
-  min-height: 3em;
-  border-color: var(--scene-line);
-  color: var(--ink-soft);
-  background: var(--pink-milk);
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  min-height: 3.1em;
+  padding: 0.25em 1em 0.6em 0.95em;
+  border-bottom: 1px solid #6b1f3a14;
+  color: var(--rose-ink);
+  background: var(--screen-bar);
+  font-size: 1em;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   text-transform: none;
 }
 
-.story-page-part-one .memory-scene .scene-screen-bar i {
-  width: 0.4em;
-  height: 0.4em;
-  background: var(--coral-dark);
-  opacity: 0.45;
+.story-page-part-one .memory-scene .scene-screen-bar span { margin-left: 0; }
+
+.story-page-part-one .memory-scene .scene-screen-back {
+  flex: none;
+  width: 0.52em;
+  height: 0.52em;
+  margin-inline: 0.1em 0.05em;
+  border: solid #6b5364;
+  border-width: 0 0 0.13em 0.13em;
+  border-radius: 0.04em;
+  background: none;
+  rotate: 45deg;
 }
 
-.story-page-part-one .memory-scene .scene-screen-bar i:nth-child(2) { opacity: 0.25; }
-.story-page-part-one .memory-scene .scene-screen-bar i:nth-child(3) { opacity: 0.12; }
+.story-page-part-one .memory-scene .scene-screen-heading {
+  display: grid;
+  min-width: 0;
+}
 
+.story-page-part-one .memory-scene .scene-screen-heading strong {
+  font-size: 0.9em;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.story-page-part-one .memory-scene .scene-screen-heading small {
+  color: var(--rose-faint);
+  font-size: 0.74em;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.story-page-part-one .memory-scene .scene-screen-body {
+  gap: 0.6em;
+  padding: 0.9em 0.95em 1.05em;
+}
+
+/* Every portrait window gets a hairline edge and a glint of glass in its upper left. */
 .story-page-part-one .memory-scene .scene-avatar {
-  background: oklch(0.87 0.065 355);
-  color: var(--ink);
+  position: relative;
+  color: var(--rose-ink);
+  background: #f6d4de;
   font-weight: 500;
 }
 
+.story-page-part-one .memory-scene .scene-avatar::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(140deg, #ffffff6b, #fff0 38%);
+  box-shadow: inset 0 0 0 1px #6b1f3a1a;
+}
+
+/* Hắt has no photo here: his window holds a dreamy evening sky with a new moon in it (năm hai · hơi mơ). */
 .story-page-part-one .memory-scene :is(.swipe-avatar-hat, .lane-avatar-hat) {
-  background: oklch(0.91 0.04 20);
+  --moon: 1em;
+  background:
+    radial-gradient(circle at 20% 30%, #fff 0 0.07em, #fff0 0.16em),
+    radial-gradient(circle at 34% 14%, #ffffffd9 0 0.05em, #fff0 0.12em),
+    radial-gradient(circle at 84% 62%, #ffffffcc 0 0.05em, #fff0 0.12em),
+    radial-gradient(circle at 14% 72%, #ffffffb3 0 0.04em, #fff0 0.1em),
+    linear-gradient(172deg, #a9b6ee, #c9c1f2 44%, #f3cbe0 80%, #ffdccf);
 }
 
-.story-page-part-one .memory-scene :is(.swipe-avatar, .suggest-avatar, .lane-avatar) {
-  border: 2px solid var(--scene-sheet);
-  box-shadow: 0 0 0 1px var(--scene-line);
+.story-page-part-one .memory-scene :is(.swipe-avatar-hat, .lane-avatar-hat)::before {
+  position: absolute;
+  top: 13%;
+  left: 17%;
+  width: 24%;
+  aspect-ratio: 1;
+  content: "";
+  border-radius: 50%;
+  box-shadow: calc(var(--moon) * -0.3) calc(var(--moon) * 0.14) 0 0 #fff6d6, calc(var(--moon) * -0.3) calc(var(--moon) * 0.14) calc(var(--moon) * 0.7) 0 #fff3c466;
 }
 
-/* 01 — Two portraits, a small stamp, then the first conversation. */
-.story-page-part-one .meeting-scene .swipe-card {
-  gap: 0.3em;
-  border-color: var(--scene-line);
-  border-radius: 0.35em;
-  background: var(--scene-sheet);
-  box-shadow: var(--scene-shadow);
-}
-
-.story-page-part-one .meeting-scene .swipe-card strong {
-  font-weight: 500;
-  line-height: 1.35;
-}
-
-.story-page-part-one .meeting-scene .swipe-card small {
-  font-weight: 400;
-  line-height: 1.6;
-}
-
-.story-page-part-one .meeting-scene .match-badge {
-  border-width: 1px;
-  background: var(--coral-dark);
-  box-shadow: 0 3px 10px oklch(0.4 0.09 355 / 0.12);
+.story-page-part-one .memory-scene :is(.swipe-avatar-hat, .lane-avatar-hat) .scene-avatar-mark {
+  color: #fffdfb;
   font-family: var(--display);
-  font-size: 1em;
-  font-weight: 500;
   font-style: italic;
-  letter-spacing: 0;
+  font-weight: 650;
+  line-height: 1;
+  text-shadow: 0 0.04em 0.3em #6d68b880;
 }
 
-.story-page-part-one .meeting-scene .meeting-platform {
-  gap: 0.75em;
-  padding: 0.45em 0;
-  border-radius: 0;
-  color: var(--ink-soft);
-  background: transparent;
-  font-size: 0.78em;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-}
-
-.story-page-part-one .meeting-scene .meeting-platform svg {
-  color: var(--coral-dark);
-}
-
-/* 02 — The empty interval has more presence than the interface around it. */
-.story-page-part-one .disconnected-scene .chat-draft {
-  min-height: 3em;
-  border-color: var(--scene-line);
-  border-radius: 0.55em;
-  background: var(--scene-sheet);
-  font-weight: 400;
-}
-
-.story-page-part-one .disconnected-scene .chat-draft em {
-  opacity: 0.8;
-}
-
-.story-page-part-one .disconnected-scene .chat-draft svg {
-  color: var(--coral-dark);
-  opacity: 0.65;
-}
-
-.story-page-part-one .disconnected-scene .story-peek {
-  font-weight: 400;
-  line-height: 1.6;
-}
-
-.story-page-part-one .disconnected-scene .story-ring {
-  background: var(--coral-dark);
-  padding: 0.15em;
-}
-
-/* 03 — An old name reappears in a clean, softly outlined suggestion. */
-.story-page-part-one .reconnecting-scene .suggest-card {
-  border-color: var(--scene-line);
-  border-radius: 0.4em;
-  background: var(--pink-milk);
-}
-
-.story-page-part-one .reconnecting-scene .suggest-copy strong {
-  font-weight: 500;
-  line-height: 1.35;
-}
-
-.story-page-part-one .reconnecting-scene .suggest-copy :is(span, small) {
-  font-weight: 400;
-  line-height: 1.5;
-}
-
-.story-page-part-one .reconnecting-scene .add-friend-btn {
-  min-height: 2.7em;
-  border: 1px solid var(--coral-dark);
-  border-radius: 0.35em;
-  background: var(--coral-dark);
-  font-weight: 500;
-  box-shadow: none;
-}
-
+/* Photographs are polaroids: a thick paper border with a little grain, lit like everything else. */
 .story-page-part-one .memory-scene .memory-photo {
-  border-color: var(--scene-line);
-  border-radius: 0.2em;
-  background: var(--scene-sheet);
-  box-shadow: var(--scene-shadow);
+  padding: 0.45em 0.45em 1.6em;
+  border: 0;
+  border-radius: 0.18em;
+  background: var(--paper-grain), linear-gradient(165deg, #fffdfb, #f5ede8);
+  background-blend-mode: soft-light, normal;
+  box-shadow: var(--scene-rim), var(--scene-lift);
 }
 
 .story-page-part-one .memory-scene .memory-photo img {
-  border-radius: 0;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 0.1em;
+  background: #f4e9e6;
 }
 
-/* 04 — The duration is the focal point; the connecting lines stay quiet. */
-.story-page-part-one .parallel-scene .lane strong {
+/* ---------- 3. 01 · The match: two profile cards taped into the diary lean in until their corners touch ---------- */
+.story-page-part-one .meeting-scene {
+  --scene-sun: #fff0e0;
+  --scene-haze: #ffd3e0;
+  gap: 1.15em;
+  justify-items: center;
+  padding: 1.2em 1.2em 4.7em;
+}
+
+/* The match sits where the two cards touch: `--apex` is the height of their top edge in the stage. */
+.story-page-part-one .meeting-scene .match-stage {
+  --apex: 3.3em;
+  grid-template-columns: repeat(2, minmax(0, 13em));
+  justify-content: center;
+  align-items: start;
+  width: 100%;
+  padding-block: var(--apex) 0;
+}
+
+/* Each card leans in from its foot, so the photos meet at the top and the names below keep apart. */
+.story-page-part-one .meeting-scene .swipe-card {
+  width: 100%;
+  gap: 0.1em;
+  padding: 0.5em 0.5em 0.8em;
+  border: 1px solid #fff;
+  border-radius: 1.1em;
+  background: linear-gradient(168deg, #fff, #fff7f8 62%, #fdeef2);
+  box-shadow: var(--scene-rim), var(--scene-lift);
+  transform: none;
+  transform-origin: 50% 100%;
+}
+
+.story-page-part-one .meeting-scene .swipe-card-left { rotate: 4.5deg; translate: 0.25em 0; }
+.story-page-part-one .meeting-scene .swipe-card-right { rotate: -4.5deg; translate: -0.25em 0; }
+
+/* Washi tape across each outer corner: pinstripes for him, polka dots for her, like the blouse in her photo. */
+.story-page-part-one .meeting-scene .swipe-card::before {
+  position: absolute;
+  top: 0.35em;
+  left: -1.15em;
+  z-index: 2;
+  width: 4.4em;
+  height: 1.3em;
+  rotate: -42deg;
+  content: "";
+  background: repeating-linear-gradient(-45deg, #c3cdf4cc 0 0.3em, #e1e6fbcc 0.3em 0.62em);
+  clip-path: var(--tape-edge);
+}
+
+.story-page-part-one .meeting-scene .swipe-card-right::before {
+  right: -1.15em;
+  left: auto;
+  rotate: 42deg;
+  background: radial-gradient(circle, #fffffff2 0 0.13em, #fff0 0.15em) 0 0 / 0.56em 0.56em, #f5b3c6d1;
+}
+
+.story-page-part-one .meeting-scene .swipe-avatar {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  margin-bottom: 0.5em;
+  border: 0;
+  border-radius: 0.75em;
+  box-shadow: none;
+  font-size: 1em;
+}
+
+.story-page-part-one .meeting-scene .swipe-avatar img { object-position: 56% 30%; }
+.story-page-part-one .meeting-scene .swipe-avatar-hat { --moon: 2.4em; }
+.story-page-part-one .meeting-scene .swipe-avatar-hat .scene-avatar-mark { font-size: 4.2em; }
+
+.story-page-part-one .meeting-scene .swipe-card strong {
+  font-size: 1.4em;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.25;
 }
 
-.story-page-part-one .parallel-scene .lane small {
+.story-page-part-one .meeting-scene .swipe-card small {
+  color: var(--rose-ink-soft);
+  font-size: 0.8em;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Where they touch, the light gathers: a rosy halo, a glossy badge, glints, and a few hearts drifting up. */
+.story-page-part-one .meeting-scene .match-glow {
+  position: absolute;
+  left: 50%;
+  top: var(--apex);
+  z-index: 5;
+  width: 10em;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #ffe3ecd9, #ffd2e08c 42%, #ffd2e000);
+  pointer-events: none;
+}
+
+/* Its own font is larger, so its top is the apex divided by that size. */
+.story-page-part-one .meeting-scene .match-badge {
+  top: calc(var(--apex) / 1.15);
+  z-index: 8;
+  gap: 0.38em;
+  padding: 0.5em 1em 0.56em 0.82em;
+  border: 0.14em solid #fff8fa;
+  color: #fff8fa;
+  background: linear-gradient(165deg, #ef7aa0, #d64f7a 55%, #bc3d67);
+  box-shadow:
+    inset 0 0.1em 0.1em #ffffff73,
+    inset 0 -0.16em 0.3em #8f2a4d4d,
+    0 0.08em 0.16em #6b1f3a38,
+    0.3em 0.75em 1.4em -0.4em #b83d6499,
+    0 0 1.8em 0.2em #ff9fb88c;
+  font-family: var(--display);
+  font-size: 1.15em;
+  font-weight: 650;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  transform: translate(-50%, -50%) rotate(-8deg);
+}
+
+.story-page-part-one .meeting-scene .match-badge svg {
+  width: 1em;
+  height: 1em;
+  filter: drop-shadow(0 0.05em 0.04em #8f2a4d66);
+}
+
+.story-page-part-one .meeting-scene .match-spark {
+  position: absolute;
+  left: 50%;
+  top: var(--apex);
+  z-index: 9;
+  width: 1.15em;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, #fff 20%, #ffd98a 70%);
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+}
+
+.story-page-part-one .meeting-scene .match-spark-1 { translate: -5.2em -1.9em; }
+.story-page-part-one .meeting-scene .match-spark-2 { translate: 4.1em -2.6em; width: 0.85em; }
+.story-page-part-one .meeting-scene .match-spark-3 { translate: 3.9em 1.3em; width: 0.75em; }
+
+.story-page-part-one .meeting-scene .match-heart {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--apex) - 2.3em);
+  z-index: 7;
+  width: 0.95em;
+  height: 0.95em;
+  color: #e8678f;
+}
+
+.story-page-part-one .meeting-scene .match-heart svg { display: block; width: 100%; height: 100%; }
+.story-page-part-one .meeting-scene .match-heart-1 { --drift: -1.2em; translate: -2.2em 0; rotate: -14deg; }
+.story-page-part-one .meeting-scene .match-heart-2 { --drift: 0.3em; translate: -0.4em -0.9em; width: 0.75em; height: 0.75em; color: #f39ab5; }
+.story-page-part-one .meeting-scene .match-heart-3 { --drift: 1.3em; translate: 1.4em -0.1em; rotate: 12deg; width: 0.65em; height: 0.65em; }
+
+/* Bumble, then Instagram: two small app icons, kept in the diary's palette. */
+.story-page-part-one .meeting-scene .meeting-platform {
+  gap: 0.55em;
+  padding: 0;
+  border-radius: 0;
+  color: var(--rose-ink-soft);
+  background: none;
+  font-size: 0.8em;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.story-page-part-one .meeting-scene .meeting-platform > svg {
+  width: 1.1em;
+  height: 1.1em;
+  color: var(--rose-accent);
+}
+
+.story-page-part-one .meeting-scene .platform-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.3em 0.85em 0.3em 0.32em;
+  border: 1px solid #fff;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdfb, #fff1f4);
+  box-shadow: var(--scene-rim), var(--scene-lift-low);
+}
+
+.story-page-part-one .meeting-scene .platform-chip i {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 0.48em;
+  box-shadow: inset 0 0.06em 0 #ffffff8c, 0 0.05em 0.1em #6b1f3a38;
+}
+
+.story-page-part-one .meeting-scene .platform-chip i::before,
+.story-page-part-one .meeting-scene .platform-chip i::after {
+  position: absolute;
+  content: "";
+}
+
+.story-page-part-one .meeting-scene .platform-bumble i { background: linear-gradient(150deg, #ffe39f, #f3b653 68%, #e49d3b); }
+
+.story-page-part-one .meeting-scene .platform-bumble i::before {
+  width: 0.72em;
+  height: 0.64em;
+  background: #fffaf0;
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+
+.story-page-part-one .meeting-scene .platform-instagram i {
+  background:
+    radial-gradient(circle at 22% 110%, #ffcf8f, #ffcf8f00 52%),
+    linear-gradient(45deg, #f08a72, #d64f7a 50%, #9b4fa6);
+}
+
+.story-page-part-one .meeting-scene .platform-instagram i::before {
+  width: 0.82em;
+  height: 0.82em;
+  border: 0.12em solid #fff8fa;
+  border-radius: 0.3em;
+}
+
+.story-page-part-one .meeting-scene .platform-instagram i::after {
+  width: 0.32em;
+  height: 0.32em;
+  border: 0.11em solid #fff8fa;
+  border-radius: 50%;
+}
+
+.story-page-part-one .meeting-scene .meeting-chat {
+  width: min(100%, 19em);
+  gap: 0.5em;
+}
+
+/* ---------- 4. 02 · The silence: the last message, a seen receipt at 23:41, then nothing for three moons ---------- */
+.story-page-part-one .disconnected-scene {
+  --scene-sun: #f2eeff;
+  --scene-haze: #e2e2fb;
+  padding: 3.3em 1.4em 4.6em;
+}
+
+.story-page-part-one .disconnected-scene .silent-desk {
+  position: relative;
+  width: min(100%, 24.5em);
+}
+
+/* Late at night the screen is the only light, and it spills onto the paper around the phone. */
+.story-page-part-one .disconnected-scene .silent-desk::before {
+  position: absolute;
+  inset: -3em -4em;
+  z-index: 0;
+  content: "";
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #e6e3ffbf, #e6e3ff4d 55%, #e6e3ff00);
+  pointer-events: none;
+}
+
+.story-page-part-one .disconnected-scene .silent-chat {
+  width: 100%;
+  rotate: -2deg;
+}
+
+.story-page-part-one .disconnected-scene .silent-chat .chat-log { gap: 0.5em; }
+.story-page-part-one .disconnected-scene .chat-meta { margin-top: -0.15em; }
+
+.story-page-part-one .disconnected-scene .silence-moons {
+  display: flex;
+  justify-content: center;
+  gap: 1em;
+}
+
+/* Waxing, one month at a time. */
+.story-page-part-one .disconnected-scene .silence-moons i {
+  width: 0.78em;
+  height: 0.78em;
+  border-radius: 50%;
+  box-shadow: inset 0.16em -0.04em 0 #bcb5e4;
+}
+
+.story-page-part-one .disconnected-scene .silence-moons i:nth-child(2) { box-shadow: inset 0.3em -0.04em 0 #b1a9df; }
+.story-page-part-one .disconnected-scene .silence-moons i:nth-child(3) { box-shadow: inset 0.5em -0.04em 0 #a69ed9; }
+
+.story-page-part-one .disconnected-scene .typing-dots i { width: 0.4em; height: 0.4em; }
+
+/* The draft that never gets sent sits pressed into the glass. */
+.story-page-part-one .disconnected-scene .chat-draft {
+  min-height: 2.9em;
+  margin-top: 0.3em;
+  padding: 0.4em 0.45em 0.4em 1em;
+  border: 1px solid #6b1f3a17;
+  border-radius: 999px;
+  color: var(--rose-ink);
+  background: #ffffffd9;
+  box-shadow: inset 0 0.08em 0.2em #6b1f3a14;
   font-weight: 400;
 }
 
+.story-page-part-one .disconnected-scene .chat-draft em { color: var(--rose-faint); opacity: 1; }
+
+.story-page-part-one .disconnected-scene .chat-draft svg {
+  box-sizing: content-box;
+  width: 1em;
+  height: 1em;
+  padding: 0.5em;
+  border-radius: 50%;
+  color: #fff8fa;
+  background: linear-gradient(165deg, #e7a3bb, #cf7d9b);
+}
+
+/* Her story ring in the chat's header, the only thing still watched. */
+.story-page-part-one .disconnected-scene .story-ring {
+  flex: none;
+  width: 2.8em;
+  height: 2.8em;
+  padding: 0.13em;
+  background: conic-gradient(from 210deg, #f6b26b, #ea5f86, #b25bc4, #f08a72, #f6b26b);
+}
+
+.story-page-part-one .disconnected-scene .story-ring .scene-avatar { border: 0.12em solid #fbfaff; }
+.story-page-part-one .disconnected-scene .story-ring img { object-position: 45% 28%; }
+
+/* A note in the margin, pointing at it: "just looking from afar". */
+.story-page-part-one .disconnected-scene .story-peek {
+  position: absolute;
+  right: auto;
+  bottom: 100%;
+  left: 0.2em;
+  z-index: 6;
+  display: block;
+  margin-bottom: 0.15em;
+  color: var(--rose-accent);
+  font-family: var(--hand);
+  font-size: 1.35em;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+  rotate: -4deg;
+}
+
+.story-page-part-one .disconnected-scene .story-peek::after {
+  position: absolute;
+  top: 88%;
+  left: 0.55em;
+  width: 1.7em;
+  height: 2.05em;
+  content: "";
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 36'%3E%3Cg fill='none' stroke='%23d64f7a' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 2C2 14 7 26 23 30'/%3E%3Cpath d='M16 25l7 5-7 4'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.story-page-part-one .disconnected-scene .silent-flower {
+  position: absolute;
+  top: -2.9em;
+  right: -2.3em;
+  z-index: 3;
+  width: 5.2em;
+  height: 5.2em;
+  overflow: visible;
+  rotate: 24deg;
+}
+
+.story-page-part-one .disconnected-scene .flower-stem { fill: none; stroke: #9bb293; stroke-width: 1.5; stroke-linecap: round; }
+.story-page-part-one .disconnected-scene .flower-leaf { fill: #a9c0a0; }
+.story-page-part-one .disconnected-scene .flower-bud { fill: #c8b8ec; }
+.story-page-part-one .disconnected-scene .flower-petals circle { fill: #b7c6f2; stroke: #9cafe8; stroke-width: 0.7; }
+.story-page-part-one .disconnected-scene .flower-eye { fill: #f6d77a; stroke: #fff8e4; stroke-width: 1.2; }
+
+/* ---------- 5. 03 · The suggestion: an old name in a pool of light; one small button, and the chat picks up ---------- */
+.story-page-part-one .reconnecting-scene {
+  --scene-sun: #fff0dc;
+  --scene-haze: #ffd8c8;
+  padding: 3.2em 1.4em 1.4em;
+}
+
+/* Phone and photo travel together, so the photo stays tucked behind the phone in a stage of any shape. */
+.story-page-part-one .reconnecting-scene .reconnect-desk {
+  position: relative;
+  width: min(100%, 24em);
+  translate: -1.6em 0;
+}
+
+.story-page-part-one .reconnecting-scene .scene-screen {
+  width: 100%;
+  rotate: 1.5deg;
+}
+
+.story-page-part-one .reconnecting-scene .suggest-card {
+  position: relative;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.4em 0.8em;
+  padding: 0.8em 0.85em 0.85em;
+  overflow: hidden;
+  border: 1px solid #fff;
+  border-radius: 1em;
+  background: linear-gradient(160deg, #fffaf6, #ffeee5);
+  box-shadow: var(--scene-rim), 0 0 0 0.24em #ffd6c28c, 0 0 1.6em 0.2em #ffc2a873, 0 0.5em 1.5em -0.4em #f08a7270, var(--scene-lift-low);
+}
+
+/* Once, a glint crosses the card, the way a notification catches the eye. */
+.story-page-part-one .reconnecting-scene .suggest-card::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(105deg, #fff0 30%, #ffffffb3 46%, #fff0 60%);
+  translate: -120% 0;
+}
+
+.story-page-part-one .reconnecting-scene .suggest-avatar {
+  width: 3.9em;
+  height: 3.9em;
+  border: 0.18em solid #fff;
+  box-shadow: 0 0 0 1px #f08a7240, var(--scene-lift-low);
+}
+
+.story-page-part-one .reconnecting-scene .suggest-avatar img { object-position: 60% 26%; }
+
+.story-page-part-one .reconnecting-scene .suggest-copy strong {
+  font-size: 1.3em;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.story-page-part-one .reconnecting-scene .suggest-copy span {
+  color: var(--rose-ink-soft);
+  font-size: 0.82em;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.story-page-part-one .reconnecting-scene .suggest-copy small {
+  color: #c2496f;
+  font-size: 0.76em;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.story-page-part-one .reconnecting-scene .add-friend {
+  position: relative;
+  grid-column: 2;
+  justify-self: start;
+}
+
+.story-page-part-one .reconnecting-scene .add-friend-btn {
+  min-width: 8.2em;
+  min-height: 2.55em;
+  border: 0;
+  border-radius: 0.8em;
+  color: #fff8fa;
+  background: linear-gradient(170deg, #ec7398, #d64f7a 60%, #c4436d);
+  box-shadow: inset 0 0.08em 0 #ffffff6b, 0 0.06em 0.12em #6b1f3a38, 0.2em 0.5em 1em -0.4em #d64f7a99;
+  font-size: 0.86em;
+  font-weight: 600;
+}
+
+.story-page-part-one .reconnecting-scene .add-friend-sparks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.story-page-part-one .reconnecting-scene .add-friend-sparks i {
+  position: absolute;
+  width: 0.36em;
+  height: 0.36em;
+  border-radius: 50%;
+  background: #f6b26b;
+  opacity: 0;
+}
+
+.story-page-part-one .reconnecting-scene .add-friend-sparks i:nth-child(1) { right: -0.5em; top: -0.3em; }
+.story-page-part-one .reconnecting-scene .add-friend-sparks i:nth-child(2) { right: -0.85em; top: 45%; background: #ea6d93; }
+.story-page-part-one .reconnecting-scene .add-friend-sparks i:nth-child(3) { right: -0.45em; bottom: -0.3em; background: #ffd38a; }
+.story-page-part-one .reconnecting-scene .add-friend-sparks i:nth-child(4) { right: 22%; top: -0.55em; width: 0.28em; height: 0.28em; background: #f08a72; }
+
+.story-page-part-one .reconnecting-scene .chat-log { gap: 0.5em; }
+
+.story-page-part-one .reconnecting-scene .chat-meta {
+  display: inline-flex;
+  align-items: center;
+  justify-self: center;
+  gap: 0.45em;
+  margin-block: 0.15em 0.1em;
+  padding: 0.3em 0.8em 0.3em 0.55em;
+  border-radius: 999px;
+  color: #a5506c;
+  background: #ffeee6;
+}
+
+.story-page-part-one .reconnecting-scene .chat-meta::before {
+  width: 0.36em;
+  height: 0.62em;
+  margin: -0.15em 0.15em 0 0.2em;
+  content: "";
+  border: solid #d64f7a;
+  border-width: 0 0.13em 0.13em 0;
+  rotate: 42deg;
+}
+
+/* Her photo, tucked in behind the phone with a strip of tape. */
+.story-page-part-one .reconnecting-scene .reconnect-photo {
+  top: -4.6em;
+  right: -6.2em;
+  bottom: auto;
+  z-index: 2;
+  width: 8.8em;
+  padding: 0.42em 0.42em 1.5em;
+  rotate: 9deg;
+  transform: none;
+}
+
+.story-page-part-one .reconnecting-scene .reconnect-photo::before {
+  position: absolute;
+  top: -0.6em;
+  left: 50%;
+  z-index: 2;
+  width: 4em;
+  height: 1.2em;
+  translate: -50% 0;
+  rotate: -6deg;
+  content: "";
+  background: repeating-linear-gradient(90deg, #ffd2bfd9 0 0.42em, #ffe6dbd9 0.42em 0.84em);
+  clip-path: var(--tape-edge);
+}
+
+/* ---------- 6. 04 · Two separate days ticking side by side, and one long call between them ---------- */
+.story-page-part-one .parallel-scene {
+  --scene-sun: #eef0ff;
+  --scene-haze: #ffdbe6;
+  gap: 1.15em;
+  padding: 2.4em 1.3em 2em;
+}
+
+.story-page-part-one .parallel-scene .lane-hat { --lane: #9aa8e6; --lane-soft: #9aa8e62e; }
+.story-page-part-one .parallel-scene .lane-no { --lane: #e98aa8; --lane-soft: #e98aa82e; }
+
+.story-page-part-one .parallel-scene .parallel-lanes {
+  --gap: 0.6em;
+  --side: max(4.6em, (100% - 15em - 2 * var(--gap)) / 2);
+  grid-template-columns: var(--side) minmax(0, 15em) var(--side);
+  gap: var(--gap);
+}
+
+.story-page-part-one .parallel-scene .lane {
+  gap: 0.15em;
+  padding-top: 0.2em;
+}
+
+/* Each day is its own column of light. */
+.story-page-part-one .parallel-scene .lane::before {
+  position: absolute;
+  inset: -0.6em 12% -0.4em;
+  z-index: -1;
+  content: "";
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--lane-soft), #fff0 88%);
+}
+
+.story-page-part-one .parallel-scene .lane strong {
+  font-size: 1.3em;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.story-page-part-one .parallel-scene .lane small {
+  color: var(--rose-ink-soft);
+  font-size: 0.78em;
+  font-weight: 400;
+}
+
+.story-page-part-one .parallel-scene .lane-avatar {
+  width: 3.9em;
+  height: 3.9em;
+  margin-bottom: 0.35em;
+  border: 0.18em solid #fff;
+  box-shadow: 0 0 0 0.14em var(--lane), var(--scene-lift-low);
+  font-size: 1em;
+}
+
+.story-page-part-one .parallel-scene .lane-avatar img { object-position: 50% 22%; }
+.story-page-part-one .parallel-scene .lane-avatar-hat { --moon: 0.9em; }
+.story-page-part-one .parallel-scene .lane-avatar-hat .scene-avatar-mark { font-size: 1.55em; }
+
+/* A small clock on each avatar: two days keeping their own time. */
+.story-page-part-one .parallel-scene .lane-clock {
+  position: absolute;
+  top: 2.6em;
+  left: calc(50% + 0.85em);
+  width: 1.75em;
+  height: 1.75em;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #5d4854 0 0.08em, #fff0 0.09em),
+    radial-gradient(circle, #fff 0 0.6em, #fff0 0.61em),
+    conic-gradient(from -4deg, var(--lane) 0 8deg, #fff0 8deg 86deg, var(--lane) 86deg 94deg, #fff0 94deg 176deg, var(--lane) 176deg 184deg, #fff0 184deg 266deg, var(--lane) 266deg 274deg, #fff0 274deg),
+    #fff;
+  box-shadow: 0 0 0 0.11em var(--lane), var(--scene-lift-low);
+}
+
+.story-page-part-one .parallel-scene .lane-clock::before,
+.story-page-part-one .parallel-scene .lane-clock::after {
+  position: absolute;
+  bottom: 50%;
+  left: calc(50% - 0.05em);
+  width: 0.1em;
+  content: "";
+  border-radius: 0.05em;
+  background: #5d4854;
+  transform-origin: 50% 100%;
+}
+
+.story-page-part-one .parallel-scene .lane-clock::before { height: 0.42em; rotate: 120deg; }
+.story-page-part-one .parallel-scene .lane-clock::after { height: 0.62em; }
+
+/* The road of each day, with a light walking down it at the same pace as the other's. */
 .story-page-part-one .parallel-scene .lane-line {
-  border-left-width: 1px;
-  border-left-style: dashed;
-  border-color: var(--scene-line);
+  position: relative;
+  width: 0.14em;
+  margin-top: 0.7em;
+  border: 0;
+  border-radius: 999px;
+  background: repeating-linear-gradient(180deg, var(--lane) 0 0.4em, #fff0 0.4em 0.8em);
+}
+
+.story-page-part-one .parallel-scene .lane-line::after {
+  position: absolute;
+  inset: 0 -0.6em;
+  content: "";
+  background: radial-gradient(circle at 50% 0.6em, #fff 0 0.2em, var(--lane) 0.23em 0.31em, #fff0 0.75em) no-repeat;
 }
 
 .story-page-part-one .parallel-scene .call-card {
-  border-color: var(--scene-line);
-  border-radius: 0.5em;
-  background: var(--scene-sheet);
-  box-shadow: var(--scene-shadow);
+  gap: 0.48em;
+  padding: 0.95em 1em 1.05em;
+  border: 1px solid #fff;
+  border-radius: 1.2em;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 0, #fff3e3, #fff3e300 72%),
+    linear-gradient(170deg, #fff, #fff6f8 70%, #fcedf2);
+  box-shadow: var(--scene-rim), 0 0 0 0.3em #ffffff66, 0 0 2.6em 0.3em #ffc8d980, var(--scene-lift);
 }
 
+/* The call reaches across to both roads: each line runs from a road's middle to the card's edge. The lanes are
+   `--side` wide and stand `--gap` from the card, so the lines follow the grid at any width. */
+.story-page-part-one .parallel-scene .call-card::before,
+.story-page-part-one .parallel-scene .call-card::after { content: none; }
+
+.story-page-part-one .parallel-scene .parallel-lanes::before,
+.story-page-part-one .parallel-scene .parallel-lanes::after {
+  position: absolute;
+  top: calc(50% - 0.07em);
+  width: calc(var(--side) / 2 + var(--gap));
+  height: 0.14em;
+  content: "";
+  background: repeating-linear-gradient(90deg, var(--road) 0 0.3em, #fff0 0.3em 0.55em);
+}
+
+.story-page-part-one .parallel-scene .parallel-lanes::before { --road: #9aa8e6; left: calc(var(--side) / 2); }
+.story-page-part-one .parallel-scene .parallel-lanes::after { --road: #e98aa8; right: calc(var(--side) / 2); }
+
 .story-page-part-one .parallel-scene .call-title {
-  color: var(--coral-dark);
-  font-size: 0.75em;
+  gap: 0.45em;
+  color: var(--rose-accent);
+  font-size: 0.78em;
   font-weight: 500;
-  line-height: 1.5;
   letter-spacing: 0;
+  line-height: 1.4;
   text-transform: none;
 }
 
 .story-page-part-one .parallel-scene .call-title svg {
   flex-shrink: 0;
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.story-page-part-one .parallel-scene .call-wave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+  height: 1.35em;
+}
+
+.story-page-part-one .parallel-scene .call-wave i {
+  width: 0.2em;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #b7c0ef, #e98aa8);
+  scale: 1 var(--level);
 }
 
 .story-page-part-one .parallel-scene .call-timer {
+  color: var(--rose-ink);
+  font-size: clamp(2.1em, 9cqi, 2.7em);
   font-weight: 500;
-  letter-spacing: -0.035em;
-  line-height: 1.4;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
+/* From his blue to her rose: the call is what joins the two days. */
 .story-page-part-one .parallel-scene .call-bar {
-  height: 0.3em;
-  background: var(--pink-soft);
+  height: 0.42em;
+  background: #f6e0e8;
+  box-shadow: inset 0 0.05em 0.08em #6b1f3a1f;
 }
 
-.story-page-part-one .parallel-scene .call-bar i {
-  background: var(--coral-dark);
-}
+.story-page-part-one .parallel-scene .call-bar i { background: linear-gradient(90deg, #9aa8e6, #d64f7a); }
 
 .story-page-part-one .parallel-scene .call-hours {
+  color: var(--rose-faint);
+  font-size: 0.74em;
   font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
 
 .story-page-part-one .parallel-scene .call-card small {
-  font-weight: 500;
-  line-height: 1.6;
-}
-
-/* 05 — A photograph, paper tape and fourteen small promises. */
-.story-page-part-one .staying-scene .staying-glow {
-  background: radial-gradient(circle, var(--pink-soft), transparent 68%);
-  opacity: 0.5;
-}
-
-.story-page-part-one .staying-scene .staying-tape {
-  border-inline: 1px solid oklch(0.85 0.06 355 / 0.4);
-  background: oklch(0.9 0.06 10 / 0.8);
-  box-shadow: none;
-}
-
-.story-page-part-one .staying-scene .staying-note {
-  border: 1px solid var(--scene-line);
-  border-radius: 0.25em;
-  color: var(--coral-dark);
-  background: var(--scene-sheet);
-  box-shadow: 0 2px 8px oklch(0.4 0.07 350 / 0.06);
+  color: var(--rose-accent);
   font-family: var(--display);
+  font-size: 0.86em;
   font-weight: 500;
   font-style: italic;
   line-height: 1.5;
 }
 
-.story-page-part-one .staying-scene .staying-calendar {
-  border-color: var(--scene-line);
-  border-radius: 0.4em;
-  background: var(--scene-sheet);
-  box-shadow: var(--scene-shadow);
+.story-page-part-one .parallel-scene .parallel-chats {
+  width: min(100%, 22em);
+  gap: 0.45em;
 }
 
+/* ---------- 7. 05 · Staying: a photograph taped in, a note on it, and a calendar filling with hearts ---------- */
+.story-page-part-one .staying-scene {
+  --scene-sun: #fff0cf;
+  --scene-haze: #ffd5c8;
+  display: block;
+  padding: 0;
+}
+
+/* The warmest light of the part pools behind the photograph. */
+.story-page-part-one .staying-scene .staying-glow {
+  inset: 0 10% 12% 0;
+  background: radial-gradient(closest-side, #ffe9c4cc, #ffe2c473 46%, #ffe2c400);
+  opacity: 1;
+}
+
+/* Photograph, calendar and sticker are laid out as one group around the middle of the page, the calendar tucked
+   under the photograph's corner, where its broad lower edge has no writing. */
+.story-page-part-one .staying-scene .staying-frame {
+  position: absolute;
+  top: calc(50% - 15.8em);
+  left: calc(50% - 15.6em);
+  width: 17.5em;
+  justify-items: stretch;
+  rotate: -3.5deg;
+  transform: none;
+}
+
+.story-page-part-one .staying-scene .staying-frame .staying-keepsake {
+  width: 100%;
+  padding: 0.55em 0.55em 2.7em;
+}
+
+.story-page-part-one .staying-scene .staying-keepsake img {
+  aspect-ratio: 4 / 5;
+  object-position: 34% 30%;
+}
+
+.story-page-part-one .staying-scene .staying-tape {
+  top: -0.75em;
+  width: 5.2em;
+  height: 1.45em;
+  border: 0;
+  background: repeating-linear-gradient(-45deg, #ffcfb6d1 0 0.32em, #ffe4d6d1 0.32em 0.64em);
+  box-shadow: none;
+  clip-path: var(--tape-edge);
+  translate: -50% 0;
+  rotate: -5deg;
+  transform: none;
+}
+
+.story-page-part-one .staying-scene .staying-blossom {
+  position: absolute;
+  top: -0.9em;
+  left: -1em;
+  z-index: 5;
+  width: 3em;
+  height: 3em;
+  overflow: visible;
+  rotate: -18deg;
+}
+
+.story-page-part-one .staying-scene .blossom-petal { fill: #f9c6d5; stroke: #ef9fb8; stroke-width: 0.7; }
+
+.story-page-part-one .staying-scene .staying-petals {
+  position: absolute;
+  top: calc(50% + 8.6em);
+  left: calc(50% - 15em);
+  z-index: 2;
+  width: 9em;
+  height: 6em;
+  overflow: visible;
+}
+
+.story-page-part-one .staying-scene .staying-petals .blossom-petal { fill: #fbd0dc; }
+.story-page-part-one .staying-scene .blossom-heart { fill: #f3c25e; stroke: #fff4dc; stroke-width: 1; }
+
+/* "lần này ở lại.", written by hand on the polaroid's broad lower edge. */
+.story-page-part-one .staying-scene .staying-note {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.55em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #c2426c;
+  background: none;
+  box-shadow: none;
+  font-family: var(--hand);
+  font-size: 1.5em;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.1;
+  text-align: center;
+  rotate: -2deg;
+  transform: none;
+}
+
+.story-page-part-one .staying-scene .staying-calendar {
+  top: calc(50% + 5.2em);
+  right: auto;
+  bottom: auto;
+  left: calc(50% - 1.6em);
+  width: 15.5em;
+  gap: 0.55em;
+  padding: 1.15em 0.95em 0.95em;
+  border: 1px solid #fff;
+  border-radius: 0.9em;
+  background: linear-gradient(170deg, #fff, #fff8f4 70%, #fff1ec);
+  box-shadow: var(--scene-rim), var(--scene-lift);
+  rotate: 2.5deg;
+  transform: none;
+}
+
+/* Two binder rings, as on a desk calendar. */
+.story-page-part-one .staying-scene .staying-calendar::before,
+.story-page-part-one .staying-scene .staying-calendar::after {
+  position: absolute;
+  top: -0.55em;
+  width: 0.48em;
+  height: 1.25em;
+  content: "";
+  border-radius: 999px;
+  background: linear-gradient(90deg, #c4aab6, #fff 46%, #b597a6);
+  box-shadow: 0.06em 0.12em 0.16em #6b1f3a38;
+}
+
+.story-page-part-one .staying-scene .staying-calendar::before { left: 26%; }
+.story-page-part-one .staying-scene .staying-calendar::after { right: 26%; }
+
 .story-page-part-one .staying-scene .staying-calendar header {
+  gap: 0.45em;
   padding-bottom: 0.55em;
-  border-bottom: 1px solid var(--scene-line);
-  font-weight: 500;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
+  border-bottom: 1px dashed #d64f7a38;
+  color: var(--rose-accent);
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.4;
   text-transform: none;
 }
 
+.story-page-part-one .staying-scene .staying-calendar header svg { width: 1.2em; height: 1.2em; }
+.story-page-part-one .staying-scene .staying-calendar ol { gap: 0.32em; }
+
 .story-page-part-one .staying-scene .staying-calendar li {
-  border-radius: 0.2em;
-  color: var(--coral-dark);
-  background: var(--pink-milk);
+  position: relative;
+  border-radius: 0.38em;
+  color: #f08aa8;
+  background: linear-gradient(170deg, #fff6f8, #fde9ef);
+  box-shadow: inset 0 0 0 1px #d64f7a14;
 }
 
+.story-page-part-one .staying-scene .staying-calendar li svg { width: 58%; height: 58%; }
+
 .story-page-part-one .staying-scene .staying-calendar li.is-today {
-  color: var(--paper);
-  background: var(--coral-dark);
-  box-shadow: 0 0 0 1px var(--scene-sheet), 0 0 0 2px var(--scene-line);
+  color: #fff;
+  background: linear-gradient(160deg, #ef7aa0, #d64f7a);
+  box-shadow: 0 0 0 0.14em #fff, 0 0 0 0.26em #f7b6c8, 0 0 1em 0.1em #ff9fb8b3;
 }
 
 .story-page-part-one .staying-scene .staying-calendar small {
-  font-weight: 400;
-  line-height: 1.6;
+  color: var(--rose-ink-soft);
+  font-family: var(--display);
+  font-size: 0.8em;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.5;
 }
 
+/* When the caption has to wrap, it breaks at its comma and nowhere else. */
+.story-page-part-one .staying-scene .staying-calendar small span { white-space: nowrap; }
+
+/* A die-cut sticker, white edge and all. */
 .story-page-part-one .staying-scene .plot-twist-sticker {
-  border: 1px solid var(--scene-line);
-  border-radius: 0.3em;
-  background: var(--scene-sheet);
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  top: calc(50% - 14.2em);
+  right: auto;
+  left: calc(50% + 5.6em);
+  gap: 0.4em;
+  padding: 0.5em 0.95em 0.55em 0.8em;
+  border: 0.24em solid #fff;
+  border-radius: 999px;
+  color: #fff8fa;
+  background: linear-gradient(160deg, #f7a37f, #f08a72 45%, #e0607e);
+  box-shadow: 0 0.06em 0.1em #6b1f3a2e, 0.25em 0.55em 1em -0.35em #6b1f3a4d;
+  font-family: var(--display);
+  font-size: 0.95em;
+  font-weight: 650;
+  font-style: italic;
+  letter-spacing: 0.01em;
   text-transform: none;
+  rotate: 8deg;
+  transform: none;
+}
+
+.story-page-part-one .staying-scene .plot-twist-sticker svg { width: 1em; height: 1em; }
+
+/* ---------- 8. Motion: a short entrance, then one or two quiet loops on each focal point ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* The cards rest on their own `rotate` and `translate`, so their swing in only moves `transform`. */
+  .story-page-part-one .meeting-scene.is-active .swipe-card-left { animation: p1-card-left 900ms var(--ease-out) both; }
+  .story-page-part-one .meeting-scene.is-active .swipe-card-right { animation: p1-card-right 900ms var(--ease-out) 120ms both; }
+  .story-page-part-one .meeting-scene.is-active .match-glow { animation: p1-glow-in 900ms var(--ease-out) 600ms both, p1-breathe 4.6s ease-in-out 1.5s infinite; }
+  .story-page-part-one .meeting-scene.is-active .match-spark { animation: p1-twinkle 2.8s ease-in-out 1.1s infinite both; }
+  .story-page-part-one .meeting-scene.is-active .match-spark-2 { animation-delay: 1.8s; }
+  .story-page-part-one .meeting-scene.is-active .match-spark-3 { animation-delay: 2.5s; }
+  .story-page-part-one .meeting-scene.is-active .match-heart { animation: p1-heart-float 3.6s ease-out 1.3s infinite both; }
+  .story-page-part-one .meeting-scene.is-active .match-heart-2 { animation-delay: 2.5s; }
+  .story-page-part-one .meeting-scene.is-active .match-heart-3 { animation-delay: 3.7s; }
+
+  .story-page-part-one .disconnected-scene.is-active .silence-moons i { animation: paper-arrive 700ms var(--ease-out) both; }
+  .story-page-part-one .disconnected-scene.is-active .silence-moons i:nth-child(1) { animation-delay: 700ms; }
+  .story-page-part-one .disconnected-scene.is-active .silence-moons i:nth-child(2) { animation-delay: 950ms; }
+  .story-page-part-one .disconnected-scene.is-active .silence-moons i:nth-child(3) { animation-delay: 1.2s; }
+
+  .story-page-part-one .reconnecting-scene.is-active .suggest-card::after { animation: p1-glint 1.4s ease-in-out 600ms both; }
+  .story-page-part-one .reconnecting-scene.is-active .add-friend-sparks i { animation: p1-spark-burst 800ms var(--ease-out) 1.15s both; }
+  .story-page-part-one .reconnecting-scene.is-active .add-friend-sparks i:nth-child(1) { --burst: 0.5em -0.45em; }
+  .story-page-part-one .reconnecting-scene.is-active .add-friend-sparks i:nth-child(2) { --burst: 0.7em 0; }
+  .story-page-part-one .reconnecting-scene.is-active .add-friend-sparks i:nth-child(3) { --burst: 0.45em 0.45em; }
+  .story-page-part-one .reconnecting-scene.is-active .add-friend-sparks i:nth-child(4) { --burst: 0.1em -0.6em; }
+
+  .story-page-part-one .parallel-scene.is-active .lane-line::after { animation: p1-day-walk 9s linear infinite; }
+  .story-page-part-one .parallel-scene.is-active .lane-clock::after { animation: p1-hand 6s linear infinite; }
+  .story-page-part-one .parallel-scene.is-active .lane-clock::before { animation: p1-hand 72s linear infinite; }
+  .story-page-part-one .parallel-scene.is-active .call-wave i { animation: p1-voice 1.1s ease-in-out infinite alternate; }
+  .story-page-part-one .parallel-scene.is-active .call-wave i:nth-child(3n + 2) { animation-duration: 0.8s; animation-delay: -0.3s; }
+  .story-page-part-one .parallel-scene.is-active .call-wave i:nth-child(3n) { animation-duration: 1.3s; animation-delay: -0.7s; }
+
+  .story-page-part-one .staying-scene.is-active .staying-calendar li.is-today::after {
+    position: absolute;
+    inset: -0.35em;
+    content: "";
+    border-radius: 0.6em;
+    background: radial-gradient(closest-side, #ff9fb873, #ff9fb800);
+    animation: p1-breathe 2.4s ease-in-out 1.6s infinite;
+  }
+
+  @media (max-width: 900px) {
+    .story-page-part-one .meeting-scene.is-active :is(.swipe-card-left, .swipe-card-right) { animation-duration: 750ms; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-page-part-one .reconnecting-scene .add-friend-sparks { display: none; }
+}
+
+@keyframes p1-card-left { from { opacity: 0; transform: translate(-1.6em, 0.7em) rotate(-5deg); } to { opacity: 1; transform: none; } }
+@keyframes p1-card-right { from { opacity: 0; transform: translate(1.6em, 0.7em) rotate(5deg); } to { opacity: 1; transform: none; } }
+@keyframes p1-glow-in { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes p1-breathe { 0%, 100% { opacity: 0.82; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.04); } }
+@keyframes p1-twinkle { 0%, 100% { opacity: 0.35; transform: scale(0.55); } 50% { opacity: 1; transform: scale(1); } }
+@keyframes p1-heart-float {
+  0% { opacity: 0; transform: translateY(1.4em) scale(0.5); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--drift), -2.6em) scale(1.05); }
+}
+@keyframes p1-glint { from { translate: -120% 0; } to { translate: 120% 0; } }
+@keyframes p1-spark-burst {
+  0% { opacity: 0; transform: scale(0.4); }
+  35% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--burst)) scale(1); }
+}
+@keyframes p1-day-walk { from { transform: translateY(0); } to { transform: translateY(calc(100% - 1.2em)); } }
+@keyframes p1-hand { to { transform: rotate(1turn); } }
+@keyframes p1-voice { from { transform: scaleY(0.45); } to { transform: scaleY(1.1); } }
+
+/* ---------- 9. Phones: the same drawings in a narrower card of fixed height ---------- */
+@media (max-width: 900px) {
+  .story-page-part-one :is(.meeting-scene, .disconnected-scene, .reconnecting-scene, .parallel-scene, .staying-scene) {
+    --scene-fs: clamp(0.66rem, min(3.2cqi, 2.95cqb), 0.82rem);
+  }
+
+  /* The card is shorter than the stage, so everything packs a little closer. */
+  .story-page-part-one .memory-scene .scene-microcopy { bottom: 0.8em; }
+  .story-page-part-one .memory-scene .message-bubble { padding: 0.5em 0.8em 0.54em; }
+  .story-page-part-one .memory-scene .scene-screen { padding: 0.4em; border-radius: 2em; }
+  .story-page-part-one .memory-scene .scene-screen-display { border-radius: 1.62em; }
+  .story-page-part-one .memory-scene .scene-screen-status { height: 1.45em; }
+  .story-page-part-one .memory-scene .scene-screen-status::before { top: 0.36em; width: 3.8em; height: 0.92em; }
+  .story-page-part-one .memory-scene .scene-screen-status::after { top: 0.5em; right: 1.2em; }
+  .story-page-part-one .memory-scene .scene-screen-bar { min-height: 2.7em; padding-block: 0.1em 0.5em; }
+  .story-page-part-one .memory-scene .scene-screen-body { gap: 0.5em; padding: 0.7em 0.75em 0.8em; }
+
+  .story-page-part-one .meeting-scene { gap: 0.85em; padding: 1em 0.8em 4.3em; }
+  .story-page-part-one .meeting-scene .match-stage { --apex: 2.8em; grid-template-columns: repeat(2, minmax(0, 9.8em)); }
+  .story-page-part-one .meeting-scene .swipe-avatar { aspect-ratio: 10 / 9; }
+
+  .story-page-part-one .disconnected-scene { padding: 2.8em 0.6em 4em; }
+  .story-page-part-one .disconnected-scene .silent-flower { top: -2.4em; right: -1em; width: 4.4em; height: 4.4em; }
+
+  .story-page-part-one .reconnecting-scene { padding: 5.4em 0.6em 0.6em; }
+  .story-page-part-one .reconnecting-scene .reconnect-desk { translate: none; }
+  .story-page-part-one .reconnecting-scene .reconnect-photo { top: -4.9em; right: 0.4em; width: 6.8em; padding-bottom: 1.2em; }
+  .story-page-part-one .reconnecting-scene .suggest-card { padding: 0.65em 0.7em 0.7em; }
+  .story-page-part-one .reconnecting-scene .suggest-avatar { width: 3.4em; height: 3.4em; }
+  .story-page-part-one .reconnecting-scene .chat-log { gap: 0.4em; }
+
+  .story-page-part-one .parallel-scene { padding: 1.6em 0.8em 1.4em; }
+  .story-page-part-one .parallel-scene .parallel-lanes {
+    --gap: 0.45em;
+    --side: max(3.9em, (100% - 2 * var(--gap)) / 4.6);
+    grid-template-columns: var(--side) minmax(0, 1fr) var(--side);
+    width: min(100%, 34em);
+    justify-self: center;
+  }
+  .story-page-part-one .parallel-scene .call-card { padding-inline: 0.75em; }
+
+  .story-page-part-one .staying-scene .staying-frame { top: 1.3em; left: max(5%, 50% - 13em); width: min(54%, 14.5em); }
+  .story-page-part-one .staying-scene .staying-calendar { top: auto; right: max(4%, 50% - 13em); bottom: 1.2em; left: auto; width: min(58%, 14em); }
+  .story-page-part-one .staying-scene .plot-twist-sticker { top: 2em; right: max(5%, 50% - 13.5em); left: auto; }
+  .story-page-part-one .staying-scene .staying-petals { top: auto; bottom: 1.6em; left: max(3%, 50% - 14em); width: 7em; }
 }
 
 /* The progress dots keep their small visual footprint and gain a usable target. */
@@ -400,18 +1450,4 @@
 .story-page-part-one .story-chapter-progress-label {
   font-weight: 500;
   letter-spacing: 0.04em;
-}
-
-@media (max-width: 420px) {
-  .story-page-part-one .memory-scene .message-bubble {
-    padding: 0.55em 0.7em;
-  }
-
-  .story-page-part-one .parallel-scene .call-card {
-    padding-inline: 0.7em;
-  }
-
-  .story-page-part-one .parallel-scene .call-title {
-    gap: 0.25em;
-  }
 }

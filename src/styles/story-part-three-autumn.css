@@ -12,6 +12,14 @@
 /* A heart inside a prop sits in its flow, not on the scene. */
 .story-part-3 .part-three-scene :is(.p3-calm) .heart-sprite { position: static; width: 100%; }
 .part-three-scene .p3-note { z-index: 4; }
+/* The light every prop shares: the soft shadow under anything resting on a surface, and the highlight on glass and glaze.
+   Static layers keep their strength in their colours rather than in opacity, which reduced motion resets to 1. */
+.story-part-3 .sprite-contact-core { stop-color: #0a0206; stop-opacity: 0.66; }
+.story-part-3 .sprite-contact-edge { stop-color: #0a0206; stop-opacity: 0; }
+.story-part-3 .sprite-gloss-hi { stop-color: #ffffff; stop-opacity: 0.9; }
+.story-part-3 .sprite-gloss-lo { stop-color: #ffffff; stop-opacity: 0; }
+/* Steam over a hot bowl: soft rising puffs rather than lines. */
+.part-three-scene :is(.p3-soup, .p3-curry) .p3-steam i { width: 0.9em; height: 2.4em; border: 0; border-radius: 50%; background: radial-gradient(ellipse 50% 50%, #ffffff4d, transparent 72%); filter: none; }
 
 /* The red lily bouquet (LilyBouquet): three open lilies over two buds and their leaves, in blush paper with a wine ribbon. */
 .p3-lilies { position: absolute; aspect-ratio: 0.62; filter: drop-shadow(0 18px 22px #0a0206b3); }
@@ -31,16 +39,38 @@
   left: 16%; right: 16%; bottom: 0; height: 50%;
   clip-path: polygon(0 0, 22% 6%, 50% 0, 78% 6%, 100% 0, 63% 100%, 37% 100%);
   background:
+    radial-gradient(ellipse 50% 60% at 100% 30%, #ffd8a047, transparent 70%),
     linear-gradient(100deg, transparent 0 30%, #ffffff66 31%, transparent 34% 64%, #c9a49433 65%, transparent 68%),
     linear-gradient(90deg, #ecd2c4, #fff3ea 44%, #f4dccc 70%, #d8b2a2);
 }
-.p3-lilies-ribbon { left: 38%; bottom: 18%; width: 24%; height: 8%; border-radius: 0.2em; background: linear-gradient(180deg, #a8122c, #6a0618); box-shadow: 0 2px 4px #3a020a80; }
+/* The ribbon: a satin band round the cone with a knot in front, two loops tucked behind the knot (its own stacking
+   context keeps them over the paper) and two tails hanging from it, cut in a V. */
+.p3-lilies-ribbon {
+  left: 30%; bottom: 17%; z-index: 1; width: 40%; height: 9%;
+  background:
+    radial-gradient(ellipse 13% 50% at 50% 50%, #f0566a, #b8162e 62%, #7a0a1e 92%, transparent 96%),
+    linear-gradient(90deg, #5a041480, transparent 30% 70%, #5a041480) 0 50% / 100% 56% no-repeat,
+    linear-gradient(180deg, #e8485c, #b8162e 46%, #7a0a1e) 0 50% / 100% 56% no-repeat;
+  border-radius: 0 0 40% 40% / 0 0 30% 30%;
+  filter: drop-shadow(0 2px 2px #3a020a80);
+}
 .p3-lilies-ribbon::before,
-.p3-lilies-ribbon::after { content: ""; position: absolute; top: -70%; width: 70%; height: 180%; border-radius: 50%; border: 0.32em solid #a8122c; }
-.p3-lilies-ribbon::before { right: 62%; rotate: -24deg; }
-.p3-lilies-ribbon::after { left: 62%; rotate: 24deg; }
-.lily-tepal { fill: #d81a32; }
-.lily-tepal.is-back { fill: #9e0c22; }
+.p3-lilies-ribbon::after {
+  content: ""; position: absolute; top: -60%; z-index: -1; width: 36%; height: 170%; border-radius: 70% 30% 30% 70% / 60% 40% 60% 40%;
+  background: radial-gradient(ellipse 34% 26% at 62% 50%, #4a0412 30%, transparent 80%), linear-gradient(160deg, #f0566a, #b8162e 52%, #7a0a1e);
+}
+.p3-lilies-ribbon::before { right: 54%; rotate: -14deg; }
+.p3-lilies-ribbon::after { left: 54%; rotate: 14deg; scale: -1 1; }
+.p3-lilies::after {
+  content: ""; position: absolute; left: 41%; bottom: 3%; width: 18%; height: 16%;
+  clip-path: polygon(40% 0, 60% 0, 100% 90%, 84% 80%, 72% 100%, 50% 12%, 28% 100%, 16% 80%, 0 90%);
+  background: linear-gradient(90deg, #7a0a1e, #d8344c 30%, #a8122c 50%, #d8344c 70%, #7a0a1e);
+}
+.lily-tip { stop-color: #9a0820; }
+.lily-mid { stop-color: #e01c34; }
+.lily-base { stop-color: #ff6a40; }
+.lily-back-tip { stop-color: #680414; }
+.lily-back-base { stop-color: #b8202a; }
 .lily-throat { fill: #ff7a52; opacity: 0.5; }
 .lily-rib { fill: none; stroke: #ffb3a8; stroke-width: 0.8; stroke-linecap: round; opacity: 0.55; }
 .lily-spot { fill: #4a0410; }
@@ -49,69 +79,124 @@
 .lily-pistil { fill: none; stroke: #eadfa0; stroke-width: 1.1; stroke-linecap: round; }
 .lily-stigma { fill: #5a3a1a; }
 .lilybud-stem { fill: none; stroke: #3d8a40; stroke-width: 2.4; stroke-linecap: round; }
-.lilybud-body { fill: #c4223a; }
+.lilybud-tip { stop-color: #ea364c; }
+.lilybud-mid { stop-color: #b81a30; }
+.lilybud-foot { stop-color: #4a7a34; }
 .lilybud-seam { fill: none; stroke: #ff9a9a; stroke-width: 1; opacity: 0.6; }
 
 /* ---------- 1. Scene: 15/9, karaoke after the rain, red neon and a promise kept ---------- */
 .story-part-3 .part-three-scene-karaoke {
   background: radial-gradient(ellipse at 66% 8%, #ff5a3c4d, transparent 58%), radial-gradient(ellipse at 12% 78%, #c8186a3d, transparent 55%), linear-gradient(180deg, #3e0a12, #28060d 62%, #160307);
 }
+/* The room: channel-tufted walls in oxblood leather, each channel rounded by the light, lit pink by the glass panel,
+   cold by the window and amber from the ceiling, and sinking into shade toward the floor. */
 .p3-kara-wall {
-  overflow: hidden;
+  inset: -12% -8% 22%; overflow: hidden;
   background:
-    radial-gradient(ellipse at 56% 34%, #ff7a3a47, transparent 56%),
-    repeating-linear-gradient(90deg, #00000029 0 1px, transparent 1px 8.5%),
-    linear-gradient(180deg, #5e1616, #3e0b14 72%);
+    radial-gradient(ellipse 24% 34% at 47.8% 36.7%, #ff6ab88c, #ff3d8a33 50%, transparent 82%),
+    radial-gradient(ellipse 26% 28% at 24.6% 35%, #6aa8e024, transparent 75%),
+    radial-gradient(ellipse 80% 50% at 72% -6%, #ff9a5a3d, transparent 72%),
+    linear-gradient(180deg, transparent 55%, #120207a6 90%),
+    repeating-linear-gradient(90deg, #140308a6 0 0.3%, #ffb08a29 0.55% 1.2%, #ffb08a0d 2.6%, transparent 4% 6.2%, #0a020647 7.9%, #140308a6 8.5%),
+    linear-gradient(180deg, #701e1c, #52131a 55%, #380a12);
 }
-/* A mirror ball's dots turning slowly over the walls. */
+/* A mirror ball's soft specks turning slowly over the walls. */
 .p3-kara-disco {
-  position: absolute; inset: -40%; opacity: 0.7; mix-blend-mode: screen;
+  position: absolute; inset: -40%; mix-blend-mode: screen;
   background:
-    radial-gradient(circle at 18% 24%, #ffd27acc 0 0.14em, transparent 0.24em),
-    radial-gradient(circle at 62% 12%, #ff6ad5cc 0 0.12em, transparent 0.22em),
-    radial-gradient(circle at 42% 58%, #7ad8ffb3 0 0.12em, transparent 0.22em),
-    radial-gradient(circle at 84% 70%, #ffd27ab3 0 0.16em, transparent 0.26em),
-    radial-gradient(circle at 8% 82%, #ff8a6acc 0 0.1em, transparent 0.2em);
-  background-size: 7em 6em;
+    radial-gradient(ellipse 0.55em 0.24em at 18% 24%, #ffc89a66, transparent),
+    radial-gradient(ellipse 0.42em 0.2em at 62% 12%, #ff8ad859, transparent),
+    radial-gradient(ellipse 0.4em 0.18em at 42% 58%, #9adcff47, transparent),
+    radial-gradient(ellipse 0.5em 0.22em at 84% 70%, #ffc89a52, transparent),
+    radial-gradient(ellipse 0.34em 0.16em at 8% 82%, #ff9a7a5c, transparent);
+  background-size: 8em 6.5em;
 }
 .part-three-scene-karaoke.is-active .p3-kara-disco { animation: p3-turn 40s linear infinite; }
-/* Outside: the rain on Nguyễn Văn Lộc, and the pharmacy's green cross. */
+/* Outside: Nguyễn Văn Lộc at night, out of focus behind wet glass, in a deep wooden frame on a sill; the pharmacy's
+   green cross shines on the road. */
 .p3-rainpane {
-  --px: -0.15; position: absolute; left: 5%; top: 6%; z-index: 1; width: 31%; height: 27%; overflow: hidden; border-radius: 0.5em;
-  background: radial-gradient(ellipse at 26% 112%, #2ad07a59, transparent 52%), linear-gradient(180deg, #121c2a, #1a2836 62%, #22303c);
-  box-shadow: 0 0 0 0.35em #2a0a10, 0 0 0 0.42em #ff7a4a2e, inset 0 0 30px #00000099;
+  --px: -0.15; position: absolute; left: 5%; top: 6%; z-index: 1; width: 31%; height: 27%; padding: 0.36em; border-radius: 0.45em;
+  background: linear-gradient(160deg, #5a2220, #2e0c10 42%, #1a0508);
+  box-shadow: 0 0.8em 1.4em -0.3em #0a0206b3, inset 0 1px 0 #ffb08a4d, inset 0 0 0 1px #ff8a5a1a;
 }
-.p3-rainpane::after { content: ""; position: absolute; inset: 0; z-index: 2; background: linear-gradient(90deg, transparent calc(50% - 0.14em), #2a0a10 0 calc(50% + 0.14em), transparent 0), linear-gradient(170deg, #ffffff14, transparent 40%); }
-.p3-rainpane-rain { position: absolute; inset: -60% -10% 0; z-index: 1; background: repeating-linear-gradient(101deg, transparent 0 9px, #cfe2f566 9px 10px, transparent 10px 19px); }
+.p3-rainpane::after {
+  content: ""; position: absolute; left: -5%; right: -5%; top: 100%; height: 0.5em; margin-top: -0.14em; border-radius: 0.12em;
+  background: linear-gradient(180deg, #9a4636, #4e1618 45%, #2a0a0e);
+  box-shadow: 0 0.45em 0.7em -0.2em #0a0206d9, inset 0 1px 0 #ffc29a80;
+}
+.p3-rainpane-glass { position: relative; display: block; height: 100%; overflow: hidden; border-radius: 0.2em; background: linear-gradient(180deg, #0b131e, #13202e 55%, #1b2834); box-shadow: inset 0 0 1.2em #000000b3; }
+.p3-rainpane-street {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 82% 24%, #ffd08a 0 0.1em, #ffb45a59 0.36em, transparent 1.3em),
+    radial-gradient(circle at 60% 60%, #ff6a4a66 0 0.18em, transparent 0.8em),
+    radial-gradient(circle at 68% 61%, #ff6a4a4d 0 0.14em, transparent 0.7em),
+    radial-gradient(ellipse 8% 46% at 82% 100%, #ffb45a40, transparent 70%),
+    radial-gradient(ellipse 52% 34% at 24% 104%, #2ad07a59, transparent 70%),
+    linear-gradient(180deg, transparent 63%, #0a121c 64%, #142230);
+}
+/* Raindrops and a mist of breath on the inside of the glass, the mullion and a cold sheen over it. */
+.p3-rainpane-glass::before {
+  --drop: #ffffff99 0 0.045em, #ffffff1f 0.08em, transparent 0.11em;
+  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 18%, var(--drop)) 0 0 / 5.3em 4.1em, radial-gradient(circle at 38% 64%, var(--drop)) 0 0 / 5.3em 4.1em,
+    radial-gradient(circle at 63% 26%, var(--drop)) 0 0 / 5.3em 4.1em, radial-gradient(circle at 81% 78%, var(--drop)) 0 0 / 5.3em 4.1em,
+    radial-gradient(circle at 27% 88%, var(--drop)) 0 0 / 5.3em 4.1em, radial-gradient(circle at 91% 44%, var(--drop)) 0 0 / 5.3em 4.1em,
+    radial-gradient(circle at 52% 8%, var(--drop)) 0 0 / 5.3em 4.1em,
+    linear-gradient(0deg, #c4d4e452, transparent 32%);
+}
+.p3-rainpane-glass::after { content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none; background: linear-gradient(90deg, transparent calc(64% - 0.14em), #2a0a10 0 calc(64% + 0.14em), transparent 0), linear-gradient(160deg, #ffffff24, transparent 34%); }
+.p3-rainpane-rain { position: absolute; inset: -60% -10% 0; z-index: 2; background: repeating-linear-gradient(101deg, transparent 0 9px, #cfe2f547 9px 10px, transparent 10px 23px), repeating-linear-gradient(98deg, transparent 0 14px, #cfe2f52e 14px 15px, transparent 15px 37px); }
 .part-three-scene-karaoke.is-active .p3-rainpane-rain { animation: rain-fall 0.8s linear infinite; }
 .p3-pharmacy {
-  position: absolute; left: 7%; bottom: 12%; z-index: 1; display: inline-flex; align-items: center; gap: 0.35em; padding: 0.28em 0.55em; border-radius: 0.2em;
-  color: #dcffe9; background: #0c3a26; font: 700 0.62em/1 var(--body); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; box-shadow: 0 0 14px #2ad07a80;
+  position: absolute; left: 6%; bottom: 13%; z-index: 1; display: inline-flex; align-items: center; gap: 0.35em; padding: 0.3em 0.55em; border-radius: 0.2em;
+  color: #e8fff2; background: linear-gradient(180deg, #156040, #0b3a26); font: 700 0.62em/1 var(--body); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+  text-shadow: 0 0 6px #5affb0b3; box-shadow: 0 0 0 1px #5affb04d, 0 0 1.2em #2ad07a99, 0 0 2.8em #2ad07a4d;
 }
-.p3-pharmacy-cross { width: 1em; aspect-ratio: 1; background: linear-gradient(#5affb0, #5affb0) center / 34% 100% no-repeat, linear-gradient(#5affb0, #5affb0) center / 100% 34% no-repeat; filter: drop-shadow(0 0 4px #3aff9a); }
-/* The pink glass panel from the photos: a note and a pair of lips. */
+.p3-pharmacy-cross { width: 1em; aspect-ratio: 1; background: linear-gradient(#7affc4, #7affc4) center / 34% 100% no-repeat, linear-gradient(#7affc4, #7affc4) center / 100% 34% no-repeat; filter: drop-shadow(0 0 4px #3aff9a); }
+/* The pink glass panel from the photos: a note and a pair of lips, lit from behind, with a sheen across the glass. */
 .p3-neon-pane {
-  --px: -0.15; position: absolute; left: 40%; top: 6%; z-index: 1; display: grid; place-items: center; width: 15%; height: 30%; border-radius: 0.6em;
-  background: radial-gradient(ellipse at 50% 38%, #ffe0f2, #ff7ac8 42%, #d81f7e 82%);
-  box-shadow: 0 0 0 0.3em #2a0a10, 0 0 46px 8px #ff4fae66, inset 0 0 22px #ffffff80;
+  --px: -0.15; position: absolute; left: 40%; top: 6%; z-index: 1; display: grid; place-items: center; width: 15%; height: 30%; border-radius: 0.55em;
+  background:
+    linear-gradient(118deg, transparent 22%, #ffffff4d 27%, #ffffff14 36%, transparent 40%),
+    radial-gradient(ellipse 72% 56% at 50% 42%, #fff4fa, #ffb2dc 30%, #ff6ab8 62%, #d02a86 92%);
+  box-shadow: 0 0 0 0.22em #1e070c, 0 0 0 0.3em #ffb2dc59, 0 0 2.2em 0.5em #ff4fae73, 0 0 6em 1.6em #ff2d8a33, inset 0 0 0 0.14em #ffffff4d, inset 0 0 1.4em #ffffff99;
 }
 .p3-neon-pane svg { width: 72%; overflow: visible; }
 .lipsnote-note { fill: none; stroke: #7a0a3a; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .lipsnote-note-head { fill: #7a0a3a; }
 .lipsnote-lips { fill: #e8143c; }
 .lipsnote-lips-line { fill: none; stroke: #7a0a24; stroke-width: 1.6; stroke-linecap: round; }
-/* The raincoats, hung up and still dripping. */
-.p3-raincoat { position: absolute; top: 37%; z-index: 2; width: 10%; overflow: visible; transform-origin: 50% 0; filter: drop-shadow(0 8px 10px #0a0206a6); }
+.lipsnote-lips-gloss { fill: none; stroke: #ffd0dccc; stroke-width: 1.5; stroke-linecap: round; }
+/* The raincoats, hung on a brass rail and still dripping: clear coloured plastic, wet highlights, beads of rain. */
+.p3-coat-rail {
+  --px: -0.12; position: absolute; left: 4.5%; top: 37.3%; z-index: 2; width: 23%; height: 0.3em; border-radius: 0.2em;
+  background: linear-gradient(180deg, #ffe6b0, #c8924a 45%, #6a4220); box-shadow: 0 0.4em 0.5em -0.1em #0a0206b3;
+}
+.p3-coat-rail::before,
+.p3-coat-rail::after { content: ""; position: absolute; top: -0.24em; width: 0.34em; height: 0.78em; border-radius: 0.1em; background: linear-gradient(90deg, #5a3618, #d6a05a 50%, #4a2c14); }
+.p3-coat-rail::before { left: 1%; }
+.p3-coat-rail::after { right: 1%; }
+.p3-raincoat { position: absolute; top: 37%; z-index: 2; width: 10%; overflow: visible; transform-origin: 50% 0; filter: drop-shadow(0 0.5em 0.6em #0a0206a6); }
 .p3-raincoat.is-one { left: 6%; }
-.p3-raincoat.is-two { left: 16%; top: 38.5%; width: 9%; }
-.raincoat-hook { fill: none; stroke: #d6b08a; stroke-width: 2; stroke-linecap: round; }
-.raincoat-body { fill: #3a78d4c7; }
-.p3-raincoat.is-two .raincoat-body { fill: #ff8fb4c2; }
-.raincoat-hood { fill: #0a020629; }
-.raincoat-seam { fill: none; stroke: #ffffff59; stroke-width: 1.2; }
-.raincoat-snap { fill: #ffffffb3; }
-.raincoat-shine { fill: none; stroke: #ffffff8c; stroke-width: 1.6; stroke-linecap: round; }
-.p3-drip { position: absolute; top: 54%; z-index: 2; width: 0.32em; height: 0.48em; border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%; background: #c6e2ffd9; box-shadow: 0 0 5px #c6e2ff99; }
+.p3-raincoat.is-two { left: 16%; top: 37.4%; width: 9%; }
+.raincoat-hook { fill: none; stroke: #e8c08a; stroke-width: 2; stroke-linecap: round; }
+.raincoat-hi { stop-color: #9ccaff; stop-opacity: 0.9; }
+.raincoat-mid { stop-color: #3a7ad8; stop-opacity: 0.8; }
+.raincoat-lo { stop-color: #1c3c8e; stop-opacity: 0.9; }
+.p3-raincoat.is-two .raincoat-hi { stop-color: #ffdcea; }
+.p3-raincoat.is-two .raincoat-mid { stop-color: #ff8fb8; }
+.p3-raincoat.is-two .raincoat-lo { stop-color: #b03e6a; }
+.raincoat-shade { stop-color: #0a0206; stop-opacity: 0.42; }
+.raincoat-clear { stop-color: #0a0206; stop-opacity: 0; }
+.raincoat-fold { fill: none; stroke: #0a020638; stroke-width: 1.8; stroke-linecap: round; }
+.raincoat-hood { fill: #0a020633; }
+.raincoat-seam { fill: none; stroke: #ffffff4d; stroke-width: 1; }
+.raincoat-shine { fill: none; stroke: #ffffffbf; stroke-width: 1.5; stroke-linecap: round; }
+.raincoat-drops { fill: none; stroke: #ffffffd9; stroke-width: 2.2; stroke-linecap: round; }
+.raincoat-snap { fill: #ffffffcc; }
+.p3-drip { position: absolute; top: 54%; z-index: 2; width: 0.32em; height: 0.48em; border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%; background: radial-gradient(circle at 36% 40%, #ffffff, #c6e2ff 50%, #8ab4e0); box-shadow: 0 0 5px #c6e2ff99; }
 .p3-drip.is-one { left: 10.5%; }
 .p3-drip.is-two { left: 20%; top: 52%; }
 .p3-promise {
@@ -120,28 +205,69 @@
   text-shadow: 0 0 3px #fff, 0 0 10px #ff4f9a, 0 0 24px #ff2d6f, 0 0 44px #ff2d6f99;
 }
 .part-three-scene-karaoke.is-active .p3-promise { animation: p3-neon 6s steps(1, end) infinite; }
+/* The low table: dark lacquer, its lit front lip, and the room mirrored in it (the pink panel, the cold window). */
 .p3-kara-table {
   --px: 0.2; position: absolute; inset: auto -6% -4%; z-index: 2; height: 30%;
-  background: radial-gradient(ellipse at 30% 0%, #ff9a6a3d, transparent 55%), radial-gradient(ellipse at 74% 0%, #ff6ac12e, transparent 50%), linear-gradient(180deg, #4e1410, #2c0808 55%, #1a0405);
-  box-shadow: inset 0 0.16em 0 #ff8a5a59, 0 -10px 30px #0a020666;
+  background:
+    linear-gradient(180deg, #ffb08a80, #ffb08a00 0.26em),
+    radial-gradient(ellipse 7% 84% at 47.8% 0%, #ff8ad08c, #ff5aa82e 50%, transparent 80%),
+    radial-gradient(ellipse 13% 64% at 23.7% 0%, #9cc4e426, transparent 75%),
+    radial-gradient(ellipse 26% 52% at 23.7% 56%, #c8f0dc29, transparent 70%),
+    radial-gradient(ellipse 22% 50% at 52% 70%, #ff9a6a1f, transparent 70%),
+    linear-gradient(180deg, transparent 40%, #0a020673),
+    repeating-linear-gradient(179deg, #ffffff07 0 1px, transparent 1px 7px),
+    linear-gradient(180deg, #561818, #320b0b 45%, #1c0406);
+  box-shadow: 0 -0.8em 1.8em #0a020680;
 }
-.p3-tablet { --px: 0.3; position: absolute; left: 5%; bottom: 6%; z-index: 3; width: 31%; overflow: visible; filter: drop-shadow(0 0 16px #8affc433) drop-shadow(0 12px 14px #0a0206b3); }
-.tablet-case { fill: #18161a; }
-.tablet-screen { fill: #f6f7f2; }
-.tablet-bar { fill: #2fb36a; }
-.tablet-search { fill: #ffffffe0; }
+/* The tablet, propped on the table, lighting it a little green. */
+.p3-tablet { --px: 0.3; position: absolute; left: 5%; bottom: 6%; z-index: 3; width: 31%; overflow: visible; filter: drop-shadow(0 0 1.1em #b8ffd838); }
+.tablet-case-hi { stop-color: #4c4856; }
+.tablet-case-mid { stop-color: #1c1a20; }
+.tablet-case-lo { stop-color: #08070a; }
+.tablet-edge { fill: none; stroke: #ffffff2e; stroke-width: 0.8; }
+.tablet-screen-hi { stop-color: #fbfdf8; }
+.tablet-screen-lo { stop-color: #dbe6df; }
+.tablet-bar-hi { stop-color: #44d486; }
+.tablet-bar-lo { stop-color: #1c9654; }
+.tablet-search { fill: #ffffffeb; }
+.tablet-lens { fill: none; stroke: #6a7a72; stroke-width: 0.9; stroke-linecap: round; }
+.tablet-query { fill: #34443c; font: 600 5.6px/1 var(--body); }
+.tablet-picked { fill: #2fb36a29; }
 .tablet-thumb { fill: #ff9a6a; }
 .tablet-sprite g:nth-of-type(2) .tablet-thumb { fill: #7ab8ff; }
 .tablet-sprite g:nth-of-type(3) .tablet-thumb { fill: #ffd27a; }
 .tablet-sprite g:nth-of-type(4) .tablet-thumb { fill: #ff7ab8; }
 .tablet-line { fill: #3a3a40; }
 .tablet-line.is-faint { fill: #a4a4ac; }
-.p3-mic { --px: 0.4; position: absolute; left: 41%; bottom: 5%; z-index: 4; width: 6.5%; overflow: visible; filter: drop-shadow(0 0 10px #ff7ab066) drop-shadow(0 10px 10px #0a0206b3); }
-.mic-cover { fill: #ff80b4; }
-.mic-mesh { fill: none; stroke: #c23a78; stroke-width: 1.4; opacity: 0.75; }
-.mic-handle { fill: #2a282e; }
-.mic-ring { fill: #d6b08a; }
-.mic-button { fill: #ff4a5a; }
+.tablet-glare { opacity: 0.2; }
+.tablet-camera { fill: #2c2a32; }
+/* The mic: a pink mesh ball lit from the panel above, a gold ring, a black handle with its own highlight. */
+.p3-mic { --px: 0.4; position: absolute; left: 41%; bottom: 5%; z-index: 4; width: 6.5%; overflow: visible; filter: drop-shadow(0 0 0.7em #ff7ab059); }
+.mic-cover-hi { stop-color: #ffe2f0; }
+.mic-cover-mid { stop-color: #ff86ba; }
+.mic-cover-lo { stop-color: #a42a60; }
+.mic-mesh { fill: none; stroke: #8a1a4a; stroke-width: 0.9; opacity: 0.5; }
+.mic-rim { fill: none; stroke: #ffc8e0; stroke-width: 1.4; stroke-linecap: round; opacity: 0.75; }
+.mic-metal-lo { stop-color: #5a3a18; }
+.mic-metal-hi { stop-color: #fff0c8; }
+.mic-metal-mid { stop-color: #c8964e; }
+.mic-handle-lo { stop-color: #060507; }
+.mic-handle-hi { stop-color: #4c4954; }
+.mic-handle-mid { stop-color: #1c1b20; }
+.mic-handle-shine { fill: none; stroke: #ffffff47; stroke-width: 0.9; stroke-linecap: round; }
+.mic-button { fill: #ff5a6a; }
+/* The pharmacy's paper bag, pink in the room's light. */
+.p3-pharmacy-bag { --px: 0.3; position: absolute; left: 52%; bottom: 5.5%; z-index: 3; width: 8.5%; overflow: visible; }
+.pharmacy-bag-hi { stop-color: #fff3f2; }
+.pharmacy-bag-mid { stop-color: #f0d6d4; }
+.pharmacy-bag-lo { stop-color: #b8928e; }
+.pharmacy-bag-side { fill: #8e6a68; }
+.pharmacy-bag-under { fill: #5a2a2a40; }
+.pharmacy-bag-fold { fill: #ead2d0; }
+.pharmacy-bag-lip { fill: none; stroke: #fff8f6; stroke-width: 1.2; stroke-linecap: round; }
+.pharmacy-bag-crease { fill: none; stroke: #6a3a3a2e; stroke-width: 0.9; stroke-linecap: round; }
+.pharmacy-bag-light { fill: none; stroke: #ffd6e6b3; stroke-width: 1.2; stroke-linecap: round; }
+.pharmacy-bag-cross { fill: #1fae62; }
 .part-three-scene-karaoke .note-head { fill: #ff9ac4; }
 .part-three-scene-karaoke .note-stem { stroke: #ff9ac4; }
 .part-three-scene-karaoke .p3-note { filter: drop-shadow(0 0 6px #ff6aa888); }
@@ -153,81 +279,171 @@
 .story-part-3 .part-three-scene-karaoke .memory-photo.p3-photo.is-portrait { top: 7%; right: 5%; width: 34%; }
 
 /* ---------- 2. Scene: 16/9, an X-ray that shows nothing wrong, gà tần, then two films on the sofa at 59A Yên Bình ---------- */
-.story-part-3 .part-three-scene-clinic { background: linear-gradient(180deg, #4e1f30, #3a1523 62%, #22090f); }
-.p3-clinic-wall {
+/* Two lights: the afternoon through the window on the right, warm, and the film on the screen, cool. The wall comes
+   down to a skirting board and a dark wooden floor (the sky reaches to 80% of the card here). */
+.story-part-3 .part-three-scene-clinic {
   background:
-    radial-gradient(ellipse at 78% 34%, #ffcfb04a, transparent 40%),
-    radial-gradient(ellipse at 46% 42%, #9ab8ff21, transparent 50%),
-    repeating-linear-gradient(90deg, #ffffff06 0 1px, transparent 1px 7%),
-    linear-gradient(180deg, #5e2a3a, #45192c);
+    radial-gradient(ellipse 34% 18% at 80% 92%, #ffc8a040, transparent 70%),
+    repeating-linear-gradient(90deg, #00000024 0 1px, transparent 1px 11%),
+    linear-gradient(180deg, #3a1620, #2a0e14 82%, #1e080c);
 }
-/* The afternoon light through the window at 59A, which "vừa đẹp vừa thơm". */
+.p3-clinic-wall {
+  inset: -12% -8% 20%;
+  background:
+    radial-gradient(ellipse 30% 42% at 79% 46%, #ffcfa857, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 48.3% 46%, #8ab0ff33, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 0% 0%, #1a060e66, transparent 70%),
+    linear-gradient(180deg, transparent 94.4%, #8a5a62 94.6%, #4a2230 96%, #2a0e18 100%),
+    repeating-linear-gradient(90deg, #ffffff09 0 1px, transparent 1px 3.2%),
+    linear-gradient(180deg, #5c2a3a, #4a1c2e 60%, #3c1426);
+}
+/* The curtain rod. */
+.p3-clinic-wall::before { content: ""; position: absolute; left: 66.4%; top: 26.6%; width: 26%; height: 0.32em; border-radius: 0.2em; background: linear-gradient(180deg, #ffe0a8, #b8843e 50%, #5a3a18); box-shadow: 0 0.3em 0.4em -0.1em #0a020699; }
+/* The afternoon light through the window at 59A, which "vừa đẹp vừa thơm": a low sun behind the glass, curtains in soft folds. */
 .p3-clinic-window {
-  position: absolute; left: 71%; top: 23%; width: 16.5%; height: 35%; border-radius: 0.3em;
-  background: linear-gradient(90deg, transparent calc(50% - 0.12em), #3a1422 0 calc(50% + 0.12em), transparent 0), linear-gradient(180deg, #fff1e2, #ffd2b4 58%, #f6aa8e);
-  box-shadow: 0 0 0 0.3em #2a0c16, 0 0 60px 14px #ffcfa83d;
+  position: absolute; left: 71.6%; top: 28.3%; width: 15.5%; height: 32.6%; border-radius: 0.3em;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.12em), #3a1422 0 calc(50% + 0.12em), transparent 0),
+    linear-gradient(180deg, transparent calc(44% - 0.1em), #3a1422 0 calc(44% + 0.1em), transparent 0),
+    radial-gradient(circle at 34% 72%, #fffaf0 0 9%, #fff0d880 16%, transparent 46%),
+    radial-gradient(ellipse 40% 26% at 84% 8%, #c88a7a59, transparent 70%),
+    linear-gradient(180deg, #ffe8d4, #ffd2b4 56%, #f6aa8e);
+  box-shadow: 0 0 0 0.3em #2a0c16, 0 0 0 0.36em #ffcfa838, 0 0 4em 1em #ffcfa84d;
 }
 .p3-clinic-window::before,
-.p3-clinic-window::after { content: ""; position: absolute; top: -6%; bottom: -10%; width: 26%; border-radius: 0 0 40% 40%; background: linear-gradient(90deg, #c8405a, #a8243e 60%, #8a1a30); box-shadow: 0 6px 10px #0a020666; }
-.p3-clinic-window::before { left: -16%; }
-.p3-clinic-window::after { right: -16%; }
-.p3-xray {
-  --px: -0.15; position: absolute; left: 5%; top: 7%; z-index: 2; display: grid; justify-items: center; gap: 0.3em; width: 17%; padding: 0.45em 0.45em 0.5em; border-radius: 0.3em;
-  background: linear-gradient(180deg, #f2f7ff, #cddcf4); box-shadow: 0 0 0 0.2em #2a0c16, 0 0 40px 6px #9ab8ff59, 0 14px 24px #0a0206a6;
+.p3-clinic-window::after {
+  content: ""; position: absolute; top: -8%; bottom: -12%; width: 28%; border-radius: 0 0 40% 40% / 0 0 8% 8%;
+  background: repeating-linear-gradient(90deg, #ffffff24 0 7%, transparent 13% 24%, #0000003d 33%), linear-gradient(90deg, #c8405a, #a8243e 60%, #8a1a30);
+  box-shadow: 0 0.4em 0.7em #0a020666;
 }
+.p3-clinic-window::before { left: -18%; }
+.p3-clinic-window::after { right: -18%; background: repeating-linear-gradient(90deg, #ffffff24 0 7%, transparent 13% 24%, #0000003d 33%), linear-gradient(90deg, #e86a7a, #b8304a 50%, #8a1a30); }
+/* Its light, falling in toward the reader and across the sofa (plain alpha on phones, where a blend would cost). */
+.p3-clinic-sun {
+  --px: -0.2; position: absolute; inset: 0; z-index: 3; pointer-events: none; mix-blend-mode: screen;
+  background: conic-gradient(from 194deg at 84% 26%, transparent 0deg, #ffd8b04d 12deg, #ffcfa03d 25deg, #ffd8b01c 38deg, transparent 52deg);
+  -webkit-mask-image: radial-gradient(ellipse 80% 90% at 84% 26%, #000 12%, transparent 88%);
+  mask-image: radial-gradient(ellipse 80% 90% at 84% 26%, #000 12%, transparent 88%);
+}
+/* The light box at the clinic, the film clipped to it. */
+.p3-xray {
+  --px: -0.15; position: absolute; left: 5%; top: 7%; z-index: 2; display: grid; justify-items: center; gap: 0.3em; width: 16.5%; padding: 0.45em 0.45em 0.5em; border-radius: 0.3em;
+  background: linear-gradient(180deg, #f8fbff, #d4e2f6);
+  box-shadow: 0 0 0 0.2em #2a0c16, 0 0 0 0.26em #9ab8ff40, 0 0 2.6em 0.5em #9ab8ff52, 0 1em 1.6em #0a0206a6;
+}
+.p3-xray::before { content: ""; position: absolute; left: 50%; top: -0.3em; width: 2.2em; height: 0.6em; margin-left: -1.1em; border-radius: 0.15em; background: linear-gradient(180deg, #f2f6fc, #8a96a8); box-shadow: 0 2px 3px #0a020680; }
 .p3-xray svg { width: 100%; }
-.xray-film { fill: #0d1626; }
-.xray-bones { fill: #e6f0ff2e; stroke: #e6f0ffd9; stroke-width: 2.2; stroke-linecap: round; }
+.xray-film-hi { stop-color: #20344e; }
+.xray-film-lo { stop-color: #060b14; }
+.xray-bones-glow { fill: none; stroke: #9ac4ff; stroke-width: 5; stroke-linecap: round; opacity: 0.22; }
+.xray-bones { fill: #e6f0ff2e; stroke: #eef6ff; stroke-width: 2.1; stroke-linecap: round; }
+.xray-mark { fill: #e6f0ffb3; font: 700 7px/1 var(--body); }
 .p3-xray small { color: #24304a; font: 700 0.58em/1.2 var(--body); letter-spacing: 0.03em; text-align: center; }
 .p3-door-plate {
-  --px: -0.2; position: absolute; right: 8%; top: 41%; z-index: 2; padding: 0.35em 0.7em; border-radius: 0.25em; white-space: nowrap;
-  color: #3a1a08; background: linear-gradient(160deg, #f6d48a, #c9953e); font: 700 0.72em/1 var(--body); letter-spacing: 0.08em; box-shadow: 0 6px 14px #0a020699, inset 0 1px 0 #fff3c8;
+  --px: -0.2; position: absolute; right: 8%; top: 50%; z-index: 2; padding: 0.35em 0.7em; border-radius: 0.25em; white-space: nowrap;
+  color: #3a1a08; background: linear-gradient(160deg, #fbe0a0, #d4a04a 55%, #a8762e); font: 700 0.72em/1 var(--body); letter-spacing: 0.08em;
+  text-shadow: 0 1px 0 #fff3c899; box-shadow: 0 0.4em 0.9em #0a020699, inset 0 1px 0 #fff3c8, inset 0 -1px 0 #6a4a1a80;
 }
+/* The screen: the film's own blue light, scan lines and a sheen on the glass, a glow on the wall around it. */
 .p3-tv {
-  --px: -0.1; position: absolute; left: 28%; top: 8%; z-index: 2; width: 40%; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 0.35em;
-  color: #fff3f6; background: radial-gradient(ellipse at 50% 42%, #5a7ac8, #2a3c6a 58%, #141c34);
-  box-shadow: 0 0 0 0.35em #12050a, 0 0 70px 10px #8ab0ff40;
+  --px: -0.1; position: absolute; left: 25%; top: 15%; z-index: 2; width: 46%; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 0.3em;
+  color: #fff3f6;
+  background: radial-gradient(ellipse 70% 36% at 50% 104%, #ff9a7a47, transparent 70%), radial-gradient(ellipse at 50% 40%, #6a8ad8, #2e4278 55%, #141c36);
+  box-shadow: 0 0 0 0.32em #0c0408, 0 0 0 calc(0.32em + 1px) #ffffff24, 0 0 3em 0.8em #8ab0ff47, 0 0 7em 2em #6a8ad826;
 }
-.p3-tv::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(180deg, #ffffff08 0 1px, transparent 1px 4px), linear-gradient(160deg, #ffffff1f, transparent 36%); pointer-events: none; }
+.p3-tv::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(180deg, #ffffff08 0 1px, transparent 1px 4px), linear-gradient(160deg, #ffffff26, transparent 34%); pointer-events: none; }
 .p3-tv-slot { position: absolute; inset: 0; }
-.p3-tv-title { position: absolute; inset: 0; display: grid; place-content: center; gap: 0.35em; text-align: center; text-shadow: 0 2px 12px #0a1a4a; }
+.p3-tv-title { position: absolute; inset: 0 0 12%; display: grid; place-content: center; gap: 0.35em; text-align: center; text-shadow: 0 2px 12px #0a1a4a; }
 .p3-tv-title b { font: italic 500 clamp(1.05rem, 6.2cqi, 1.9rem)/1.1 var(--memory-display); letter-spacing: -0.02em; }
 .p3-tv-title small { font: 600 0.72em/1.2 var(--body); letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.85; }
-.p3-tv-glow { --px: -0.06; position: absolute; left: 16%; top: 30%; z-index: 1; width: 64%; height: 48%; pointer-events: none; background: radial-gradient(ellipse at 50% 0%, #9ab8ff47, transparent 70%); mix-blend-mode: screen; }
-.p3-couch { --px: 0.2; position: absolute; left: 13%; bottom: 15%; z-index: 3; width: 72%; overflow: visible; filter: drop-shadow(0 16px 20px #0a0206b3); }
-.couch-back { fill: #8e1a32; }
-.couch-seat { fill: #ac243e; }
-.couch-arm { fill: #7a1428; }
-.couch-cushion { fill: none; stroke: #5a0a1c; stroke-width: 2; }
-.couch-legs { fill: none; stroke: #2a0a10; stroke-width: 4; stroke-linecap: round; }
-.couch-people { fill: #2c0f1b; stroke: #ff9ab066; stroke-width: 1; }
-.couch-hair { fill: #160509; stroke: none; }
+.p3-tv-glow { --px: -0.06; position: absolute; left: 14%; top: 28%; z-index: 4; width: 68%; height: 50%; pointer-events: none; background: radial-gradient(ellipse at 50% 18%, #9ab8ff40, transparent 66%); mix-blend-mode: screen; }
+/* The sofa, seen from behind: rose velvet, diamond tufting, the two of them leaning together over its back. */
+.p3-couch { --px: 0.2; position: absolute; left: 20%; bottom: 19.5%; z-index: 3; width: 70%; overflow: visible; }
+.couch-shade { stop-color: #420a1a; }
+.couch-mid { stop-color: #7a1a30; }
+.couch-lit { stop-color: #b8384e; }
+.couch-fall-top { stop-color: #0a0206; stop-opacity: 0; }
+.couch-fall-bottom { stop-color: #0a0206; stop-opacity: 0.55; }
+.couch-people-hi { stop-color: #321626; }
+.couch-people-lo { stop-color: #12060c; }
+.couch-rim { fill: none; stroke: #c4d8ff; stroke-width: 0.9; stroke-linecap: round; opacity: 0.6; }
+.couch-hair-sheen { fill: none; stroke: #c4d8ff; stroke-width: 0.7; stroke-linecap: round; opacity: 0.3; }
+.couch-arm-light { fill: none; stroke: #ffc8a8; stroke-width: 1.6; stroke-linecap: round; opacity: 0.7; }
+.couch-tufts { fill: none; stroke: #2a040e; stroke-width: 1; opacity: 0.4; }
+.couch-buttons circle { fill: #2a0410; stroke: #ff8aa059; stroke-width: 0.6; }
+.couch-piping { fill: none; stroke: #ff9ab0; stroke-width: 1.4; opacity: 0.55; }
+.couch-skirt { fill: #2a0610; opacity: 0.6; }
+.couch-legs { fill: #2a120a; }
+/* The coffee table in front: walnut, its grain, the window and the screen both caught in its top, and its edge. */
 .p3-coffee-table {
-  --px: 0.3; position: absolute; left: 21%; bottom: 2%; z-index: 4; width: 58%; height: 12%; border-radius: 50% / 46%;
-  background: radial-gradient(ellipse at 50% 30%, #74402c, #4e2618 72%); box-shadow: inset 0 0.22em 0 #b06e4e80, 0 12px 22px #0a0206b3;
+  --px: 0.3; position: absolute; left: 18%; bottom: 2%; z-index: 4; width: 64%; height: 13%; border-radius: 50% / 46%;
+  background:
+    radial-gradient(ellipse 30% 50% at 78% 30%, #ffd2a84d, transparent 70%),
+    radial-gradient(ellipse 50% 46% at 46% 18%, #9ab8ff26, transparent 70%),
+    repeating-radial-gradient(ellipse at 40% 34%, transparent 0 0.9em, #00000017 0.9em 1em),
+    radial-gradient(ellipse at 44% 30%, #8a4e34, #5e2e1c 62%, #3a1a10);
+  box-shadow: inset 0 0.2em 0 #d49a7a80, inset 0 -0.4em 0.6em #1a080680, 0 0.36em 0 #2e140c, 0 1.2em 1.6em #0a0206b3;
 }
-.p3-soup { --px: 0.34; position: absolute; left: 26%; bottom: 7%; z-index: 5; width: 17%; }
-.p3-soup svg { width: 100%; overflow: visible; filter: drop-shadow(0 8px 10px #0a0206a6); }
-.herbsoup-broth { fill: #7a4a1e; }
-.herbsoup-chicken { fill: #ecd0a6; }
+.p3-soup { --px: 0.34; position: absolute; left: 24%; bottom: 6%; z-index: 5; width: 17%; }
+.p3-soup svg { width: 100%; overflow: visible; }
+.herbsoup-inside { fill: #d8d2cc; }
+.herbsoup-broth-hi { stop-color: #8a5a28; }
+.herbsoup-broth-lo { stop-color: #4a2a0e; }
+.herbsoup-sheen { fill: none; stroke: #ffe2b0; stroke-width: 1.6; stroke-linecap: round; opacity: 0.55; }
+.herbsoup-meat-hi { stop-color: #fbe6c4; }
+.herbsoup-meat-lo { stop-color: #d4aa78; }
+.herbsoup-date { fill: #8a1a1a; }
 .herbsoup-goji { fill: #e2302a; }
-.herbsoup-spoon { fill: #f6f1e8; stroke: #cdc3b4; stroke-width: 1; }
-.herbsoup-bowl { fill: #f6f1e8; }
+.herbsoup-glint { fill: none; stroke: #ffffffd9; stroke-width: 1.2; stroke-linecap: round; }
+.herbsoup-spoon { fill: #f6f1e8; stroke: #c8bdae; stroke-width: 1; }
+.herbsoup-bowl-hi { stop-color: #ffffff; }
+.herbsoup-bowl-mid { stop-color: #efe8e0; }
+.herbsoup-bowl-lo { stop-color: #b8aaa0; }
+.herbsoup-band { fill: none; stroke: #3a6ac8; stroke-width: 2.2; opacity: 0.75; }
 .herbsoup-rim { fill: none; stroke: #ffffff; stroke-width: 2; }
-.p3-phone-down { --px: 0.36; position: absolute; z-index: 5; overflow: visible; filter: drop-shadow(0 6px 8px #0a0206a6); }
-.p3-phone-down.is-one { left: 51%; bottom: 8%; width: 10%; rotate: -8deg; }
-.p3-phone-down.is-two { left: 62%; bottom: 6%; width: 10%; rotate: 12deg; }
-.phone-down-body { fill: #2a2830; }
-.p3-phone-down.is-two .phone-down-body { fill: #e8dcd2; }
-.phone-down-camera { fill: #4a4852; stroke: #7a7882; stroke-width: 0.8; }
-.story-part-3 .part-three-scene .p3-couch-heart.is-one { left: 47%; top: 47%; }
-.story-part-3 .part-three-scene .p3-couch-heart.is-two { left: 53%; top: 45%; width: 0.6rem; fill: #ffc2cc; }
-.story-part-3 .part-three-scene-clinic .offline-scene-caption { top: 40%; bottom: auto; left: 5%; max-width: 12ch; }
+.herbsoup-glaze { fill: none; stroke: #ffffff; stroke-width: 2.4; stroke-linecap: round; opacity: 0.8; }
+.p3-phone-down { --px: 0.36; position: absolute; z-index: 5; overflow: visible; }
+.p3-phone-down.is-one { left: 50%; bottom: 7%; width: 10%; rotate: -8deg; }
+.p3-phone-down.is-two { left: 62%; bottom: 4.5%; width: 10%; rotate: 12deg; }
+.phone-down-hi { stop-color: #44424e; }
+.phone-down-lo { stop-color: #121116; }
+.p3-phone-down.is-two .phone-down-hi { stop-color: #fbf4ec; }
+.p3-phone-down.is-two .phone-down-lo { stop-color: #c4b4a8; }
+.phone-down-sheen { opacity: 0.22; }
+.phone-down-edge { fill: none; stroke: #ffffff59; stroke-width: 0.9; stroke-linecap: round; }
+.phone-down-bump { fill: #0000002e; stroke: #ffffff1f; stroke-width: 0.6; }
+.phone-down-camera { fill: #24222a; stroke: #8a8892; stroke-width: 0.8; }
+.phone-down-glint { fill: none; stroke: #ffffffcc; stroke-width: 1.1; stroke-linecap: round; }
+.story-part-3 .part-three-scene .p3-couch-heart.is-one { left: 48%; top: 39%; }
+.story-part-3 .part-three-scene .p3-couch-heart.is-two { left: 55%; top: 37%; width: 0.6rem; fill: #ffc2cc; }
+.story-part-3 .part-three-scene-clinic .offline-scene-caption { top: 46%; bottom: auto; left: 5%; max-width: 12ch; }
 
 /* ---------- 3. Scene: 16/9 evening, Văn Quán, the lake under red flags, then the ride home through the rain ---------- */
 .story-part-3 .part-three-scene-lakeside { background: linear-gradient(180deg, #120a24, #1e1236 40%, #2a1430 58%, #160810); }
-.p3-lake-sky { background: radial-gradient(ellipse at 36% 88%, #ff7a5a3d, transparent 55%), radial-gradient(ellipse at 82% 16%, #6a4aa82e, transparent 50%), linear-gradient(180deg, #0c0720, #1c1236 58%, #3a1a3a); }
-/* The towers across the lake, their windows lit. */
+/* A city night: violet above with a few stars, a rain cloud lit from beneath, the towers' glow low on the horizon. */
+.p3-lake-sky {
+  background:
+    radial-gradient(ellipse 60% 16% at 40% 72%, #ff8a6a59, transparent 72%),
+    radial-gradient(ellipse 42% 12% at 68% 34%, #6a4a8a4d, transparent 70%),
+    radial-gradient(ellipse 30% 9% at 22% 26%, #5a3e7a40, transparent 70%),
+    radial-gradient(circle at 14% 12%, #ffffffb3 0 1px, transparent 1.5px), radial-gradient(circle at 52% 8%, #ffffff8c 0 1px, transparent 1.5px),
+    radial-gradient(circle at 86% 16%, #ffffff99 0 1px, transparent 1.5px), radial-gradient(circle at 33% 18%, #ffffff73 0 1px, transparent 1.5px),
+    linear-gradient(180deg, #0a061c, #1a1034 55%, #3e1c40);
+}
+/* The towers across the lake in two rows: the far ones hazy and pale in the glow, the near ones dark with their windows lit. */
+.p3-lake-far {
+  --far:
+    linear-gradient(#000, #000) 6% 100% / 6% 70% no-repeat, linear-gradient(#000, #000) 20% 100% / 8% 46% no-repeat,
+    linear-gradient(#000, #000) 31% 100% / 5% 88% no-repeat, linear-gradient(#000, #000) 53% 100% / 7% 58% no-repeat,
+    linear-gradient(#000, #000) 66% 100% / 5% 100% no-repeat, linear-gradient(#000, #000) 80% 100% / 9% 52% no-repeat,
+    linear-gradient(#000, #000) 95% 100% / 6% 76% no-repeat;
+  position: absolute; left: 0; right: 0; bottom: 24%; height: 34%;
+  background:
+    radial-gradient(circle at 23% 30%, #ffc89a59 0 0.05em, transparent 0.09em) 0 0 / 1.7em 1.3em,
+    linear-gradient(180deg, #2a1e46, #3a2652 70%, #4a2c58);
+  -webkit-mask: var(--far);
+  mask: var(--far);
+}
 .p3-lake-towers {
   --towers:
     linear-gradient(#000, #000) 4% 100% / 9% 62% no-repeat, linear-gradient(#000, #000) 15% 100% / 6% 88% no-repeat,
@@ -235,71 +451,133 @@
     linear-gradient(#000, #000) 47% 100% / 9% 70% no-repeat, linear-gradient(#000, #000) 60% 100% / 7% 82% no-repeat,
     linear-gradient(#000, #000) 72% 100% / 11% 46% no-repeat, linear-gradient(#000, #000) 88% 100% / 8% 64% no-repeat;
   position: absolute; left: 0; right: 0; bottom: 0; height: 52%;
-  background: linear-gradient(180deg, #221642, #160e2c);
+  background:
+    radial-gradient(circle at 38.6% 1.4%, #ff5a4a 0 0.14em, #ff5a4a59 0.22em, transparent 0.4em),
+    radial-gradient(circle at 17.1% 13.2%, #ff5a4a 0 0.12em, #ff5a4a59 0.2em, transparent 0.36em),
+    linear-gradient(90deg, #ff9a7a14, transparent 30%),
+    linear-gradient(180deg, #241846, #160e2c);
   -webkit-mask: var(--towers);
   mask: var(--towers);
 }
 .p3-lake-towers::before, .p3-hadong::before { inset: 6% 0 4%; opacity: 0.75; scale: 0.7; transform-origin: 0 0; width: 143%; height: 129%; }
-.p3-lake { --px: -0.1; position: absolute; inset: 47% -6% 24%; z-index: 1; overflow: hidden; background: linear-gradient(180deg, #24183e, #1a1230 40%, #0e0a1c); box-shadow: inset 0 1px 0 #ffd08a40; }
+/* The lake: a haze over the far shore, the lit windows drawn down the water in shivering streaks. */
+.p3-lake {
+  --px: -0.1; position: absolute; inset: 47% -6% 24%; z-index: 1; overflow: hidden;
+  background: linear-gradient(180deg, #ffb48a2e, transparent 14%), linear-gradient(180deg, #2a1c44, #1a1230 40%, #0c0818);
+  box-shadow: inset 0 1px 0 #ffd08a52;
+}
 .p3-lake-shimmer {
-  position: absolute; inset: 0 -20%; opacity: 0.8;
+  position: absolute; inset: 0 -20%;
   background:
-    repeating-linear-gradient(180deg, transparent 0 5px, #ffd08a2b 5px 6px),
-    radial-gradient(ellipse 4% 60% at 18% 0%, #ffd88a59, transparent), radial-gradient(ellipse 3% 70% at 33% 0%, #ffd88a4d, transparent),
-    radial-gradient(ellipse 4% 50% at 45% 0%, #ff9a7a47, transparent), radial-gradient(ellipse 3% 64% at 58% 0%, #ffd88a40, transparent);
+    repeating-linear-gradient(180deg, transparent 0 5px, #ffd08a1f 5px 6px),
+    radial-gradient(ellipse 1.8% 70% at 16% 0%, #ffd88a73, transparent), radial-gradient(ellipse 1.4% 58% at 23% 0%, #ffd88a59, transparent),
+    radial-gradient(ellipse 1.8% 74% at 33% 0%, #ffd88a6b, transparent), radial-gradient(ellipse 1.3% 50% at 40% 0%, #ff9a7a59, transparent),
+    radial-gradient(ellipse 1.8% 64% at 47% 0%, #ffd88a5c, transparent), radial-gradient(ellipse 1.5% 56% at 57% 0%, #ffd88a4d, transparent),
+    radial-gradient(ellipse 1.6% 60% at 66% 0%, #ffd88a47, transparent), radial-gradient(ellipse 1.3% 50% at 79% 0%, #ff9a7a40, transparent);
   -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent);
   mask-image: linear-gradient(180deg, #000 30%, transparent);
 }
 .part-three-scene-lakeside.is-active .p3-lake-shimmer { animation: p3-shimmer 7s ease-in-out infinite alternate; }
-.p3-starflags { --px: -0.2; position: absolute; left: -4%; top: 1%; z-index: 2; width: 108%; height: 17%; overflow: visible; transform-origin: 50% 0; filter: drop-shadow(0 4px 6px #0a020680); }
-.starflags-string { fill: none; stroke: #3a2420; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
-.starflags-flag { fill: #da1f2c; }
-.starflags-star { fill: #ffd640; }
-/* Palms and ferns at the water's edge, as fans of dark fronds. */
-.p3-lake-leaves {
-  --px: -0.2; position: absolute; inset: 30% -6% 20%; z-index: 2; pointer-events: none;
+/* The café's railing over the water: a wooden handrail catching the lamp, dark balusters, a bottom rail. */
+.p3-lake-rail {
+  --px: -0.06; position: absolute; left: -6%; right: -6%; top: 68.5%; z-index: 2; height: 8.5%;
   background:
-    conic-gradient(from 2deg at 0% 100%, transparent 0deg, #10301c 3deg 7deg, transparent 8deg 13deg, #143a22 14deg 19deg, transparent 20deg 26deg, #0e2a18 27deg 33deg, transparent 34deg 41deg, #143a22 42deg 47deg, transparent 48deg) 0 100% / 34% 100% no-repeat,
-    conic-gradient(from 316deg at 100% 100%, transparent 0deg, #10301c 4deg 9deg, transparent 10deg 16deg, #143a22 17deg 22deg, transparent 23deg 30deg, #0e2a18 31deg 37deg, transparent 38deg) 100% 100% / 30% 90% no-repeat;
-  -webkit-mask-image: radial-gradient(ellipse 36% 100% at 0% 100%, #000 60%, transparent 100%), radial-gradient(ellipse 32% 90% at 100% 100%, #000 60%, transparent 100%);
-  mask-image: radial-gradient(ellipse 36% 100% at 0% 100%, #000 60%, transparent 100%), radial-gradient(ellipse 32% 90% at 100% 100%, #000 60%, transparent 100%);
+    linear-gradient(180deg, #f0b07e 0 0.1em, #7a4430 0.1em 0.34em, #2a140e 0.34em 0.48em, transparent 0.48em),
+    linear-gradient(0deg, #1e0e0a 0 0.32em, #5a3022 0.32em 0.4em, transparent 0.4em),
+    repeating-linear-gradient(90deg, transparent 0 1.3em, #1a0c0a 1.3em 1.52em, #3a1e16 1.52em 1.6em, transparent 1.6em 2.8em);
+  -webkit-mask-image: linear-gradient(90deg, #000 60%, #0008);
+  mask-image: linear-gradient(90deg, #000 60%, #0008);
+}
+/* Areca palms at the water's edge, deep green against the city, their midribs caught by the lamp. */
+.p3-palm { position: absolute; z-index: 2; overflow: visible; transform-origin: 50% 100%; }
+.p3-palm.is-one { --px: -0.16; left: -8%; top: 33%; width: 32%; }
+.p3-palm.is-two { --px: -0.14; right: -9%; top: 49%; width: 26%; scale: -1 1; }
+.palm-leaves { fill: #163a22; }
+.palm-frond.is-front .palm-leaves { fill: #24583a; }
+.palm-rib { fill: none; stroke: #0e2616; stroke-width: 1.3; stroke-linecap: round; }
+.palm-rim { fill: none; stroke: #ffc88a; stroke-width: 0.8; stroke-linecap: round; opacity: 0.32; }
+.p3-starflags { --px: -0.2; position: absolute; left: -4%; top: 1%; z-index: 3; width: 108%; height: 17%; overflow: visible; transform-origin: 50% 0; filter: drop-shadow(0 0.3em 0.4em #0a020680); }
+.starflags-string { fill: none; stroke: #3a2420; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.starflags-lit { stop-color: #ff4e48; }
+.starflags-red { stop-color: #da1f2c; }
+.starflags-fold { stop-color: #8a0a18; }
+.starflags-hem { fill: none; stroke: #5a0a12; stroke-width: 2; vector-effect: non-scaling-stroke; opacity: 0.5; }
+.starflags-star { fill: #ffd640; }
+/* The café's lamp, hung from the flags' string in a little shade, and its cone of light down onto the table. */
+.p3-lake-lamp {
+  --px: -0.2; position: absolute; left: 31.5%; top: 7.4%; z-index: 3; width: 2.2em; height: 1em; margin-left: -1.1em; border-radius: 1.1em 1.1em 0.2em 0.2em;
+  background: linear-gradient(180deg, #4a3630, #1a100e); box-shadow: 0 0.5em 0.5em -0.15em #ffd8a0, 0 0.8em 2.4em 0.6em #ffc27a5c, inset 0 1px 0 #ffffff2e;
+}
+.p3-lake-lamp::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: 1px; height: 1.2em; background: #2a1a16; }
+.p3-lake-lamp::after { content: ""; position: absolute; left: 50%; top: 82%; width: 0.7em; height: 0.46em; margin-left: -0.35em; border-radius: 0 0 0.35em 0.35em; background: radial-gradient(circle at 50% 30%, #fffbe8, #ffd88a 70%); }
+.p3-lake-cone {
+  --px: -0.12; position: absolute; inset: 0; z-index: 3; pointer-events: none; mix-blend-mode: screen;
+  background: conic-gradient(from 158deg at 31.5% 9%, transparent 0deg, #ffdca81f 8deg, #ffdca83d 22deg, #ffdca81f 36deg, transparent 44deg);
+  -webkit-mask-image: radial-gradient(ellipse 60% 90% at 31.5% 9%, #000 30%, transparent 92%);
+  mask-image: radial-gradient(ellipse 60% 90% at 31.5% 9%, #000 30%, transparent 92%);
 }
 .p3-lake-rain { z-index: 3; }
+.p3-rain-lit { position: absolute; inset: 0; clip-path: polygon(30% 9%, 33% 9%, 58% 92%, 6% 92%); }
+.p3-rain-lit i { background: repeating-linear-gradient(104deg, transparent 0 18px, #ffe8c0a6 18px 19.5px, transparent 19.5px 38px); }
 .part-three-scene-lakeside.is-active .p3-rain i { animation: rain-fall 0.9s linear infinite; }
 .part-three-scene-lakeside.is-active .p3-rain i:nth-child(2) { animation-duration: 1.3s; }
+/* The round stone table: terrazzo, a pool of lamplight on it, a rim of light where its edge turns away. */
 .p3-stone-table {
-  --px: 0.2; position: absolute; left: 1%; bottom: -12%; z-index: 3; width: 64%; height: 36%; border-radius: 50%;
-  background: radial-gradient(ellipse at 44% 28%, #f6efe4, #dccfbf 52%, #a99a8a);
-  box-shadow: inset 0 -0.7em 1.2em #6a5a4a80, inset 0 0.2em 0 #ffffffb3, 0 -8px 30px #0a020666;
+  --px: 0.2; position: absolute; left: 0; bottom: -11%; z-index: 3; width: 62%; height: 35%; border-radius: 50%;
+  background:
+    radial-gradient(ellipse 44% 46% at 50% 30%, #ffdcae73, transparent 72%),
+    var(--paper-grain) 0 0 / 160px 160px,
+    radial-gradient(ellipse at 46% 28%, #c8beb2, #8e847a 55%, #534b49);
+  box-shadow: inset 0 0.18em 0 #fff2dca6, inset 0 -1.2em 1.6em #1a121080, 0 -0.4em 2em #0a020666;
 }
-.p3-snails { --px: 0.3; position: absolute; left: 6%; bottom: 9%; z-index: 4; width: 22%; overflow: visible; filter: drop-shadow(0 6px 8px #2a1a1080); }
-.snail-dish { fill: #f6f1e8; }
-.snail-dish-well { fill: #d8683a; }
-.snail-shell { fill: #e0b07a; stroke: #6a3a1a; stroke-width: 1.4; stroke-linejoin: round; }
-.snail-shell-tip { fill: none; stroke: #6a3a1a; stroke-width: 2.4; stroke-linecap: round; }
+.p3-snails { --px: 0.3; position: absolute; left: 5%; bottom: 6%; z-index: 4; width: 21%; overflow: visible; }
+.snail-dish-hi { stop-color: #fbf6ee; }
+.snail-dish-lo { stop-color: #c8bcae; }
+.snail-dish-rim { fill: none; stroke: #ffffff; stroke-width: 1; opacity: 0.6; }
+.snail-sauce-hi { stop-color: #f2904e; }
+.snail-sauce-lo { stop-color: #b03e1c; }
+.snail-shell-hi { stop-color: #fde6bc; }
+.snail-shell-mid { stop-color: #d49a5e; }
+.snail-shell-lo { stop-color: #74401c; }
+.snail-shell { stroke: #5a2e12; stroke-width: 1.2; stroke-linejoin: round; }
+.snail-shell-tip { fill: none; stroke: #5a2e12; stroke-width: 2.4; stroke-linecap: round; }
+.snail-shell-glint { fill: none; stroke: #fff6e0; stroke-width: 1.2; stroke-linecap: round; opacity: 0.8; }
 .snail-herb { fill: none; stroke: #4fa24a; stroke-width: 2.4; stroke-linecap: round; }
-.p3-smoothie { --px: 0.3; position: absolute; z-index: 4; overflow: visible; filter: drop-shadow(0 6px 8px #2a1a1080); }
-.p3-smoothie.is-avocado { left: 30%; bottom: 10%; width: 6.5%; }
-.smoothie-drink { fill: #a8c84a; }
-.smoothie-foam { fill: #d8ea92; }
-.smoothie-glass { fill: #ffffff1c; stroke: #ffffffa6; stroke-width: 1.6; }
+.snail-chilli { fill: none; stroke: #e8231e; stroke-width: 2.6; stroke-linecap: round; }
+/* Glasses: the drink lit from above, clear glass thickening at its edges, one long highlight, a bright rim. */
+.p3-smoothie { --px: 0.3; position: absolute; z-index: 4; overflow: visible; }
+.p3-smoothie.is-avocado { left: 29%; bottom: 10%; width: 6.5%; }
+.smoothie-drink-hi { stop-color: #c8e070; }
+.smoothie-drink-lo { stop-color: #7a9a2e; }
+.smoothie-foam { fill: #e2f0a6; }
+.smoothie-glass-edge { stop-color: #ffffff; stop-opacity: 0.42; }
+.smoothie-glass-clear { stop-color: #ffffff; stop-opacity: 0.06; }
+.smoothie-glass { stroke: #ffffffa6; stroke-width: 1.2; }
+.smoothie-shine { opacity: 0.85; }
+.smoothie-rim { fill: none; stroke: #ffffffd9; stroke-width: 1.4; stroke-linecap: round; }
 .smoothie-stem { fill: #ffffff59; }
 .smoothie-straw { fill: none; stroke: #fff6ea; stroke-width: 2.6; stroke-linecap: round; }
 .smoothie-sprig { fill: none; stroke: #3f8a40; stroke-width: 1.8; stroke-linecap: round; }
 .p3-smoothie.is-avocado .smoothie-sprig { display: none; }
-.p3-yogurt { --px: 0.3; position: absolute; left: 38%; bottom: 10%; z-index: 4; width: 6.5%; overflow: visible; filter: drop-shadow(0 6px 8px #2a1a1080); }
-.yogurt-drink { fill: #f6ead0; }
+.p3-yogurt { --px: 0.3; position: absolute; left: 37%; bottom: 10.5%; z-index: 4; width: 6%; overflow: visible; }
+.yogurt-drink-hi { stop-color: #fbf2dc; }
+.yogurt-drink-lo { stop-color: #d6c4a2; }
 .yogurt-top { fill: #e8a83a; }
-.yogurt-glass { fill: #ffffff1a; stroke: #ffffff99; stroke-width: 1.6; }
+.yogurt-glass { stroke: #ffffff99; stroke-width: 1.2; }
 .yogurt-straw { fill: none; stroke: #4a9ad8; stroke-width: 2.6; stroke-linecap: round; }
-.p3-seeds { --px: 0.34; position: absolute; z-index: 4; overflow: visible; filter: drop-shadow(0 5px 6px #2a1a1080); }
-.p3-seeds.is-one { left: 46%; bottom: 9%; width: 14%; }
-.seeds-dish { fill: #ea6a2a; }
-.seeds-seed { fill: #34302c; stroke: #a49c90; stroke-width: 0.6; }
+.p3-seeds { --px: 0.34; position: absolute; z-index: 4; overflow: visible; }
+.p3-seeds.is-one { left: 44%; bottom: 9%; width: 13%; }
+.p3-seeds.is-three { left: 28%; bottom: 2.5%; z-index: 5; width: 13.5%; }
+.seeds-dish-hi { stop-color: #f08a4a; }
+.seeds-dish-lo { stop-color: #a4441c; }
+.seeds-rim { fill: #c8602a; stroke: #ffb48a; stroke-width: 0.8; }
+.seeds-seed { fill: #2c2824; stroke: #0a0806; stroke-width: 0.4; }
+.seeds-stripe { fill: none; stroke: #d8d0c4; stroke-width: 0.6; stroke-linecap: round; opacity: 0.7; }
+.seeds-glaze { fill: none; stroke: #ffd8b0; stroke-width: 1.2; stroke-linecap: round; opacity: 0.6; }
 /* The ride home: "2 đứa cười ha hả trên đường về như dở ấy". */
-.p3-lake-scooter { position: absolute; left: 6%; top: 38%; z-index: 3; width: 20%; overflow: visible; }
+.p3-lake-scooter { position: absolute; left: 6%; top: 36.5%; z-index: 3; width: 20%; overflow: visible; filter: drop-shadow(0 0 0.25em #ffd2a0b3) drop-shadow(0 0 1em #ff9a6a59); }
 .part-three-scene-lakeside .scooter-body,
-.part-three-scene-lakeside .scooter-rider { fill: #1c0e1e; }
+.part-three-scene-lakeside .scooter-rider { fill: #12080e; }
 .part-three-scene-lakeside .scooter-wheel { fill: #1c0e1e; stroke: #4a3448; }
 .part-three-scene-lakeside .scooter-hub { fill: #6a4a64; }
 .part-three-scene-lakeside .scooter-shadow { fill: #0a020659; }
@@ -307,20 +585,56 @@
 .story-part-3 .part-three-scene-lakeside .offline-scene-caption { top: 19%; bottom: auto; left: 5%; max-width: 14ch; }
 
 /* ---------- 4. Scene: 19/9, Tiny cf on a golden afternoon, the notebook with a kiss, lego still missing a leg ---------- */
-.story-part-3 .part-three-scene-notebook { background: linear-gradient(180deg, #f2c48a, #d8905a 46%, #8a3a2a 72%, #4a1a14); }
-.p3-tiny-wall { background: radial-gradient(ellipse at 24% 26%, #fff3d0d9, transparent 42%), linear-gradient(180deg, #f8d6a4, #eaab72 60%, #cc7a4a); }
-.p3-tiny-sun { position: absolute; left: 13%; top: 20%; width: 13%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 44% 40%, #fffcf2, #ffe6b0 58%, #ffc46e); box-shadow: 0 0 40px 14px #fff1c899, 0 0 120px 40px #ffd08a66; }
+/* The café's wooden floor below the wall (the sky ends at 60% of the card here), the rug on it, the table on the rug. */
+.story-part-3 .part-three-scene-notebook { background: radial-gradient(ellipse 34% 8% at 42% 63%, #ffd89a4d, transparent 70%), repeating-linear-gradient(180deg, #0000003d 0 1px, transparent 1px 0.9em), linear-gradient(180deg, #a85e30 58%, #7a3e1c 68%, #3e1c0e); }
+/* Warm plaster, brightest round the window and falling off toward the far wall; the low sun in the window itself,
+   blooming over its frame, and a tree outside in the top corners of the glass. */
+.p3-tiny-wall {
+  inset: -12% -8% 40%;
+  background:
+    radial-gradient(ellipse 36% 44% at 21.6% 44.4%, #fff6dcf2, #ffe8b866 48%, transparent 80%),
+    linear-gradient(90deg, transparent 34%, #7a341440),
+    linear-gradient(180deg, transparent 95.6%, #f0b47e 95.8%, #6a3418 97%, #3e1c0e 100%),
+    var(--paper-grain) 0 0 / 160px 160px,
+    linear-gradient(180deg, #f6d2a0, #e8a870 64%, #d08250);
+}
+.p3-tiny-window {
+  position: absolute; left: 11.2%; top: 20.8%; width: 20.7%; height: 47.2%; border-radius: 0.3em;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.14em), #7a4422 0 calc(50% + 0.14em), transparent 0),
+    linear-gradient(180deg, transparent calc(48% - 0.12em), #7a4422 0 calc(48% + 0.12em), transparent 0),
+    radial-gradient(circle at 36% 66%, #ffffff 0 7%, #fff6d8 13%, #ffe2a080 28%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 92% 4%, #5e5a2e80, transparent 70%),
+    radial-gradient(ellipse 34% 20% at 8% 2%, #5e5a2e66, transparent 70%),
+    linear-gradient(180deg, #f4dcb4, #ffd896 55%, #ffb868);
+  box-shadow: 0 0 0 0.3em #7a4422, 0 0 0 0.38em #f6c48a, 0 0 2.4em 1em #fff1c8b3, 0 0 8em 3em #ffd08a8c;
+}
+.p3-tiny-window::before { content: ""; position: absolute; inset: -24%; pointer-events: none; background: radial-gradient(circle at 39% 60%, #fff8e6c7, #fff1c84d 22%, transparent 46%); }
+.p3-tiny-window::after { content: ""; position: absolute; left: -10%; right: -10%; top: 100%; height: 0.45em; margin-top: 0.22em; border-radius: 0.1em; background: linear-gradient(180deg, #fbe0b8, #a8683a 50%, #6a3a1e); box-shadow: 0 0.4em 0.6em -0.2em #5a2a14b3; }
+/* Its light in the room: long beams down toward the table, and the dust turning in them. */
 .p3-tiny-rays {
-  --px: -0.25; position: absolute; inset: -10% -10% 30%; z-index: 0; opacity: 0.4; mix-blend-mode: screen;
-  background: conic-gradient(from 110deg at 21% 22%, transparent 0deg, #fff3d0 5deg, transparent 10deg 24deg, #ffe8b8 28deg, transparent 34deg 50deg, #fff3d0 55deg, transparent 62deg 80deg, #ffe8b8 84deg, transparent 90deg);
-  -webkit-mask-image: radial-gradient(ellipse at 21% 22%, #000, transparent 72%);
-  mask-image: radial-gradient(ellipse at 21% 22%, #000, transparent 72%);
+  --px: -0.25; position: absolute; inset: -10% -10% 0; z-index: 0; pointer-events: none; mix-blend-mode: screen;
+  background: conic-gradient(from 126deg at 22.5% 27.3%, transparent 0deg, #fff3d080 5deg, transparent 10deg 13deg, #ffe8b866 18deg, transparent 24deg 27deg, #fff3d073 32deg, transparent 39deg);
+  -webkit-mask-image: radial-gradient(ellipse 90% 90% at 22.5% 27.3%, #000 14%, transparent 84%);
+  mask-image: radial-gradient(ellipse 90% 90% at 22.5% 27.3%, #000 14%, transparent 84%);
 }
 .part-three-scene-notebook.is-active .p3-tiny-rays { animation: p3-glow 4.5s ease-in-out infinite alternate; }
+.p3-tiny-motes {
+  --px: -0.16; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(circle at 30% 34%, #fffbe8 0 1px, transparent 2px), radial-gradient(circle at 37% 46%, #fffbe8cc 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 26% 52%, #fffbe8b3 0 1px, transparent 2px), radial-gradient(circle at 44% 58%, #fffbe8 0 1.4px, transparent 2.4px),
+    radial-gradient(circle at 33% 64%, #fffbe899 0 1px, transparent 2px), radial-gradient(circle at 49% 40%, #fffbe8b3 0 1px, transparent 2px),
+    radial-gradient(circle at 54% 66%, #fffbe8cc 0 1.2px, transparent 2.2px), radial-gradient(circle at 41% 28%, #fffbe899 0 1px, transparent 2px);
+}
+.part-three-scene-notebook.is-active .p3-tiny-motes { animation: p3-glow 3.2s ease-in-out infinite alternate; }
+/* The napkin, pinned up with a strip of tape. */
 .p3-tiny-napkin {
   --px: -0.12; position: absolute; left: 5%; top: 40%; z-index: 2; display: grid; gap: 0.2em; padding: 0.55em 0.8em 0.6em; border-radius: 2px; rotate: -5deg;
-  color: #6a3a1a; background: linear-gradient(170deg, #fffaf0, #f6ead6); font: 700 0.86em/1 var(--body); letter-spacing: 0.06em; text-transform: uppercase; box-shadow: 0 12px 20px -8px #5a2a1499;
+  color: #6a3a1a; background: var(--paper-grain), linear-gradient(170deg, #fffaf0, #f2e2c8); background-blend-mode: soft-light, normal;
+  font: 700 0.86em/1 var(--body); letter-spacing: 0.06em; text-transform: uppercase; box-shadow: 0 0.8em 1.2em -0.5em #5a2a14b3, 0 0.1em 0.2em #5a2a1440;
 }
+.p3-tiny-napkin::before { content: ""; position: absolute; top: -0.42em; left: 50%; width: 3em; height: 0.9em; margin-left: -1.5em; background: #ffd6a88c; rotate: 4deg; }
 .p3-tiny-napkin small { color: #a8603a; font: 600 1.05em/1.1 var(--hand); letter-spacing: 0; text-transform: none; }
 .p3-chat { --px: -0.06; position: absolute; left: 31%; top: 6%; z-index: 2; display: grid; justify-items: center; gap: 0.5em; width: 17%; }
 /* The real message to her father, in a phone: a dark bezel drawn as a ring of shadow, rounded glass and a glare. */
@@ -331,117 +645,237 @@
 .p3-chat-phone img { display: block; width: 100%; height: auto; aspect-ratio: 739 / 1600; object-fit: cover; }
 .p3-chat-phone::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(118deg, #ffffff40, #ffffff00 36%); }
 .p3-chat small { color: #5a2a14; font: 700 0.86em/1.1 var(--hand); text-align: center; white-space: nowrap; }
-/* A red rug with the café's woven pattern, and the round wooden table on it. */
+/* The thổ cẩm rug on the floor: woven lozenges in red and cream, a border band, a fringe, the sun across it. */
 .p3-rug {
-  --px: 0.12; position: absolute; inset: auto -6% -4%; z-index: 1; height: 38%;
+  --px: 0.12; position: absolute; inset: auto -6% -4%; z-index: 1; height: 36%;
   background:
-    repeating-linear-gradient(45deg, transparent 0 0.7em, #f6e2c84d 0.7em 0.82em, transparent 0.82em 1.6em),
-    repeating-linear-gradient(-45deg, transparent 0 0.7em, #f6e2c84d 0.7em 0.82em, transparent 0.82em 1.6em),
-    linear-gradient(180deg, #b22a2e, #8a1a22 60%, #5a0e16);
-  box-shadow: inset 0 0.5em 0 #6a1418, inset 0 0.6em 0 #f6e2c8;
-  opacity: 0.96;
+    radial-gradient(ellipse 40% 50% at 70% 36%, #ffd8a033, transparent 70%),
+    linear-gradient(180deg, #1a060466 0 0.3em, transparent 1em),
+    linear-gradient(180deg, transparent 0.8em, #f2dcb8b3 0.8em 0.94em, #1e0e0ab3 0.94em 1.1em, #f2dcb8b3 1.1em 1.24em, transparent 1.24em),
+    repeating-linear-gradient(45deg, transparent 0 0.8em, #f0c88a5c 0.8em 0.95em, transparent 0.95em 1.9em),
+    repeating-linear-gradient(-45deg, transparent 0 0.8em, #f0c88a5c 0.8em 0.95em, transparent 0.95em 1.9em),
+    var(--paper-grain) 0 0 / 160px 160px,
+    linear-gradient(180deg, #a8282c, #8a1a22 60%, #5a0e16);
+  box-shadow: 0 -0.2em 0.5em #3a120a59;
 }
+.p3-rug::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 0.36em; background: repeating-linear-gradient(90deg, #f6e2c8 0 1px, transparent 1px 0.3em); }
+/* The round wooden table: its grain in rings, the sun on its far side, its near edge in its own shade. */
 .p3-wood-table {
   --px: 0.18; position: absolute; left: 3%; bottom: -16%; z-index: 2; width: 72%; height: 46%; border-radius: 50%;
-  background: repeating-radial-gradient(ellipse at 40% 34%, transparent 0 0.9em, #00000014 0.9em 1em), radial-gradient(ellipse at 40% 30%, #b47442, #84482a 58%, #4e2814);
-  box-shadow: inset 0 0.25em 0 #e0a0704d, 0 -6px 30px #3a120a66;
+  background:
+    radial-gradient(ellipse 40% 34% at 72% 30%, #ffd89a59, transparent 70%),
+    repeating-radial-gradient(ellipse 120% 60% at 40% 34%, transparent 0 0.7em, #0000000d 0.7em 0.8em, transparent 0.8em 1.3em, #ffffff08 1.3em 1.4em),
+    var(--paper-grain) 0 0 / 160px 160px,
+    radial-gradient(ellipse at 40% 30%, #c08048, #8a5030 58%, #4e2814);
+  box-shadow: inset 0 0.25em 0 #f0b07e73, inset 0 -1em 1.4em #2a0e0699, 0 -0.4em 2em #3a120a59;
 }
-.p3-notebook { --px: 0.24; position: absolute; left: 7%; bottom: 7%; z-index: 3; width: 37%; overflow: visible; filter: drop-shadow(0 12px 14px #3a120ab3); }
-.notebook-cover { fill: #8a2a2a; }
-.notebook-page { fill: #fbf8f0; }
+.p3-tiny-patch { --px: 0.18; position: absolute; left: 36%; bottom: 7%; z-index: 2; width: 36%; height: 15%; overflow: visible; mix-blend-mode: screen; }
+.sunpatch-far { stop-color: #fff0c4; stop-opacity: 0.36; }
+.sunpatch-near { stop-color: #ffd28a; stop-opacity: 0.14; }
+.sunpatch-glow { fill: #ffe2a8; opacity: 0.12; stroke: #ffe2a8; stroke-width: 7; stroke-linejoin: round; }
+.p3-notebook { --px: 0.24; position: absolute; left: 7%; bottom: 7%; z-index: 3; width: 37%; overflow: visible; }
+.notebook-cover-hi { stop-color: #a83a32; }
+.notebook-cover-lo { stop-color: #681a1a; }
+.notebook-stack { fill: none; stroke: #d8ccb8; stroke-width: 0.8; }
+.notebook-page-edge { stop-color: #fffbf2; }
+.notebook-page-face { stop-color: #f8f0e0; }
+.notebook-page-gutter { stop-color: #cfbe9e; }
 .notebook-grid { fill: none; stroke: #9ab8d8; stroke-width: 0.4; opacity: 0.6; }
 .notebook-margin { fill: none; stroke: #e88a9a; stroke-width: 0.7; }
 .notebook-ink { fill: none; stroke: #2a3a7a; stroke-width: 1; stroke-linecap: round; }
 .notebook-ink.is-signature { stroke-width: 1.4; }
-.notebook-kiss { fill: #d8182e; opacity: 0.88; }
+.notebook-kiss-core { stop-color: #c4102a; }
+.notebook-kiss-edge { stop-color: #e83a52; stop-opacity: 0.72; }
+.notebook-kiss-creases { fill: none; stroke: #fff0f0; stroke-width: 0.7; stroke-linecap: round; opacity: 0.5; }
 .notebook-kiss-line { fill: none; stroke: #8a0a1e; stroke-width: 1.2; }
-.p3-pen { --px: 0.28; position: absolute; z-index: 4; overflow: visible; filter: drop-shadow(0 5px 6px #3a120a99); }
+.notebook-gutter { fill: none; stroke: #a8987e; stroke-width: 0.8; }
+.notebook-ribbon { fill: none; stroke: #b81e2e; stroke-width: 2.2; stroke-linecap: round; }
+/* The pen, here and on the desk and the birthday page. */
+.p3-pen { --px: 0.28; position: absolute; z-index: 4; overflow: visible; }
 .part-three-scene-notebook .p3-pen { left: 39%; bottom: 7%; width: 15%; }
-.pen-body { fill: #1f2a5a; }
-.pen-tip { fill: #c9a24a; }
-.pen-clip { fill: none; stroke: #d6c08a; stroke-width: 1.4; }
-.p3-lego { --px: 0.3; position: absolute; left: 44%; bottom: 16%; z-index: 3; width: 17%; overflow: visible; filter: drop-shadow(0 6px 8px #3a120a99); }
-.lego-brick.is-red rect { fill: #e0262e; }
-.lego-brick.is-green rect { fill: #2fa04a; }
-.lego-brick.is-yellow rect { fill: #ffc72e; }
-.lego-brick .lego-stud { filter: brightness(1.15); }
+.pen-body-hi { stop-color: #5262a6; }
+.pen-body-mid { stop-color: #1f2a5a; }
+.pen-body-lo { stop-color: #0a1030; }
+.pen-grip { fill: #0a0e22; opacity: 0.45; }
+.pen-metal-hi { stop-color: #fff0c0; }
+.pen-metal-lo { stop-color: #a8823a; }
+.pen-shine { fill: none; stroke: #ffffff; stroke-width: 0.8; stroke-linecap: round; opacity: 0.45; }
+.pen-clip { fill: none; stroke: #ecd490; stroke-width: 1.4; }
+/* The lego: glossy plastic, each piece lit along its top, and the figure still missing a leg. */
+.p3-lego { --px: 0.3; position: absolute; left: 44%; bottom: 16%; z-index: 3; width: 17%; overflow: visible; }
+.lego-brick.is-red :is(.lego-face, .lego-stud) { fill: #e0262e; }
+.lego-brick.is-green :is(.lego-face, .lego-stud) { fill: #2fa04a; }
+.lego-brick.is-yellow :is(.lego-face, .lego-stud) { fill: #ffc72e; }
+.lego-shade-hi { stop-color: #ffffff; stop-opacity: 0.42; }
+.lego-shade-mid { stop-color: #ffffff; stop-opacity: 0; }
+.lego-shade-lo { stop-color: #000000; stop-opacity: 0.3; }
+.lego-glint { fill: none; stroke: #ffffff; stroke-width: 0.8; stroke-linecap: round; opacity: 0.65; }
 .lego-head { fill: #ffd24a; }
 .lego-hat { fill: #c8102e; }
 .lego-torso { fill: #2a6ad8; }
-.lego-hip { fill: #1a2a4a; }
-.lego-leg { fill: #1a2a4a; }
+.lego-hip, .lego-leg { fill: #1a2a4a; }
 .lego-leg-missing { fill: none; stroke: #ffffffb3; stroke-width: 1; stroke-dasharray: 2 2; }
 .part-three-scene-notebook .p3-smoothie { bottom: 21%; width: 6%; }
 .part-three-scene-notebook .p3-smoothie.is-one { left: 59%; }
 .part-three-scene-notebook .p3-smoothie.is-two { left: 66%; bottom: 20%; }
-.p3-smoothie.is-cream .smoothie-drink { fill: #f6ead8; }
+.p3-smoothie.is-cream .smoothie-drink-hi { stop-color: #fdf6e8; }
+.p3-smoothie.is-cream .smoothie-drink-lo { stop-color: #e0caa6; }
 .p3-smoothie.is-cream .smoothie-foam { fill: #fffaf0; }
+/* Where the sun comes through a glass, it leaves a bright caustic on the table beside it. */
+.smoothie-caustic { display: none; }
+.part-three-scene-notebook .smoothie-caustic { display: inline; fill: #ffe8b0; opacity: 0.6; }
 .story-part-3 .part-three-scene-notebook .offline-scene-caption { left: auto; right: 5%; bottom: 5%; max-width: 13ch; padding: 0 1.4rem 0 0; text-align: right; }
 .story-part-3 .part-three-scene-notebook .offline-scene-caption::before { left: auto; right: 0; }
 
 /* ---------- 5. Scene: 19/9 evening, Jollibee, then Cúc cu's little yellow stage and the songs of the night ---------- */
 .story-part-3 .part-three-scene-acoustic { background: linear-gradient(180deg, #2c1508, #1c0b06 70%, #120604); }
-.p3-stage-wall { background: radial-gradient(ellipse at 34% 46%, #ffe49a, #f4ba40 38%, #b8741e 72%, #6a3a10); }
-.p3-stage-shutter { position: absolute; top: 30%; width: 16%; height: 56%; background: repeating-linear-gradient(180deg, #6a4a2a59 0 2px, transparent 2px 7px), #8a5a2a33; box-shadow: inset 0 0 0 1px #6a4a2a4d; }
+/* The yellow wall from the photo: plaster in a spotlight behind the mic, falling off to ochre and umber at the edges. */
+.p3-stage-wall {
+  background:
+    var(--paper-grain) 0 0 / 160px 160px,
+    radial-gradient(ellipse 18% 22% at 31% 79%, #fff8de, #ffeaa8c7 42%, transparent 74%),
+    radial-gradient(ellipse 72% 64% at 34% 60%, #ffe49a, #f4ba40 46%, #b8741e 78%, #5e320c);
+}
+/* The dark wooden shutters from the photo, louvred, on the wall to the right. */
+.p3-stage-shutter {
+  position: absolute; top: 30%; width: 16%; height: 56%; border-radius: 0.15em;
+  background:
+    linear-gradient(90deg, #2a1608 0 7%, transparent 7% 93%, #2a1608 93%),
+    repeating-linear-gradient(180deg, #5a3416 0 0.18em, #946232 0.18em 0.3em, #3a200c 0.3em 0.44em);
+  box-shadow: 0 0.5em 0.9em #2a120680, inset 0 0 0 0.12em #2a1608;
+}
 .p3-stage-shutter.is-one { left: 64%; }
 .p3-stage-shutter.is-two { left: 82%; }
-/* A string of bulbs swinging in shallow loops across the wall. */
+/* A string of festoon bulbs swinging in shallow loops across the wall, each with its own halo. */
 .p3-stage-lights {
-  --px: -0.18; position: absolute; left: -4%; right: -4%; top: 4%; z-index: 1; height: 2.4em;
+  --px: -0.18; position: absolute; left: -4%; right: -4%; top: 4%; z-index: 1; height: 3.4em;
   background:
-    radial-gradient(circle at 50% 100%, #fff4d0 0 0.18em, #ffd27a99 0.24em, transparent 0.6em) 0 0 / 3.4em 2.4em repeat-x,
+    radial-gradient(circle at 50% 2.4em, #fffbe8 0 0.15em, #ffe08ad9 0.22em, #ffcf6a47 0.5em, transparent 1em) 0 0 / 3.4em 3.4em repeat-x,
     radial-gradient(ellipse 52% 100% at 50% 0, transparent 92%, #3a2410 93% 97%, transparent 98%) 0 0 / 3.4em 2.1em repeat-x;
 }
 .part-three-scene-acoustic.is-active .p3-stage-lights { animation: p3-glow 2.6s ease-in-out infinite alternate; }
+/* The spot, from high on the left, down onto the mic. */
 .p3-stage-cone {
   --px: -0.08; position: absolute; left: 4%; top: -6%; z-index: 1; width: 52%; height: 84%; pointer-events: none; mix-blend-mode: screen;
-  background: conic-gradient(from 164deg at 50% 0, transparent 0deg, #fff6d640 7deg, #fff6d626 25deg, transparent 32deg);
+  background: conic-gradient(from 160deg at 50% 0, transparent 0deg, #fff6d62e 8deg, #fff6d652 20deg, #fff6d62e 32deg, transparent 40deg);
+  -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent 98%);
+  mask-image: linear-gradient(180deg, #000 45%, transparent 98%);
 }
-.p3-stage-floor { --px: 0.08; position: absolute; inset: auto -6% -4%; z-index: 1; height: 34%; background: linear-gradient(180deg, #4a2810, #2c1608 50%, #180a04); box-shadow: inset 0 0.22em 0 #ffd27a4d, 0 -10px 30px #2a12064d; }
-.p3-guitar { --px: -0.04; position: absolute; left: 9%; bottom: 31%; z-index: 2; width: 9%; overflow: visible; transform: rotate(-14deg); filter: drop-shadow(0 10px 10px #2a120699); }
-.guitar-body { fill: #c87a3a; }
-.guitar-neck { fill: #5a3418; }
-.guitar-head { fill: #3a2010; }
-.guitar-hole { fill: #2a1408; }
-.guitar-strings { fill: none; stroke: #f6e8c8; stroke-width: 0.6; }
-.guitar-bridge { fill: none; stroke: #2a1408; stroke-width: 2.2; }
-.p3-micstand { position: absolute; left: 25%; bottom: 31%; z-index: 2; width: 7%; overflow: visible; filter: drop-shadow(0 8px 8px #2a120699); }
-.micstand-pole, .micstand-boom { fill: none; stroke: #2a2a2e; stroke-width: 3; stroke-linecap: round; }
-.micstand-mic { fill: #3a3a40; }
-.p3-fan { --px: 0.04; position: absolute; left: 38%; bottom: 31%; z-index: 2; width: 8%; overflow: visible; filter: drop-shadow(0 8px 8px #2a120699); }
-.fan-cage { fill: #ffffff1f; stroke: #e8e4dc; stroke-width: 1.4; }
-.fan-blades path { fill: #8ac4ecd9; }
-.fan-hub { fill: #f2eee6; }
-.fan-pole { fill: none; stroke: #e8e4dc; stroke-width: 2.4; stroke-linecap: round; }
+/* The stage: lit planks, a bright lip, a dark riser, then the café's own floor in front where the audience sits. */
+.p3-stage-floor {
+  --px: 0.08; position: absolute; inset: auto -6% -4%; z-index: 1; height: 34%;
+  background:
+    radial-gradient(ellipse 24% 16% at 30.4% 6%, #ffe7a080, transparent 70%),
+    repeating-linear-gradient(90deg, #0000003d 0 1px, transparent 1px 5.5%) 0 0 / 100% 16.6% no-repeat,
+    linear-gradient(180deg, #9a6028, #66391a 16.6%, #ffd27a 16.6% 17.4%, #3a1c08 17.4%, #1e0e04 29%, #0a0402 29% 30%, #26140a 30%, #120804);
+  box-shadow: 0 -0.6em 1.6em #2a12064d;
+}
+/* The guitar leans on the wall, its shadow thrown on the plaster beside it. */
+.p3-guitar { --px: -0.04; position: absolute; left: 9%; bottom: 31%; z-index: 2; width: 9%; overflow: visible; rotate: -14deg; }
+.guitar-cast { fill: #4a20063d; }
+.guitar-wood-hi { stop-color: #f8c87e; }
+.guitar-wood-mid { stop-color: #c87a3a; }
+.guitar-wood-lo { stop-color: #643014; }
+.guitar-neck-hi { stop-color: #7e4c24; }
+.guitar-neck-lo { stop-color: #3a200c; }
+.guitar-frets { fill: none; stroke: #e0d0a8; stroke-width: 0.5; opacity: 0.7; }
+.guitar-head { fill: #2a1408; }
+.guitar-pegs { fill: none; stroke: #ecdcac; stroke-width: 1.2; stroke-linecap: round; }
+.guitar-binding { fill: none; stroke: #f6e2b8; stroke-width: 0.9; opacity: 0.8; }
+.guitar-guard { fill: #2a1008; opacity: 0.85; }
+.guitar-rosette { fill: none; stroke: #3a1c08; stroke-width: 1.6; stroke-dasharray: 1.2 1; }
+.guitar-hole { fill: #1a0a04; }
+.guitar-strings { fill: none; stroke: #fff6dc; stroke-width: 0.35; opacity: 0.9; }
+.guitar-bridge { fill: none; stroke: #2a1408; stroke-width: 2.2; stroke-linecap: round; }
+.guitar-gloss { opacity: 0.6; }
+.p3-micstand { position: absolute; left: 25%; bottom: 31%; z-index: 2; width: 7%; overflow: visible; }
+.micstand-chrome-lo { stop-color: #34343a; }
+.micstand-chrome-hi { stop-color: #f4f4f8; }
+.micstand-chrome-mid { stop-color: #8a8a94; }
+.micstand-legs { fill: none; stroke: #1e1e22; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.micstand-boom { fill: none; stroke: #2a2a30; stroke-width: 2.4; stroke-linecap: round; }
+.micstand-mic { fill: #1e1e24; }
+.micstand-grille-hi { stop-color: #f4f4f8; }
+.micstand-grille-lo { stop-color: #5a5a64; }
+.micstand-mesh { fill: none; stroke: #2a2a30; stroke-width: 0.5; opacity: 0.6; }
+.p3-fan { --px: 0.04; position: absolute; left: 38%; bottom: 31%; z-index: 2; width: 8%; overflow: visible; }
+.fan-metal-lo { stop-color: #8a8a90; }
+.fan-metal-hi { stop-color: #fbfbfd; }
+.fan-motor { fill: #d8d8dc; opacity: 0.5; }
+.fan-blade-in { stop-color: #c4e6ff; stop-opacity: 0.95; }
+.fan-blade-out { stop-color: #6ab0e8; stop-opacity: 0.75; }
+.fan-cage { fill: #ffffff14; stroke: #f4f1ea; stroke-width: 1.3; }
+.fan-ring { fill: none; stroke: #f4f1ea; stroke-width: 0.6; opacity: 0.6; }
+.fan-spokes { fill: none; stroke: #f4f1ea; stroke-width: 0.5; opacity: 0.55; }
+.fan-hub { fill: #f4f0e8; }
+.fan-glint { fill: none; stroke: #ffffff; stroke-width: 1.2; stroke-linecap: round; opacity: 0.8; }
 .part-three-scene-acoustic.is-active .fan-blades { animation: p3-turn 0.7s linear infinite; transform-box: view-box; transform-origin: 30px 28px; }
+/* The evening's two songs, on cards taped to the wall. */
 .p3-song {
   --px: -0.14; position: absolute; left: 6%; top: 14%; z-index: 3; max-width: 13ch; padding: 0.45em 0.8em 0.5em; border-radius: 0.3em; rotate: -3deg;
-  color: #4a1a08; background: linear-gradient(170deg, #fffaf0, #f8ead2); font: 700 1em/1.25 var(--hand); box-shadow: 0 10px 18px #2a120680;
+  color: #4a1a08; background: var(--paper-grain), linear-gradient(170deg, #fffaf0, #f6e4c8); background-blend-mode: soft-light, normal; font: 700 1em/1.25 var(--hand);
+  box-shadow: 0 0.7em 1.2em -0.3em #2a1206a6, 0 0.1em 0.2em #2a120640;
 }
 .p3-song::before { content: "♪ "; color: #e0263f; }
+.p3-song::after { content: ""; position: absolute; top: -0.4em; left: 50%; width: 2.6em; height: 0.8em; margin-left: -1.3em; background: #ffe8a894; rotate: -4deg; }
 .p3-song-slot { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
 .p3-song.is-two { rotate: 2deg; }
-.p3-chair { --px: 0.24; position: absolute; z-index: 3; width: 15%; overflow: visible; filter: drop-shadow(0 8px 8px #0a020699); }
+.p3-chair { --px: 0.24; position: absolute; z-index: 3; width: 15%; overflow: visible; }
 .p3-chair.is-one { left: 58%; bottom: 3%; }
 .p3-chair.is-two { left: 76%; bottom: 2%; }
-.chair-frame { fill: none; stroke: #1e1e1e; stroke-width: 3; stroke-linecap: round; }
-.chair-canvas { fill: #3e7e4c; }
-.p3-tray { --px: 0.34; position: absolute; left: 4%; bottom: 4%; z-index: 4; width: 36%; overflow: visible; filter: drop-shadow(0 10px 12px #0a0206b3); }
-.tray-base { fill: #c8102e; }
-.tray-liner { fill: #fff3e2; opacity: 0.9; }
-.tray-plate { fill: #f8c232; }
+.chair-frame { fill: none; stroke: #1a1a1a; stroke-width: 3; stroke-linecap: round; }
+.chair-frame-light { fill: none; stroke: #9a9a86; stroke-width: 0.8; stroke-linecap: round; opacity: 0.6; }
+.chair-canvas-hi { stop-color: #5ea46e; }
+.chair-canvas-lo { stop-color: #2a5a36; }
+.chair-seam { fill: none; stroke: #c8e8c8; stroke-width: 0.6; stroke-dasharray: 1.4 1.2; opacity: 0.5; }
+/* A low wooden café table in front of the stage, the stage light caught along its far edge. */
+.p3-cafe-table {
+  --px: 0.28; position: absolute; left: -4%; bottom: -12%; z-index: 3; width: 66%; height: 36%; border-radius: 50%;
+  background:
+    radial-gradient(ellipse 50% 30% at 46% 8%, #ffd88a47, transparent 70%),
+    repeating-radial-gradient(ellipse 120% 60% at 44% 40%, transparent 0 0.8em, #0000000f 0.8em 0.9em),
+    var(--paper-grain) 0 0 / 160px 160px,
+    radial-gradient(ellipse at 44% 30%, #7a4a26, #4a2810 60%, #24120a);
+  box-shadow: inset 0 0.2em 0 #ffd27a59, inset 0 -1em 1.4em #0a040299, 0 -0.4em 1.6em #0a040266;
+}
+/* The Jollibee tray: red plastic with a gloss, the yellow plates, the chicken crisp and the colas beaded with cold. */
+.p3-tray { --px: 0.34; position: absolute; left: 6%; bottom: 3%; z-index: 4; width: 31%; overflow: visible; }
+.tray-base-hi { stop-color: #ea2c42; }
+.tray-base-lo { stop-color: #980a20; }
+.tray-lip { fill: none; stroke: #ff7a8a; stroke-width: 1.2; opacity: 0.6; }
+.tray-liner { fill: #fff3e2; opacity: 0.92; }
+.tray-liner-print { fill: none; stroke: #e0263f; stroke-width: 1.6; stroke-linecap: round; opacity: 0.4; }
+.tray-plate-shadow { fill: #6a1a0a40; }
+.tray-plate-hi { stop-color: #ffe684; }
+.tray-plate-lo { stop-color: #e6a41c; }
 .tray-plate-well { fill: #ffd85a; }
 .tray-noodles { fill: #f6dca0; }
 .tray-noodle-lines { fill: none; stroke: #d8b06a; stroke-width: 1; stroke-linecap: round; }
 .tray-sauce { fill: #d8382a; }
-.tray-chicken { fill: #c27026; stroke: #8a4614; stroke-width: 1; stroke-linejoin: round; }
-.tray-crumb { fill: none; stroke: #f2b04a; stroke-width: 1.6; stroke-linecap: round; }
+.tray-sauce-gloss { fill: none; stroke: #ffb8a0; stroke-width: 1.2; stroke-linecap: round; opacity: 0.8; }
+.tray-chicken-hi { stop-color: #f4b85e; }
+.tray-chicken-mid { stop-color: #c27026; }
+.tray-chicken-lo { stop-color: #763810; }
+.tray-chicken { stroke: #6a3010; stroke-width: 0.8; stroke-linejoin: round; }
+.tray-crumb { fill: none; stroke: #ffd27a; stroke-width: 1.6; stroke-linecap: round; }
 .tray-fries-box { fill: #e0263f; }
-.tray-fries { fill: none; stroke: #f8cc4a; stroke-width: 3; stroke-linecap: round; }
-.tray-cola { fill: #3a1a10; stroke: #ffffffb3; stroke-width: 1.2; }
+.tray-fries-box-shine { fill: none; stroke: #ff8a9a; stroke-width: 1.2; stroke-linecap: round; opacity: 0.7; }
+.tray-fries { fill: none; stroke: #f2b83a; stroke-width: 3; stroke-linecap: round; }
+.tray-fries-light { fill: none; stroke: #fff0a8; stroke-width: 1.2; stroke-linecap: round; }
+.tray-cola-hi { stop-color: #6e3c28; }
+.tray-cola-lo { stop-color: #1e0a06; }
+.tray-cola { stroke: #ffffffb3; stroke-width: 1.2; }
+.tray-cola-shine { opacity: 0.55; }
+.tray-cola-drops { fill: none; stroke: #ffffffcc; stroke-width: 1.4; stroke-linecap: round; }
 .tray-cola-lid { fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; }
 .tray-cola-straw { fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; }
-.part-three-scene-acoustic .p3-seeds.is-two { left: 45%; bottom: 4%; width: 12%; }
+.tray-gloss { opacity: 0.35; }
+.part-three-scene-acoustic .p3-seeds.is-two { left: 47%; bottom: 4%; width: 12%; }
+.part-three-scene-acoustic .p3-smoothie.is-matcha { left: 40.5%; bottom: 5%; width: 5.4%; }
+.p3-smoothie.is-matcha .smoothie-drink-hi { stop-color: #e2efc4; }
+.p3-smoothie.is-matcha .smoothie-drink-lo { stop-color: #6e9c3c; }
+.p3-smoothie.is-matcha .smoothie-foam { fill: #f8f8ea; }
+.p3-smoothie.is-matcha .smoothie-sprig { display: none; }
 .part-three-scene-acoustic .note-head { fill: #fff1c8; }
 .part-three-scene-acoustic .note-stem { stroke: #fff1c8; }
 .p3-stage-note.is-one { left: 30%; top: 40%; }
@@ -452,25 +886,47 @@
 
 /* ---------- 6. Scene: 23/9, the birthday planned a week ahead, a storm that blows over "như không có chuyện gì" ---------- */
 .story-part-3 .part-three-scene-planner { background: linear-gradient(180deg, #3e1a3a, #2a1028 60%, #1a0814); }
-.p3-planner-wall { background: radial-gradient(ellipse at 80% 24%, #ff9ab047, transparent 45%), repeating-linear-gradient(90deg, #ffffff06 0 1px, transparent 1px 8%), linear-gradient(180deg, #5e2c4c, #3e1a34); }
-.p3-planner-window {
-  position: absolute; left: 67%; top: 22%; width: 22%; height: 38%; border-radius: 0.4em 0.4em 0.2em 0.2em;
-  background: linear-gradient(90deg, transparent calc(50% - 0.12em), #2a0e22 0 calc(50% + 0.12em), transparent 0), linear-gradient(180deg, #4a2a6a, #b8507e 52%, #ffa070 88%);
-  box-shadow: 0 0 0 0.3em #2a0e22, 0 0 50px 10px #ff9ab03d;
+/* Her room at dusk: striped wallpaper, the window's rose light, and the warm spill of the desk lamp (the sky reaches to
+   78% of the card here, under the desk). */
+.p3-planner-wall {
+  inset: -12% -8% 22%;
+  background:
+    radial-gradient(ellipse 22% 26% at 76% 74%, #ffcf9a5c, transparent 70%),
+    radial-gradient(ellipse 30% 32% at 78% 37%, #ff9ab04d, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 0% 0%, #1a081466, transparent 70%),
+    repeating-linear-gradient(90deg, #ffffff09 0 1px, transparent 1px 2.4%, #00000014 2.4% 2.6%, transparent 2.6% 4.8%),
+    var(--paper-grain) 0 0 / 160px 160px,
+    linear-gradient(180deg, #5e2c4c, #4a2040 60%, #3a1834);
 }
-.p3-calendar { --px: -0.14; position: absolute; left: 5%; top: 7%; z-index: 2; width: 29%; overflow: visible; filter: drop-shadow(0 14px 18px #0a0206a6); }
-.calendar-sheet { fill: #fbf4ec; }
-.calendar-head { fill: #d8213a; }
-.calendar-rings { fill: none; stroke: #8a8a8e; stroke-width: 3; stroke-linecap: round; }
+.p3-planner-window {
+  position: absolute; left: 67%; top: 20%; width: 22%; height: 34.7%; border-radius: 0.4em 0.4em 0.2em 0.2em;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.12em), #2a0e22 0 calc(50% + 0.12em), transparent 0),
+    radial-gradient(ellipse 70% 30% at 50% 100%, #ffc890b3, transparent 70%),
+    radial-gradient(circle at 76% 16%, #fff6e6 0 1px, #fff6e640 2px, transparent 3px),
+    linear-gradient(180deg, #3a2260, #8a3f7e 45%, #e0708a 78%, #ffb07a);
+  box-shadow: 0 0 0 0.3em #2a0e22, 0 0 0 0.36em #ff9ab033, 0 0 3em 0.6em #ff9ab040;
+}
+.p3-planner-window::after { content: ""; position: absolute; left: -8%; right: -8%; top: 100%; height: 0.42em; margin-top: 0.24em; border-radius: 0.1em; background: linear-gradient(180deg, #9a5a72, #4a1e38 50%, #2a0e22); box-shadow: 0 0.4em 0.6em -0.2em #0a0206b3; }
+/* The calendar: paper on wire rings, the first circled in red. */
+.p3-calendar { --px: -0.14; position: absolute; left: 5%; top: 8%; z-index: 2; width: 31%; overflow: visible; filter: drop-shadow(0 0.8em 1em #0a0206a6); }
+.calendar-under { fill: #0a020638; }
+.calendar-sheet-hi { stop-color: #fffaf4; }
+.calendar-sheet-lo { stop-color: #ead8cc; }
+.calendar-head-hi { stop-color: #ec3249; }
+.calendar-head-lo { stop-color: #b41a30; }
+.calendar-curl { fill: #cdb6a8; }
+.calendar-ring-lo { stop-color: #46464c; }
+.calendar-ring-hi { stop-color: #ececf2; }
 .calendar-month { fill: #fff6ee; font: 700 9px/1 var(--body); letter-spacing: 1.4px; }
 .calendar-day { fill: #5a3a42; font: 600 7.2px/1 var(--body); }
 .calendar-day.is-birthday { fill: #d8213a; font-weight: 800; }
 .calendar-circle { fill: none; stroke: #d8213a; stroke-width: 1.6; }
 .calendar-heart { fill: #d8213a; }
 .p3-plan {
-  --px: -0.06; position: absolute; left: 39%; top: 9%; z-index: 3; width: 26%; padding: 0.8em 0.9em 0.9em; border-radius: 2px; transform: rotate(4deg);
-  color: var(--p3-paper-ink); background: var(--paper-grain), linear-gradient(170deg, #fffaf2, #f6e8d8); background-blend-mode: soft-light, normal;
-  box-shadow: 0 18px 30px -12px #0a0206b3;
+  --px: -0.06; position: absolute; left: 40%; top: 11%; z-index: 3; width: 27%; padding: 0.8em 0.9em 0.9em; border-radius: 2px; rotate: 4deg;
+  color: var(--p3-paper-ink); background: var(--paper-grain), linear-gradient(170deg, #fffaf2, #f2e2d2); background-blend-mode: soft-light, normal;
+  box-shadow: 0 1.2em 1.8em -0.8em #0a0206b3, 0 0.1em 0.2em #0a020640;
 }
 .p3-plan::before { content: ""; position: absolute; top: -0.45em; left: 50%; width: 3.6em; height: 1em; margin-left: -1.8em; background: #ff9ab080; rotate: -3deg; }
 .p3-plan b { display: block; color: #c3304b; font: 700 1em/1.2 var(--hand); }
@@ -479,30 +935,78 @@
 .p3-plan li i { display: inline-block; width: 82%; height: 0.42em; vertical-align: middle; background: radial-gradient(circle at 50% 100%, transparent 0.16em, #4a2a3099 0.18em 0.26em, transparent 0.28em) 0 0 / 0.46em 0.42em repeat-x; }
 .p3-plan li:nth-child(3) i { width: 64%; }
 .p3-plan li:nth-child(4) i { width: 74%; }
-.p3-storm { position: absolute; left: 68%; top: 9%; z-index: 3; width: 23%; overflow: visible; filter: drop-shadow(0 10px 14px #0a020680); }
-.storm-cloud { fill: #6e5a7c; }
-.storm-bolt { fill: #ffd84a; filter: drop-shadow(0 0 4px #ffd84a); }
+/* The quarrel, a heavy little cloud in the dusk window, lit from above and crackling; then the calm. */
+.p3-storm { position: absolute; left: 68%; top: 9%; z-index: 3; width: 23%; overflow: visible; filter: drop-shadow(0 0.6em 0.9em #0a020680); }
+.storm-cloud-hi { stop-color: #ab96b6; }
+.storm-cloud-mid { stop-color: #6e5a7c; }
+.storm-cloud-lo { stop-color: #3c2c48; }
+.storm-cloud-edge { fill: none; stroke: #ffd0dc; stroke-width: 1.2; stroke-linecap: round; opacity: 0.55; }
+.storm-bolt-glow { fill: none; stroke: #ffd84a; stroke-width: 6; stroke-linejoin: round; opacity: 0.3; }
+.storm-bolt { fill: #ffe46a; }
 .storm-rain { fill: none; stroke: #b0c0dc; stroke-width: 2; stroke-linecap: round; }
 .p3-calm { position: absolute; left: 70%; top: 13%; z-index: 3; display: grid; justify-items: center; gap: 0.4em; width: 19%; }
 .story-part-3 .part-three-scene .p3-calm .heart-sprite { width: 48%; fill: #ff6b7a; filter: drop-shadow(0 0 14px #ff6b7aaa); }
 .p3-calm small { color: #fff0f2; font: 700 0.92em/1.2 var(--hand); text-align: center; text-shadow: 0 2px 10px #3a0a1e; }
 .part-three-scene-planner.is-active .p3-calm .heart-sprite { animation: heart-beat 2.6s ease-in-out infinite; }
-.p3-desk { --px: 0.16; position: absolute; inset: auto -6% -4%; z-index: 2; height: 28%; background: linear-gradient(180deg, #6e3e2c, #4e2618 60%, #2a120a); box-shadow: inset 0 0.22em 0 #b0704e66, 0 -10px 30px #0a02064d; }
-.p3-gift {
-  --px: 0.2; position: absolute; left: 14%; bottom: 13%; z-index: 3; width: 15%; aspect-ratio: 1.1; border-radius: 0.2em;
-  background: linear-gradient(90deg, transparent 43%, #f3c77e 43% 57%, transparent 57%), linear-gradient(180deg, #e0263f, #a8122c);
-  box-shadow: 0 14px 18px -6px #0a0206b3, inset 0 -0.4em 0.6em #0000002e;
+/* The desk: walnut grain, its lit back edge and its front edge in shade. */
+.p3-desk {
+  --px: 0.16; position: absolute; inset: auto -6% -4%; z-index: 2; height: 28%;
+  background:
+    linear-gradient(180deg, #f2b48a80 0 0.16em, transparent 0.16em),
+    linear-gradient(180deg, transparent 74%, #e8a07a66 74% 75%, #3a1a10 75%, #1e0c08),
+    repeating-linear-gradient(178deg, #ffffff07 0 1px, transparent 1px 0.5em, #0000000f 0.5em 0.56em, transparent 0.56em 1.1em),
+    var(--paper-grain) 0 0 / 160px 160px,
+    linear-gradient(180deg, #7a4630, #5a2e1c 60%, #3e1c10);
+  box-shadow: 0 -0.6em 1.6em #0a020666;
 }
-.p3-gift::before { content: ""; position: absolute; inset: -0.5em -0.35em auto; height: 0.9em; border-radius: 0.15em; background: linear-gradient(90deg, transparent 43%, #f3c77e 43% 57%, transparent 57%), linear-gradient(180deg, #f2364e, #c8183a); box-shadow: 0 0.2em 0.3em #0a020666; }
-.p3-gift::after { content: ""; position: absolute; left: 50%; top: -1.6em; width: 2.6em; height: 1.2em; margin-left: -1.3em; background: radial-gradient(ellipse 34% 46% at 28% 60%, transparent 52%, #f3c77e 56% 92%, transparent 96%), radial-gradient(ellipse 34% 46% at 72% 60%, transparent 52%, #f3c77e 56% 92%, transparent 96%); }
+/* The lamp's light: a glow at the mouth of its shade, a soft cone, and a warm pool across the desk. */
+.p3-lamp-light {
+  --px: 0.16; position: absolute; inset: 0; z-index: 2; pointer-events: none; mix-blend-mode: screen;
+  background:
+    radial-gradient(circle at 76% 67%, #fff0c8 0 0.2em, #ffd8a066 1em, transparent 3em),
+    radial-gradient(ellipse 32% 12% at 57% 84%, #ffd8a070, transparent 72%),
+    conic-gradient(from 196deg at 76% 67%, transparent 0deg, #ffe2b01f 12deg, #ffe2b03d 32deg, #ffe2b01f 52deg, transparent 66deg);
+  -webkit-mask-image: radial-gradient(ellipse 46% 46% at 68% 76%, #000 34%, transparent 82%);
+  mask-image: radial-gradient(ellipse 46% 46% at 68% 76%, #000 34%, transparent 82%);
+}
+.p3-desklamp { --px: 0.2; position: absolute; left: 70%; bottom: 15%; z-index: 3; width: 24%; overflow: visible; }
+.desklamp-hi { stop-color: #f8dca8; }
+.desklamp-mid { stop-color: #b8823e; }
+.desklamp-lo { stop-color: #4a2c14; }
+.desklamp-arm { fill: none; stroke: #6a4420; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.desklamp-arm-light { fill: none; stroke: #ffe2a8; stroke-width: 0.9; stroke-linecap: round; opacity: 0.7; }
+.desklamp-joint { fill: #8a5a28; stroke: #ffe2a8; stroke-width: 0.6; }
+.desklamp-bulb-core { stop-color: #fffbe8; }
+.desklamp-bulb-edge { stop-color: #ffc86a; stop-opacity: 0.6; }
+.desklamp-rim { fill: none; stroke: #fff0c8; stroke-width: 1; stroke-linecap: round; opacity: 0.8; }
+/* The present, a week early. */
+.p3-gift { --px: 0.2; position: absolute; left: 13%; bottom: 12%; z-index: 3; width: 17%; overflow: visible; }
+.gift-front-lo { stop-color: #a8122c; }
+.gift-front-hi { stop-color: #d8263e; }
+.gift-side { fill: #e8384e; }
+.gift-top { fill: #f44c60; }
+.gift-satin-lo { stop-color: #c8963e; }
+.gift-satin-hi { stop-color: #fff0b8; }
+.gift-ribbon.is-side { fill: #f6d58a; }
+.gift-ribbon.is-top { fill: #ffe8a8; }
+.gift-tail { fill: #d8a24a; }
+.gift-knot { fill: #e8b85a; }
+.gift-shine { fill: none; stroke: #ffffff; stroke-width: 1; stroke-linecap: round; opacity: 0.4; }
 .p3-phone-down.is-desk { left: 44%; bottom: 9%; width: 13%; rotate: -6deg; }
-.part-three-scene-planner .p3-pen.is-desk { left: 62%; bottom: 10%; width: 18%; }
-.p3-tay { --px: -0.1; position: absolute; left: 41%; bottom: 41%; z-index: 4; color: #ffd8a8; font: 700 1.35em/1 var(--hand); rotate: -6deg; text-shadow: 0 0 14px #ff8a5a80, 0 2px 10px #0a0206; }
+.part-three-scene-planner .p3-pen.is-desk { left: 60%; bottom: 10%; width: 18%; }
+.p3-tay { --px: -0.1; position: absolute; left: 38%; bottom: 40%; z-index: 4; color: #ffe8c8; font: 700 1.6em/1 var(--hand); rotate: -6deg; text-shadow: 0 0 2px #fff6e6, 0 0 14px #ff9a6ab3, 0 0 30px #ff7a5a66, 0 2px 10px #0a0206; }
 .story-part-3 .part-three-scene-planner .offline-scene-caption { left: 5%; bottom: 31%; max-width: 13ch; }
 
 /* ---------- 7. Scene: 24/9, Mid-Autumn in Hà Đông, red lanterns, tacos in ngõ Ao Sen, a hotel "như ma" ---------- */
-.story-part-3 .part-three-scene-lantern { background: linear-gradient(180deg, #1a0a2a, #2c0e2c 46%, #3c1022 70%, #1a060c); }
-.p3-autumn-sky { background: radial-gradient(ellipse at 68% 34%, #ff9a5a2e, transparent 46%), linear-gradient(180deg, #110624, #2a0c2c 60%, #4a1426); }
+/* The street at the foot of the towers takes the lanterns' light: the star lantern's red, the claw machine's pink. */
+.story-part-3 .part-three-scene-lantern {
+  background:
+    radial-gradient(ellipse 30% 10% at 14% 86%, #ff6a4a47, transparent 70%),
+    radial-gradient(ellipse 22% 8% at 87% 88%, #ff7ad847, transparent 70%),
+    radial-gradient(ellipse 40% 10% at 52% 84%, #ffb46a2e, transparent 70%),
+    linear-gradient(180deg, #1a0a2a, #2c0e2c 46%, #3c1022 70%, #2a0c18 74%, #1a060c);
+}
+.p3-autumn-sky { background: radial-gradient(ellipse at 68% 34%, #ff9a5a33, transparent 46%), radial-gradient(circle at 18% 30%, #fff6e699 0 1px, transparent 1.6px), radial-gradient(circle at 40% 14%, #fff6e680 0 1px, transparent 1.6px), linear-gradient(180deg, #110624, #2a0c2c 60%, #4a1426); }
 .p3-full-moon {
   position: absolute; left: 57%; top: 24%; width: 22%; aspect-ratio: 1; border-radius: 50%;
   background:
@@ -511,6 +1015,25 @@
   box-shadow: 0 0 60px 16px #ffb46a59, 0 0 170px 54px #ff7a4a33;
 }
 .part-three-scene-lantern.is-active .p3-full-moon { animation: sun-breathe 6s ease-in-out infinite alternate; }
+/* Thin cloud drifting across the moon's lower edge, darker than the sky where it crosses the light. */
+.p3-moon-cloud {
+  position: absolute; left: 47%; top: 46%; width: 50%; height: 9%;
+  background:
+    radial-gradient(ellipse 20% 34% at 26% 54%, #3c1a3cd9, transparent 75%), radial-gradient(ellipse 24% 40% at 44% 46%, #46204ae0, transparent 75%),
+    radial-gradient(ellipse 18% 30% at 62% 58%, #3c1a3cc7, transparent 75%), radial-gradient(ellipse 22% 26% at 80% 50%, #3c1a3ca6, transparent 75%),
+    radial-gradient(ellipse 30% 22% at 50% 40%, #ffcf9a2e, transparent 75%);
+}
+/* Hà Đông's towers in two rows: the far ones pale in the moon's haze, the near ones dark with their windows lit. */
+.p3-hadong-far {
+  --far:
+    linear-gradient(#000, #000) 4% 100% / 7% 64% no-repeat, linear-gradient(#000, #000) 17% 100% / 9% 92% no-repeat,
+    linear-gradient(#000, #000) 31% 100% / 6% 70% no-repeat, linear-gradient(#000, #000) 45% 100% / 10% 54% no-repeat,
+    linear-gradient(#000, #000) 70% 100% / 7% 80% no-repeat, linear-gradient(#000, #000) 86% 100% / 9% 60% no-repeat;
+  position: absolute; left: 0; right: 0; bottom: 12%; height: 22%;
+  background: radial-gradient(circle at 30% 30%, #ffc89a4d 0 0.05em, transparent 0.09em) 0 0 / 1.6em 1.2em, linear-gradient(180deg, #3a1e4a, #4a2452);
+  -webkit-mask: var(--far);
+  mask: var(--far);
+}
 .p3-hadong {
   --px: -0.16; position: absolute; inset: auto -6% 27% -6%; z-index: 1; height: 26%;
   background:
@@ -518,119 +1041,237 @@
   -webkit-mask: linear-gradient(#000, #000) 2% 100% / 10% 60% no-repeat, linear-gradient(#000, #000) 14% 100% / 7% 84% no-repeat, linear-gradient(#000, #000) 24% 100% / 12% 44% no-repeat, linear-gradient(#000, #000) 39% 100% / 6% 72% no-repeat, linear-gradient(#000, #000) 48% 100% / 11% 52% no-repeat, linear-gradient(#000, #000) 62% 100% / 8% 100% no-repeat, linear-gradient(#000, #000) 73% 100% / 12% 58% no-repeat, linear-gradient(#000, #000) 88% 100% / 9% 76% no-repeat, linear-gradient(#000, #000) 0 100% / 100% 22% no-repeat;
   mask: linear-gradient(#000, #000) 2% 100% / 10% 60% no-repeat, linear-gradient(#000, #000) 14% 100% / 7% 84% no-repeat, linear-gradient(#000, #000) 24% 100% / 12% 44% no-repeat, linear-gradient(#000, #000) 39% 100% / 6% 72% no-repeat, linear-gradient(#000, #000) 48% 100% / 11% 52% no-repeat, linear-gradient(#000, #000) 62% 100% / 8% 100% no-repeat, linear-gradient(#000, #000) 73% 100% / 12% 58% no-repeat, linear-gradient(#000, #000) 88% 100% / 9% 76% no-repeat, linear-gradient(#000, #000) 0 100% / 100% 22% no-repeat;
 }
-.p3-redlantern { --px: -0.1; position: absolute; z-index: 2; overflow: visible; transform-origin: 50% 0; filter: drop-shadow(0 0 18px #ff4a3a73); }
-.p3-redlantern.is-one { left: 6%; top: -1%; width: 9%; }
-.p3-redlantern.is-two { left: 19%; top: -3%; width: 7%; }
-.p3-redlantern.is-three { left: 31%; top: 0; width: 8%; }
+/* Lights far down the street, out of focus. */
+.p3-lantern-bokeh {
+  --px: -0.1; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 54%, #ffb46a52 0 0.4em, transparent 0.9em), radial-gradient(circle at 46% 46%, #ff6a5a47 0 0.5em, transparent 1.1em),
+    radial-gradient(circle at 63% 58%, #ffd08a4d 0 0.3em, transparent 0.7em), radial-gradient(circle at 74% 49%, #ff8a6a40 0 0.6em, transparent 1.2em),
+    radial-gradient(circle at 92% 60%, #ffb46a47 0 0.35em, transparent 0.8em), radial-gradient(circle at 34% 62%, #ff7ad83d 0 0.4em, transparent 0.9em);
+}
+/* The red lanterns, strung on a cord across the top, each lit from inside. */
+.p3-lantern-string { --px: -0.1; position: absolute; left: -6%; top: -8%; z-index: 2; width: 56%; height: 11%; border-bottom: 1.5px solid #2a0a10; border-radius: 0 0 50% 50% / 0 0 100% 100%; pointer-events: none; }
+.p3-redlantern { --px: -0.1; position: absolute; z-index: 2; overflow: visible; transform-origin: 50% 0; filter: drop-shadow(0 0 1.1em #ff4a3a80); }
+.p3-redlantern.is-one { left: 6%; top: 2.5%; width: 9%; }
+.p3-redlantern.is-two { left: 19%; top: 3%; width: 7%; }
+.p3-redlantern.is-three { left: 31%; top: 2.4%; width: 8%; }
 .redlantern-cord { fill: none; stroke: #2a0a10; stroke-width: 1.4; }
-.redlantern-cap { fill: #e8b04a; }
-.redlantern-body { fill: #e0202e; }
-.redlantern-ribs { fill: none; stroke: #9a0a1a; stroke-width: 1.4; }
-.redlantern-glow { fill: #ffd27a; opacity: 0.55; filter: blur(3px); }
-.redlantern-tassel { fill: none; stroke: #ffc24a; stroke-width: 1.4; stroke-linecap: round; }
-.part-three-scene-lantern.is-active .redlantern-glow,
-.part-three-scene-bento.is-active .redlantern-glow { animation: lamp-flicker 3.4s ease-in-out infinite alternate; }
-.p3-starlantern { --px: 0.12; position: absolute; left: 5%; bottom: 17%; z-index: 4; width: 19%; overflow: visible; filter: drop-shadow(0 0 22px #ff6a4a80); }
-.starlantern-stick { fill: none; stroke: #8a5a2a; stroke-width: 3; stroke-linecap: round; }
-.starlantern-star { fill: #ff3a3a; stroke: #ffd27a; stroke-width: 1.6; stroke-linejoin: round; }
-.starlantern-frame { fill: none; stroke: #ffd27a99; stroke-width: 0.9; }
-.starlantern-tassel { fill: none; stroke: #ffd24a; stroke-width: 1.6; stroke-linecap: round; }
-.starlantern-glow { fill: #fff1c8; opacity: 0.55; filter: blur(4px); }
-.p3-claw { --px: 0.08; position: absolute; right: 5%; bottom: 13%; z-index: 3; width: 16%; overflow: visible; filter: drop-shadow(0 0 18px #ff7ad866) drop-shadow(0 12px 14px #0a0206b3); }
-.claw-cabinet { fill: #e8306a; }
-.claw-marquee { fill: #ffd84a; }
+.redlantern-core { stop-color: #ffd890; }
+.redlantern-silk { stop-color: #f0302a; }
+.redlantern-edge { stop-color: #860a16; }
+.redlantern-flame-core { stop-color: #fff2c0; stop-opacity: 0.7; }
+.redlantern-flame-edge { stop-color: #ffb46a; stop-opacity: 0; }
+.redlantern-ribs { fill: none; stroke: #7a0a14; stroke-width: 1.2; opacity: 0.6; }
+.redlantern-sheen { fill: none; stroke: #ffc0a0; stroke-width: 1.6; stroke-linecap: round; opacity: 0.5; }
+.redlantern-cap-lo { stop-color: #8a5a1a; }
+.redlantern-cap-hi { stop-color: #ffe08a; }
+.redlantern-tassel { fill: none; stroke: #ffc24a; stroke-width: 1.2; stroke-linecap: round; }
+.redlantern-knot { fill: #e8a83a; }
+.part-three-scene-lantern.is-active .redlantern-flame,
+.part-three-scene-bento.is-active .redlantern-flame { animation: lamp-flicker 3.4s ease-in-out infinite alternate; }
+/* Đèn ông sao: red cellophane glowing from its candle, a gold edge, a bamboo stick. */
+.p3-starlantern { --px: 0.12; position: absolute; left: 5%; bottom: 17%; z-index: 4; width: 19%; overflow: visible; filter: drop-shadow(0 0 1.4em #ff6a4a8c); }
+.starlantern-core { stop-color: #fff6c8; }
+.starlantern-red { stop-color: #ff3a3a; stop-opacity: 0.92; }
+.starlantern-deep { stop-color: #b0101e; stop-opacity: 0.96; }
+.starlantern-star { stroke: #ffd27a; stroke-width: 1.4; stroke-linejoin: round; }
+.starlantern-stick { fill: none; stroke-width: 3; stroke-linecap: round; }
+.starlantern-stick-hi { stop-color: #d8a868; }
+.starlantern-stick-lo { stop-color: #6a4220; }
+.starlantern-frame { fill: none; stroke: #ffd27a8c; stroke-width: 0.9; }
+.starlantern-edge { fill: none; stroke: #fff0b8; stroke-width: 1.2; stroke-linejoin: round; opacity: 0.75; }
+.starlantern-tassel { fill: none; stroke: #ffd24a; stroke-width: 1.4; stroke-linecap: round; }
+/* Playik's claw machine: a pink cabinet, a lit marquee, plush toys behind reflecting glass, its glow on the street. */
+.p3-claw { --px: 0.08; position: absolute; right: 5%; bottom: 13%; z-index: 3; width: 16%; overflow: visible; filter: drop-shadow(0 0 1.2em #ff7ad866); }
+.claw-cabinet-lo { stop-color: #9a1a4a; }
+.claw-cabinet-hi { stop-color: #ff5e92; }
+.claw-cabinet-mid { stop-color: #e02e66; }
+.claw-marquee { fill: #ffe25a; }
 .claw-name { fill: #c8104a; font: 800 9px/1 var(--body); letter-spacing: 0.08em; }
-.claw-glass { fill: #ffe6f4; opacity: 0.85; }
-.claw-arm { fill: none; stroke: #8a8a96; stroke-width: 2; stroke-linecap: round; }
-.claw-plush.is-pink { fill: #ff9ac4; }
-.claw-plush.is-gold { fill: #ffd24a; }
-.claw-plush.is-blue { fill: #7ac4ff; }
+.claw-glass-hi { stop-color: #fff2f8; }
+.claw-glass-lo { stop-color: #ffc4e2; }
+.claw-arm { fill: none; stroke: #9a9aa6; stroke-width: 2; stroke-linecap: round; }
+.claw-plush.is-pink .claw-plush-body { fill: #ff9ac4; }
+.claw-plush.is-gold .claw-plush-body { fill: #ffd24a; }
+.claw-plush.is-blue .claw-plush-body { fill: #7ac4ff; }
+.claw-plush-light { stop-color: #ffffff; stop-opacity: 0.55; }
+.claw-plush-shade { stop-color: #3a0a2a; stop-opacity: 0.35; }
+.claw-reflection { opacity: 0.45; }
 .claw-panel { fill: #b8104a; }
-.claw-button { fill: #ffd84a; }
+.claw-button-glow { fill: #ffe25a; opacity: 0.35; }
+.claw-button { fill: #ffe25a; }
 .claw-stick { fill: none; stroke: #2a2a30; stroke-width: 2.4; }
 .claw-knob { fill: #2a2a30; }
 .claw-chute { fill: #3a0a1e; }
-/* The low plastic table of a street stall, and three tacos. */
-.p3-street-table { --px: 0.2; position: absolute; left: 33%; bottom: 3%; z-index: 3; width: 40%; height: 11%; border-radius: 0.4em 0.4em 0.2em 0.2em; background: linear-gradient(180deg, #2f7ad0, #1e5aa8 70%, #174a8a); box-shadow: inset 0 0.18em 0 #8ac4ff80, 0 14px 20px #0a0206b3; }
-.p3-tacos { --px: 0.28; position: absolute; left: 35%; bottom: 11%; z-index: 4; width: 36%; overflow: visible; filter: drop-shadow(0 8px 10px #0a0206a6); }
-.tacos-plate { fill: #f6f1e8; }
+.claw-edge { fill: none; stroke: #ffb8d4; stroke-width: 1; opacity: 0.5; }
+/* The low plastic table of a street stall: a blue top catching the lantern light, its apron, its legs. A red stool by it. */
+.p3-street-table {
+  --px: 0.2; position: absolute; left: 33%; bottom: 0; z-index: 3; width: 40%; height: 14%;
+  background:
+    radial-gradient(ellipse 50% 22% at 28% 0%, #ffb46a4d, transparent 70%) 0 0 / 100% 100% no-repeat,
+    linear-gradient(180deg, #8ac4ff, #4a94e4 12%, #2f7ad0 22%, #1e5aa8 24%, #174a8a 36%) 0 0 / 100% 36% no-repeat,
+    linear-gradient(90deg, #0e2c5a, #1e5aa8 50%, #0e2c5a) 5% 100% / 6% 66% no-repeat,
+    linear-gradient(90deg, #0e2c5a, #1e5aa8 50%, #0e2c5a) 95% 100% / 6% 66% no-repeat;
+  filter: drop-shadow(0 0.6em 0.8em #0a0206b3);
+}
+.p3-stool { --px: 0.24; position: absolute; left: 72%; bottom: 2%; z-index: 3; width: 8.5%; overflow: visible; }
+.stool-lo { stop-color: #860a1a; }
+.stool-hi { stop-color: #ff5048; }
+.stool-mid { stop-color: #d61e2a; }
+.stool-seat { fill: #ff5a54; }
+.stool-grip { fill: #8a0a1a; }
+.stool-rim { fill: none; stroke: #ffb0a0; stroke-width: 1; stroke-linecap: round; opacity: 0.7; }
+.p3-tacos { --px: 0.28; position: absolute; left: 35%; bottom: 10.6%; z-index: 4; width: 36%; overflow: visible; }
+.tacos-plate-hi { stop-color: #fbf6ee; }
+.tacos-plate-lo { stop-color: #c4b8ac; }
+.tacos-plate-rim { fill: none; stroke: #ffffff; stroke-width: 0.8; opacity: 0.6; }
 .tacos-filling { fill: #a8442a; }
 .tacos-cream { fill: none; stroke: #fff6ea; stroke-width: 1.6; stroke-linecap: round; }
 .tacos-shell-edge { fill: none; stroke: #c8862a; stroke-width: 1.2; opacity: 0.7; }
 .tacos-lettuce { fill: none; stroke: #6ac04a; stroke-width: 2.4; stroke-linecap: round; }
 .tacos-tomato { fill: none; stroke: #ff4a3a; stroke-width: 2.4; stroke-linecap: round; }
-.tacos-shell { fill: #f4bc4a; stroke: #c8862a; stroke-width: 1; }
+.tacos-shell-hi { stop-color: #ffd884; }
+.tacos-shell-lo { stop-color: #d48c2c; }
+.tacos-shell { stroke: #b8762a; stroke-width: 1; }
+.tacos-shell-light { fill: none; stroke: #fff2c0; stroke-width: 1.2; stroke-linecap: round; opacity: 0.7; }
+/* The street sign, blue enamel in a white border, as on every ngõ in Hà Nội. */
 .p3-alley {
   --px: -0.1; position: absolute; left: 30%; top: 47%; z-index: 3; padding: 0.4em 0.75em; border: 2px solid #ffffffd9; border-radius: 0.25em; white-space: nowrap;
-  color: #ffffff; background: #1f4a9a; font: 700 0.8em/1 var(--body); letter-spacing: 0.06em; text-transform: uppercase; box-shadow: 0 8px 16px #0a020680;
+  color: #ffffff; background: linear-gradient(180deg, #2c5cb2, #1f4a9a 50%, #173a80); font: 700 0.8em/1 var(--body); letter-spacing: 0.06em; text-transform: uppercase;
+  box-shadow: 0 0 0 1px #0a1a3a, 0 0.5em 1em #0a020680, inset 0 1px 0 #ffffff59;
 }
 .p3-hotel { --px: -0.08; position: absolute; right: 7%; top: 38%; z-index: 3; display: grid; justify-items: center; }
-.p3-hotel-sign { padding: 0.25em 0.5em; border: 2px solid #ff5a8a; border-radius: 0.25em; color: #ffe6ef; background: #2a0a1af2; font: 800 1.05em/1 var(--body); letter-spacing: 0.24em; text-shadow: 0 0 8px #ff4f9a; box-shadow: 0 0 18px #ff4f9a73; }
+.p3-hotel-sign { padding: 0.25em 0.5em; border: 2px solid #ff5a8a; border-radius: 0.25em; color: #ffe6ef; background: #2a0a1af2; font: 800 1.05em/1 var(--body); letter-spacing: 0.24em; text-shadow: 0 0 8px #ff4f9a; box-shadow: 0 0 18px #ff4f9a73, inset 0 0 10px #ff4f9a40; }
 .p3-hotel-sign i { font-style: normal; }
 .part-three-scene-lantern.is-active .p3-hotel-sign i { animation: p3-neon 2.6s steps(1, end) infinite; }
 .p3-ghost { position: relative; width: 3.4em; margin-top: -0.4em; overflow: visible; filter: drop-shadow(0 0 12px #ffffff80); }
-.ghost-body { fill: #f6f2ff; }
+.ghost-hi { stop-color: #ffffff; }
+.ghost-lo { stop-color: #d6caff; stop-opacity: 0.86; }
 .ghost-eye { fill: #2a1a3a; }
 .ghost-blush { fill: #ff9ab4; opacity: 0.8; }
 .ghost-mouth { fill: none; stroke: #2a1a3a; stroke-width: 1.6; stroke-linecap: round; }
-.story-part-3 .part-three-scene-lantern .offline-scene-caption { left: 5%; bottom: 4%; max-width: 15ch; }
+.story-part-3 .part-three-scene-lantern .offline-scene-caption { left: 5%; bottom: 4%; max-width: 12ch; }
 
 /* ---------- 8. Scene: 26/9, Phùng Khoang, saku under the noren, the dinner from the photo, then karaoke and a rest ---------- */
 .story-part-3 .part-three-scene-bento { background: linear-gradient(180deg, #3e1c10, #2a120a 60%, #1a0a06); }
-/* The shop front keeps to the left two thirds; the photo of the dinner hangs on the wall to its right. */
-.p3-izakaya { background: radial-gradient(ellipse at 33% 36%, #ffb46a40, transparent 55%), repeating-linear-gradient(90deg, #00000038 0 2px, transparent 2px 9%), linear-gradient(180deg, #84462a, #5e2e18 70%); }
+/* The shop front keeps to the left two thirds; the photo of the dinner hangs on the wall to its right. Cedar slats, warm
+   where the paper lamp lights them, darker toward the corners. */
+.p3-izakaya {
+  background:
+    radial-gradient(ellipse 26% 30% at 33.6% 58%, #ffc87a5c, transparent 72%),
+    radial-gradient(ellipse 50% 40% at 33% 36%, #ffb46a38, transparent 70%),
+    linear-gradient(180deg, transparent 66%, #1a0a0666),
+    repeating-linear-gradient(90deg, #00000052 0 2px, #ffffff12 2px 3px, transparent 3px 9%),
+    repeating-linear-gradient(90deg, transparent 0 0.8%, #0000000f 0.8% 1.1%, transparent 1.1% 2.3%),
+    var(--paper-grain) 0 0 / 160px 160px,
+    linear-gradient(180deg, #8a4a2c, #62321a 70%);
+}
+/* The noren: three panels of red cloth in soft folds on a wooden rod, the lamp's light on their hems. */
 .p3-noren { --px: -0.16; position: absolute; left: 5%; right: 43%; top: 0; z-index: 2; display: flex; gap: 1.2%; height: 21%; padding-top: 0.5em; }
-.p3-noren::before { content: ""; position: absolute; inset: 0 -3% auto; height: 0.5em; border-radius: 0.25em; background: linear-gradient(180deg, #6a4026, #3a2010); box-shadow: 0 4px 8px #0a020680; }
-.p3-noren i { position: relative; flex: 1; border-radius: 0 0 0.2em 0.2em; background: repeating-linear-gradient(90deg, #0000 0 18%, #0000001a 24%, #0000 30%), linear-gradient(180deg, #d0162e, #a80e24 70%, #8a0a1e); box-shadow: inset 0 0.5em 0.6em -0.3em #0000004d, 0 10px 18px #0a020673; }
+.p3-noren::before { content: ""; position: absolute; inset: 0 -3% auto; height: 0.5em; border-radius: 0.25em; background: linear-gradient(180deg, #ae763e, #5a3418 60%, #3a2010); box-shadow: 0 4px 8px #0a020680, inset 0 1px 0 #ffd8a066; }
+.p3-noren i {
+  position: relative; flex: 1; border-radius: 0 0 0.2em 0.2em;
+  background:
+    linear-gradient(180deg, #00000052, transparent 0.7em),
+    linear-gradient(0deg, #ffb46a2e, transparent 34%),
+    repeating-linear-gradient(90deg, #ffffff14 0 6%, transparent 10% 22%, #00000033 30%, transparent 34%),
+    linear-gradient(180deg, #d4182e, #ac0e24 70%, #8a0a1e);
+  box-shadow: 0 10px 18px #0a020673;
+}
 .p3-noren i:nth-child(2)::after { content: ""; position: absolute; left: 50%; top: 46%; width: 2.2em; aspect-ratio: 1; margin: -1.1em 0 0 -1.1em; border-radius: 50%; background: radial-gradient(circle, #a80e24 0 28%, #fff3e6 30% 58%, transparent 60%), #fff3e6; box-shadow: 0 0 0 0.16em #a80e24, 0 0 0 0.3em #fff3e6; }
+/* Paper chōchin, red with black caps and hoops instead of ribs, no tassels. */
 .p3-redlantern.is-paper.is-one { left: 1%; top: 24%; width: 7.5%; }
 .p3-redlantern.is-paper.is-two { left: 52.5%; top: 24%; width: 7.5%; }
-.p3-redlantern.is-paper .redlantern-body { fill: #f2483a; }
-.p3-redlantern.is-paper .redlantern-cap { fill: #1e1210; }
-.p3-redlantern.is-paper .redlantern-ribs { stroke: #b8201a; }
+.redlantern-hoops { display: none; }
+.p3-redlantern.is-paper .redlantern-hoops { display: inline; fill: none; stroke: #9a1a12; stroke-width: 1; opacity: 0.55; }
+.p3-redlantern.is-paper :is(.redlantern-ribs, .redlantern-tassel, .redlantern-knot) { display: none; }
+.p3-redlantern.is-paper .redlantern-core { stop-color: #ffe6a8; }
+.p3-redlantern.is-paper .redlantern-silk { stop-color: #f24a38; }
+.p3-redlantern.is-paper .redlantern-edge { stop-color: #8a1a10; }
+.p3-redlantern.is-paper .redlantern-cap-lo { stop-color: #0a0606; }
+.p3-redlantern.is-paper .redlantern-cap-hi { stop-color: #4a3a36; }
 .p3-saku {
   --px: -0.2; position: absolute; left: 31%; top: 27%; z-index: 3; width: 40%; margin-left: -20%; padding: 0.5em 0.6em; border-radius: 0.3em; text-align: center;
-  color: #fff3e0; background: linear-gradient(180deg, #2e160c, #1e0e08); border: 2px solid #c9953e; font: 700 1.25em/1.2 var(--hand); box-shadow: 0 12px 20px #0a020699;
+  color: #fff3e0; background: var(--paper-grain), linear-gradient(180deg, #3a1e10, #1e0e08); background-blend-mode: soft-light, normal; border: 2px solid #c9953e;
+  font: 700 1.25em/1.2 var(--hand); text-shadow: 0 0 10px #ffc87a66; box-shadow: 0 12px 20px #0a020699, inset 0 1px 0 #ffd8a04d, 0 0 0 1px #3a200c;
 }
-/* A paper lamp over the counter, and the pool of light it throws. */
-.p3-pendant { --px: -0.12; position: absolute; left: 28%; top: 36%; z-index: 2; width: 6%; aspect-ratio: 0.8; border-radius: 45% 45% 40% 40%; transform-origin: 50% -3em; background: radial-gradient(ellipse at 50% 40%, #fff4d8, #ffc46a 60%, #e08a3a); box-shadow: 0 0 30px 10px #ffb45a59; }
+/* A washi lamp over the counter, swaying a little on its cord, and the cone of light it throws. */
+.p3-pendant {
+  --px: -0.12; position: absolute; left: 28%; top: 36%; z-index: 2; width: 6%; aspect-ratio: 0.8; border-radius: 45% 45% 40% 40%; transform-origin: 50% -3em;
+  background: repeating-linear-gradient(180deg, transparent 0 18%, #c8783a38 18% 21%), radial-gradient(ellipse at 50% 42%, #fffaec, #ffd690 55%, #e8963e);
+  box-shadow: 0 0 1.6em 0.6em #ffc46a73, 0 0 5em 1.6em #ffb45a33;
+}
 .p3-pendant::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: 1px; height: 3em; background: #2a1408; }
-.p3-pendant::after { content: ""; position: absolute; left: -260%; top: 100%; width: 620%; height: 7em; pointer-events: none; background: radial-gradient(ellipse at 50% 0, #ffd08a33, transparent 70%); clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%); }
-.p3-counter-top { --px: 0.16; position: absolute; inset: auto -6% -4%; z-index: 2; height: 33%; background: linear-gradient(180deg, #ddb07a, #bc8a52 50%, #8e5e30); box-shadow: inset 0 0.25em 0 #f6d8a8, inset 0 0.6em 0.8em -0.4em #ffffff40, 0 -10px 30px #0a020666; }
+.p3-pendant::after {
+  content: ""; position: absolute; left: -260%; top: 100%; width: 620%; height: 7em; pointer-events: none;
+  background: linear-gradient(180deg, #ffd08a47, transparent 92%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 34%, #000 66%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 34%, #000 66%, transparent);
+}
+/* The counter: pale hinoki, its grain, a pool of lamplight on it, darker toward the diners. */
+.p3-counter-top {
+  --px: 0.16; position: absolute; inset: auto -6% -4%; z-index: 2; height: 33%;
+  background:
+    radial-gradient(ellipse 28% 40% at 33% 10%, #fff0c880, transparent 72%),
+    linear-gradient(180deg, #fff2d8 0 0.16em, #b8864e 0.16em 0.28em, transparent 0.28em),
+    repeating-linear-gradient(178deg, transparent 0 0.6em, #6a3a1a1c 0.6em 0.66em, transparent 0.66em 1.3em),
+    var(--paper-grain) 0 0 / 160px 160px,
+    linear-gradient(180deg, #d6a46a, #ae7a44 50%, #7a4a22);
+  box-shadow: inset 0 -1.2em 1.6em #3a1a0a66, 0 -10px 30px #0a020666;
+}
+/* What they ate, as in the photo: the curry in its speckled bowl, the karaage on slate, two cold juices. */
 .p3-curry { --px: 0.24; position: absolute; left: 3%; bottom: 4%; z-index: 3; width: 34%; }
-.p3-curry svg { display: block; width: 100%; overflow: visible; filter: drop-shadow(0 12px 14px #2a1006b3); }
+.p3-curry svg { display: block; width: 100%; overflow: visible; }
 .p3-curry .p3-steam { left: 42%; width: 32%; height: 60%; }
-.curry-bowl { fill: #4c4852; }
-.curry-foot { fill: #2e2a32; }
-.curry-rim { fill: #6c6772; }
-.curry-well { fill: #3a363e; }
-.curry-sauce { fill: #a4622a; }
-.curry-gloss { fill: none; stroke: #ffffff47; stroke-width: 2; stroke-linecap: round; }
+.curry-bowl-hi { stop-color: #5e5a66; }
+.curry-bowl-lo { stop-color: #2a272e; }
+.curry-speckle { fill: none; stroke: #d8d0c4; stroke-width: 1.2; stroke-linecap: round; opacity: 0.35; }
+.curry-foot { fill: #24212a; }
+.curry-rim { fill: #74707c; }
+.curry-rim-light { fill: none; stroke: #f6e6d0; stroke-width: 1.4; stroke-linecap: round; opacity: 0.55; }
+.curry-well { fill: #36323a; }
+.curry-sauce-hi { stop-color: #c27a36; }
+.curry-sauce-lo { stop-color: #7a4216; }
+.curry-gloss { fill: none; stroke: #ffffff5c; stroke-width: 2; stroke-linecap: round; }
 .curry-carrot { fill: #e0782a; }
 .curry-potato { fill: #e2b45a; }
-.curry-rice { fill: #fbf7ee; }
-.curry-grain { fill: none; stroke: #e4dccb; stroke-width: 1.4; stroke-linecap: round; }
-.katsu-slice path { fill: #dc943f; stroke: #9a5220; stroke-width: 1.1; stroke-linejoin: round; }
+.curry-veg-light { fill: none; stroke: #ffe2b0; stroke-width: 1.1; stroke-linecap: round; opacity: 0.7; }
+.curry-rice-hi { stop-color: #ffffff; }
+.curry-rice-lo { stop-color: #e6dccb; }
+.curry-grain { fill: none; stroke: #d6cbb6; stroke-width: 1.4; stroke-linecap: round; }
+.katsu-hi { stop-color: #f0b058; }
+.katsu-lo { stop-color: #b8682a; }
+.katsu-slice path:not(.katsu-face) { stroke: #8a4a1c; stroke-width: 1.1; stroke-linejoin: round; }
 .katsu-slice .katsu-face { fill: none; stroke: #fbeed8; stroke-width: 1.4; stroke-linecap: round; }
-.katsu-crumb { fill: none; stroke: #f6c878; stroke-width: 1.5; stroke-dasharray: 1.2 3.2; stroke-linecap: round; }
+.katsu-crumb { fill: none; stroke: #ffd890; stroke-width: 1.5; stroke-dasharray: 1.2 3.2; stroke-linecap: round; }
 .katsu-glaze { fill: none; stroke: #4a1c08; stroke-width: 2.2; stroke-linecap: round; }
-.p3-karaage { --px: 0.28; position: absolute; left: 37%; bottom: 6%; z-index: 4; width: 25%; overflow: visible; filter: drop-shadow(0 10px 12px #2a1006a6); }
-.karaage-plate-side { fill: #121014; stroke: #121014; stroke-width: 6; stroke-linejoin: round; }
-.karaage-plate { fill: #232027; stroke: #232027; stroke-width: 6; stroke-linejoin: round; }
-.karaage-plate-well { fill: #2c2930; }
-.karaage-cabbage-heap { fill: #e9efd6; }
+.katsu-glaze-light { fill: none; stroke: #ffc89a; stroke-width: 0.9; stroke-linecap: round; opacity: 0.7; }
+.p3-karaage { --px: 0.28; position: absolute; left: 37%; bottom: 6%; z-index: 4; width: 25%; overflow: visible; }
+.karaage-plate-side { fill: #0e0c10; stroke: #0e0c10; stroke-width: 6; stroke-linejoin: round; }
+.karaage-slate-hi { stop-color: #3e3a44; }
+.karaage-slate-lo { stop-color: #18161c; }
+.karaage-plate { stroke: #232027; stroke-width: 6; stroke-linejoin: round; }
+.karaage-plate-well { fill: #2c29301a; }
+.karaage-plate-edge { fill: none; stroke: #8a8494; stroke-width: 0.9; stroke-linecap: round; opacity: 0.6; }
+.karaage-cabbage-hi { stop-color: #f6fae6; }
+.karaage-cabbage-lo { stop-color: #cfdcae; }
 .karaage-cabbage { fill: none; stroke: #fbfdf2; stroke-width: 1.4; stroke-linecap: round; }
 .karaage-cabbage.is-green { stroke: #c8dc98; }
 .karaage-cabbage.is-red { stroke: #a2608e; }
-.karaage-piece path { fill: #a8561e; stroke: #6a2a0c; stroke-width: 0.8; }
-.karaage-piece .karaage-glaze { fill: #5e230a; stroke: none; opacity: 0.88; }
-.karaage-shine { fill: #ffd9a48c; }
+.karaage-hi { stop-color: #d4823a; }
+.karaage-mid { stop-color: #a8561e; }
+.karaage-lo { stop-color: #5e260a; }
+.karaage-meat { stroke: #5a2208; stroke-width: 0.8; }
+.karaage-piece .karaage-glaze { fill: #5e230a; stroke: none; opacity: 0.72; }
+.karaage-shine { fill: #ffd9a499; }
 .karaage-glint { fill: #fff3dc; }
 .karaage-mayo { fill: none; stroke: #fff8ec; stroke-width: 1.3; stroke-linecap: round; }
+.karaage-sesame { fill: none; stroke: #f6ead0; stroke-width: 1.1; stroke-linecap: round; }
 .part-three-scene-bento .p3-smoothie { bottom: 14%; z-index: 3; width: 5.5%; }
 .part-three-scene-bento .p3-smoothie.is-one { left: 63%; }
 .part-three-scene-bento .p3-smoothie.is-two { left: 69.5%; bottom: 12.5%; }
-.p3-smoothie.is-juice .smoothie-drink { fill: #f1e6b4; }
+.p3-smoothie.is-juice .smoothie-drink-hi { stop-color: #f8f0ca; }
+.p3-smoothie.is-juice .smoothie-drink-lo { stop-color: #e0cc8a; }
 .p3-smoothie.is-juice .smoothie-foam { fill: #fbf5d8; }
 .p3-smoothie.is-juice .smoothie-sprig { display: none; }
 .part-three-scene-clinic.is-active .p3-steam i,
@@ -647,7 +1288,8 @@
 /* "Chốn nghỉ chân": a little wooden board on a cord. */
 .p3-hanger {
   --px: -0.12; position: absolute; left: 38%; top: 49%; z-index: 3; padding: 0.4em 0.7em; border-radius: 0.3em; white-space: nowrap; transform-origin: 50% -1.6em;
-  color: #3a1a08; background: linear-gradient(180deg, #e8c08a, #c8955a); font: 700 0.95em/1 var(--hand); box-shadow: 0 10px 16px #0a020699;
+  color: #3a1a08; background: var(--paper-grain), linear-gradient(180deg, #f0cc96, #c8955a 60%, #a8763e); background-blend-mode: soft-light, normal; font: 700 0.95em/1 var(--hand);
+  box-shadow: 0 10px 16px #0a020699, inset 0 1px 0 #fff0d099, inset 0 -1px 0 #6a3a1a80;
 }
 .p3-hanger::before { content: ""; position: absolute; left: 50%; bottom: calc(100% - 0.55em); width: 1.1em; height: 1.1em; margin-left: -0.55em; border-top: 1px solid #2a1408; border-left: 1px solid #2a1408; rotate: 45deg; }
 .story-part-3 .part-three-scene-bento .offline-scene-caption { left: 5%; bottom: 35%; max-width: 15ch; }
@@ -656,16 +1298,27 @@
 
 /* ---------- 9. Scene: 1/10, the birthday, lily red: bunting, the cake, the red lilies and a page left for him ---------- */
 .story-part-3 .part-three-scene-birthday { background: radial-gradient(ellipse at 50% 30%, #ff4a5a3d, transparent 55%), linear-gradient(180deg, #4e0a18, #36060f 60%, #1e0308); }
-.p3-party-wall { background: radial-gradient(ellipse at 50% 40%, #ff6a7a30, transparent 52%), repeating-linear-gradient(90deg, #ffffff07 0 1px, transparent 1px 6%), linear-gradient(180deg, #600e20, #3e0814); }
-.p3-party-spot { position: absolute; left: 25%; top: 0; width: 50%; height: 120%; mix-blend-mode: screen; background: conic-gradient(from 158deg at 50% 0, transparent 0deg, #fff1d82e 10deg, #fff1d81a 34deg, transparent 44deg); }
-.p3-bunting { --px: -0.16; position: absolute; left: 3%; right: 3%; top: 3%; z-index: 3; display: flex; justify-content: center; gap: 0.12em; margin: 0; padding: 0.3em 0 0; list-style: none; transform-origin: 50% 0; }
-.p3-bunting::before { content: ""; position: absolute; inset: 0.3em -4% auto; height: 1px; background: #f6d8b0b3; }
-.p3-bunting li {
-  display: grid; justify-items: center; width: 2em; height: 2.5em; padding-top: 0.32em;
-  color: #fff6ee; background: #e0263f; font: 800 0.95em/1 var(--body); clip-path: polygon(0 0, 100% 0, 50% 100%);
+/* The room in lily red, lit by the candles on the cake: their glow climbs the wall behind it (the sky reaches to 78% of
+   the card here, under the table). */
+.p3-party-wall {
+  inset: -12% -8% 22%;
+  background:
+    radial-gradient(ellipse 34% 30% at 50% 92%, #ffb45a5c, #ff7a4a1f 50%, transparent 75%),
+    radial-gradient(ellipse at 50% 40%, #ff6a7a30, transparent 52%),
+    repeating-linear-gradient(90deg, #ffffff07 0 1px, transparent 1px 6%),
+    var(--paper-grain) 0 0 / 160px 160px,
+    linear-gradient(180deg, #600e20, #3e0814);
 }
-.p3-bunting li:nth-child(3n + 2) { color: #5a0a1a; background: #f3c77e; }
-.p3-bunting li:nth-child(3n) { color: #c3304b; background: #fbefe6; }
+.p3-party-spot { position: absolute; left: 25%; top: 0; width: 50%; height: 120%; mix-blend-mode: screen; background: conic-gradient(from 158deg at 50% 0, transparent 0deg, #fff1d82e 10deg, #fff1d81a 34deg, transparent 44deg); }
+/* The banner on its drooping string: each flag cloth, shaded across, tipped to follow the string. */
+.p3-bunting { --px: -0.16; position: absolute; left: 3%; right: 3%; top: 3%; z-index: 3; display: flex; justify-content: center; gap: 0.12em; margin: 0; padding: 0.3em 0 0; list-style: none; transform-origin: 50% 0; }
+.p3-bunting::before { content: ""; position: absolute; left: -4%; right: -4%; top: -1.7em; height: 3.2em; border-bottom: 1px solid #f6d8b0b3; border-radius: 0 0 50% 50% / 0 0 100% 100%; }
+.p3-bunting li {
+  display: grid; justify-items: center; width: 2em; height: 2.5em; margin-top: calc((1 - var(--k, 0) * var(--k, 0)) * 1.2em); padding-top: 0.32em; rotate: calc(var(--k, 0) * -7deg); transform-origin: 50% 0;
+  color: #fff6ee; background-color: #e0263f; background-image: linear-gradient(100deg, #ffffff38, transparent 46%, #00000033); font: 800 0.95em/1 var(--body); clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+.p3-bunting li:nth-child(3n + 2) { color: #5a0a1a; background-color: #f3c77e; }
+.p3-bunting li:nth-child(3n) { color: #c3304b; background-color: #fbefe6; }
 .p3-bunting li:empty { width: 0.7em; background: none; }
 .p3-confetti { --px: -0.08; position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
 /* Confetti in tiles half the layer's height: it falls one tile per loop, so the loop never jumps. */
@@ -679,11 +1332,14 @@
     radial-gradient(ellipse 0.11em 0.22em at 30% 40%, #fbefe6 90%, transparent) 0 0 / 41% 50%;
 }
 .part-three-scene-birthday.is-active .p3-confetti::before { animation: p3-confetti 9s linear infinite; }
-/* A bunch of balloons on long strings, lily red, gold and cream. */
+/* A bunch of balloons on long strings, lily red, gold and cream: glossy, round, warmed underneath by the candles. */
 .p3-balloon {
   --px: -0.1; --tone: #e0263f; position: absolute; z-index: 2; width: 9%; aspect-ratio: 0.82; border-radius: 50% 50% 48% 48% / 56% 56% 44% 44%;
-  background: radial-gradient(ellipse 30% 22% at 34% 26%, #ffffffa6, transparent 70%), radial-gradient(circle at 40% 36%, color-mix(in srgb, var(--tone) 72%, #fff), var(--tone) 52%, color-mix(in srgb, var(--tone) 70%, #000));
-  box-shadow: 0 12px 20px -8px #0a0206b3;
+  background:
+    radial-gradient(ellipse 30% 22% at 34% 26%, #ffffffb8, transparent 70%),
+    radial-gradient(ellipse 60% 36% at 34% 94%, #ffb46a47, transparent 70%),
+    radial-gradient(circle at 40% 36%, color-mix(in srgb, var(--tone) 72%, #fff), var(--tone) 52%, color-mix(in srgb, var(--tone) 62%, #000));
+  box-shadow: 0 12px 20px -8px #0a0206b3, inset -0.3em -0.4em 0.8em #0000002e;
 }
 .p3-balloon::before { content: ""; position: absolute; left: 50%; top: 99%; width: 0.5em; height: 0.36em; margin-left: -0.25em; clip-path: polygon(50% 0, 100% 100%, 0 100%); background: var(--tone); }
 .p3-balloon::after { content: ""; position: absolute; left: 50%; top: calc(100% + 0.32em); width: 1px; height: 5.2em; background: linear-gradient(#fff3e0b3, #fff3e000); }
@@ -693,40 +1349,71 @@
 .p3-popper { --px: 0.1; position: absolute; top: 15%; z-index: 3; width: 13%; overflow: visible; filter: drop-shadow(0 8px 10px #0a020699); }
 .p3-popper.is-one { left: 2%; }
 .p3-popper.is-two { right: 2%; scale: -1 1; }
-.popper-cone { fill: #f3c77e; }
+.popper-foil-lo { stop-color: #a4722c; }
+.popper-foil-hi { stop-color: #fff2c4; }
+.popper-foil-mid { stop-color: #e8b860; }
 .popper-stripe { fill: none; stroke: #e0263f; stroke-width: 3; stroke-linecap: round; }
+.popper-rim { fill: none; stroke: #fff6d8; stroke-width: 1.4; stroke-linecap: round; }
+.popper-streamer { fill: none; stroke-width: 1.8; stroke-linecap: round; }
+.popper-streamer.is-red { stroke: #ff4a5a; }
+.popper-streamer.is-gold { stroke: #ffd24a; }
+.popper-streamer.is-pink { stroke: #ff9ab4; }
 .popper-burst { fill: none; stroke: #ffd24a; stroke-width: 2.2; stroke-linecap: round; }
 .popper-dot.is-gold { fill: #ffd24a; }
 .popper-dot.is-pink { fill: #ff9ab4; }
 .popper-dot.is-red { fill: #ff4a5a; }
 .p3-birthday-lilies { --px: 0.12; left: 2%; bottom: 12%; z-index: 3; width: 35%; }
+/* The table: a white cloth lit by the candles and falling away into the room's shade at both sides, a red satin runner,
+   and the cloth's front drop below its lit edge, hanging in soft folds. */
 .p3-party-table {
   --px: 0.18; position: absolute; inset: auto -6% -4%; z-index: 2; height: 25%;
-  background: linear-gradient(90deg, transparent 37%, #c3304b 37% 63%, transparent 63%) 0 0 / 100% 100% no-repeat, linear-gradient(180deg, #fbf1ea, #ead6ca 60%, #c8a69a);
-  box-shadow: inset 0 0.2em 0 #ffffff, 0 -10px 30px #0a020666;
+  background:
+    radial-gradient(ellipse 24% 44% at 50% 8%, #fff2d6b3, #ffd89a2e 55%, transparent 75%),
+    radial-gradient(ellipse 66% 150% at 50% 0%, transparent 42%, #3a08188c 100%),
+    linear-gradient(180deg, transparent 56%, #fff6ee8c 56% 57.4%, #00000033 58%, transparent 68%, #00000040),
+    repeating-linear-gradient(90deg, #0000001a 0 1.4%, #ffffff12 2.8%, #0000001a 4.6%) 0 100% / 100% 43% no-repeat,
+    linear-gradient(90deg, transparent 37%, #ffffff2e 44%, transparent 50%, #0000001f 58%, transparent 63%),
+    linear-gradient(90deg, transparent 37%, #c3304b 37% 63%, transparent 63%),
+    linear-gradient(180deg, #f4e4dc, #e2c8bc 56%, #c8a69a 57%, #9a7470);
+  box-shadow: inset 0 0.16em 0 #fff6ee, 0 -10px 30px #0a020666;
 }
-.p3-cake { --px: 0.24; position: absolute; left: 36%; bottom: 9%; z-index: 4; width: 28%; }
-.p3-cake svg { width: 100%; overflow: visible; filter: drop-shadow(0 14px 16px #3a020ab3); }
-.cake-stand { fill: #f6efe6; }
-.cake-tier { fill: #fbe4e8; }
-.cake-tier.is-top { fill: #fff3f4; }
-.cake-cream { fill: #ffffff; }
-.cake-berry { fill: #d8182e; }
+/* The cake on its stand, in the halo of its own candles. */
+.p3-cake { --px: 0.24; position: absolute; left: 35%; bottom: 9%; z-index: 4; width: 30%; }
+.p3-cake::before { content: ""; position: absolute; left: -30%; right: -30%; top: -34%; z-index: -1; height: 80%; pointer-events: none; background: radial-gradient(ellipse 50% 50%, #ffcf7a52, #ff9a5a17 50%, transparent 72%); }
+.p3-cake svg { width: 100%; overflow: visible; }
+.cake-stand-hi { stop-color: #ffffff; }
+.cake-stand-lo { stop-color: #d6c4ba; }
+.cake-stand-rim { fill: none; stroke: #ffffff; stroke-width: 1; opacity: 0.8; }
+.cake-tier-hi { stop-color: #fff4ec; }
+.cake-tier-lo { stop-color: #f0c4cc; }
+.cake-round-edge { stop-color: #8a2a3a; stop-opacity: 0.24; }
+.cake-round-clear { stop-color: #8a2a3a; stop-opacity: 0; }
+.cake-top-hi { stop-color: #fff8f2; }
+.cake-top-lo { stop-color: #f2d8d4; }
+.cake-cream { fill: #fffdfa; }
+.cake-glow-core { stop-color: #ffe2a0; stop-opacity: 0.62; }
+.cake-glow-edge { stop-color: #ffe2a0; stop-opacity: 0; }
+.cake-berry-hi { stop-color: #ff6a7a; }
+.cake-berry-lo { stop-color: #940a1c; }
+.cake-berry-glint { fill: none; stroke: #ffffff; stroke-width: 1.4; stroke-linecap: round; }
 .cake-script { fill: none; stroke: #c3304b; stroke-width: 2; stroke-linecap: round; }
 .cake-candle { fill: #fbefe6; stroke: #e0263f; stroke-width: 1.4; stroke-dasharray: 3 3; }
+.cake-wick { fill: none; stroke: #3a2010; stroke-width: 1; stroke-linecap: round; }
 /* The flames are their own sprites, so they can flicker; they sit on the candle wicks (x 52, 70, 88 of 140; top at y 22 of 130). */
 .p3-flames { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-.p3-flames i { position: absolute; top: 10%; width: 4.6%; aspect-ratio: 0.6; margin-left: -2.3%; border-radius: 50% 50% 50% 50% / 64% 64% 36% 36%; background: radial-gradient(ellipse at 50% 72%, #fffbe8, #ffd24a 46%, #ff7a2a 78%, transparent 82%); box-shadow: 0 0 14px 4px #ffb44a8c; transform-origin: 50% 90%; }
+.p3-flames i { position: absolute; top: 10%; width: 4.6%; aspect-ratio: 0.6; margin-left: -2.3%; border-radius: 50% 50% 50% 50% / 64% 64% 36% 36%; background: radial-gradient(ellipse at 50% 72%, #fffbe8, #ffd24a 46%, #ff7a2a 78%, transparent 82%); box-shadow: 0 0 14px 4px #ffb44a8c, 0 0 34px 10px #ff9a4a40; transform-origin: 50% 90%; }
 .p3-flames i:nth-child(1) { left: 37.1%; }
 .p3-flames i:nth-child(2) { left: 50%; }
 .p3-flames i:nth-child(3) { left: 62.9%; }
 .part-three-scene-birthday.is-active .p3-flames i { animation: p3-flicker 0.9s ease-in-out infinite alternate; }
 .part-three-scene-birthday.is-active .p3-flames i:nth-child(2) { animation-delay: -0.3s; }
 .part-three-scene-birthday.is-active .p3-flames i:nth-child(3) { animation-delay: -0.6s; }
-/* The page she left for him: a date and "Tadaaaa" in her red, then his two lines in dark ink, each on its rule. */
+/* The page she left for him: a date and "Tadaaaa" in her red, then his two lines in dark ink, each on its rule; the
+   candlelight warms its near edge. */
 .p3-his-letter {
-  --px: 0.3; position: absolute; right: 4%; bottom: 9%; z-index: 4; display: grid; gap: 0.4em; width: 30%; padding: 0.9em 1em 1.1em; border-radius: 2px; transform: rotate(-5deg);
-  color: var(--p3-paper-ink); background: var(--paper-grain), linear-gradient(170deg, #fffaf4, #f6e6dc); background-blend-mode: soft-light, normal; box-shadow: 0 22px 34px -14px #0a0206cc;
+  --px: 0.3; position: absolute; right: 4%; bottom: 9%; z-index: 4; display: grid; gap: 0.4em; width: 30%; padding: 0.9em 1em 1.1em; border-radius: 2px; rotate: -5deg;
+  color: var(--p3-paper-ink); background: radial-gradient(ellipse 50% 70% at 0% 70%, #ffd8a03d, transparent 70%), var(--paper-grain), linear-gradient(170deg, #fffaf4, #f6e6dc); background-blend-mode: normal, soft-light, normal;
+  box-shadow: 0 22px 34px -14px #0a0206cc, 0 0.1em 0.2em #0a020633;
 }
 .p3-his-letter small { color: #a8606a; font: 600 0.62em/1 var(--body); letter-spacing: 0.12em; }
 .p3-his-letter b { color: #c3304b; font: 700 1.2em/1.1 var(--hand); }
@@ -749,18 +1436,22 @@
 /* ---------- 10. Small screens: the same rooms on a narrow card ---------- */
 @media (max-width: 900px) {
   .story-part-3 .part-three-scene :is(.p3-tv, .p3-couch, .p3-stone-table, .p3-curry, .p3-cake, .p3-lilies, .p3-full-moon) { will-change: auto; }
+  /* The light layers lose their blend here: plain alpha over these dark rooms reads almost the same and costs far less. */
+  .story-part-3 .part-three-scene :is(.p3-kara-disco, .p3-clinic-sun, .p3-tv-glow, .p3-lake-cone, .p3-tiny-rays, .p3-tiny-patch, .p3-stage-cone, .p3-lamp-light, .p3-party-spot) { mix-blend-mode: normal; }
   .p3-pharmacy { font-size: 0.5em; }
   .p3-promise { font-size: 1.35em; }
   .story-part-3 .part-three-scene-karaoke .offline-scene-caption { bottom: 29%; max-width: 13ch; }
   .p3-xray small, .p3-chat small { font-size: 0.52em; }
   .p3-door-plate { font-size: 0.6em; }
-  .story-part-3 .part-three-scene-clinic .offline-scene-caption { max-width: 11ch; }
+  .p3-tv { top: 9%; }
+  .story-part-3 .part-three-scene-clinic .offline-scene-caption { top: 40%; max-width: 11ch; }
   .story-part-3 .part-three-scene-lakeside .offline-scene-caption { max-width: 12ch; }
   .p3-tiny-napkin { font-size: 0.72em; }
   .p3-song { font-size: 0.88em; }
   .story-part-3 .part-three-scene-acoustic .offline-scene-caption { top: 27%; max-width: 12ch; }
   .p3-plan { font-size: 0.86em; }
   .p3-alley { font-size: 0.66em; }
+  .story-part-3 .part-three-scene-lantern .offline-scene-caption { top: 21%; bottom: auto; }
   .p3-saku { font-size: 0.9em; }
   .story-part-3 .part-three-scene-bento .memory-photo.p3-photo,
   .story-part-3 .part-three-scene-bento .memory-photo.p3-photo.is-portrait { width: 34%; }

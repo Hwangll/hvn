@@ -6,7 +6,10 @@ import { MemoryPhoto } from "../atoms/MemoryPhoto";
 import { PartThreeAutumnScene } from "./PartThreeAutumnScene";
 import { BirdSprite, CloudSprite, HeartSprite, LeafSprite, ScooterSprite } from "../atoms/SceneSprites";
 import {
+  BedSprite,
   CakeBoxSprite,
+  CumulusSprite,
+  FarRowSprite,
   FlagSprite,
   FruitTeaSprite,
   LotusPadSprite,
@@ -15,15 +18,20 @@ import {
   MuseumSprite,
   MusicNoteSprite,
   NoodleBowlSprite,
+  OfficeTowerSprite,
   PagodaSprite,
   PaperBoatSprite,
   PetSprite,
+  PlazaSprite,
   PrayerFlagsSprite,
   ProjectorSprite,
   PyjamasSprite,
   RedCarSprite,
   StallSprite,
   StoneBenchSprite,
+  StreetLampSprite,
+  StreetRowSprite,
+  TreelineSprite,
   TreeSprite,
 } from "../atoms/PartThreeSprites";
 
@@ -103,15 +111,20 @@ export function PartThreeScene({ chapter, isActive }: PartThreeSceneProps) {
         <div className="scene-sky p3-room" data-parallax="-0.3"><i className="p3-room-lamp" /></div>
         {/* The screen runs through the evening: the film they wanted, the one they settled on, and what happened instead. */}
         <div className="p3-screen" data-parallax="-0.12" data-delay="0.05">
-          <span className="p3-screen-title" data-fade="-0.24"><b>Me Before You</b><small>không tìm được</small></span>
-          <span className="p3-screen-slot" data-fade="0.32">
-            <span className="p3-screen-title" data-fade="-0.46"><b>365 Days</b><small>cũng không xem được</small></span>
-          </span>
-          <span className="p3-screen-slot" data-fade="0.52"><PaperBoatSprite className="p3-boat" /></span>
+          <i className="p3-screen-roller" />
+          <div className="p3-screen-face">
+            <span className="p3-screen-title" data-fade="-0.24"><b>Me Before You</b><small>không tìm được</small></span>
+            <span className="p3-screen-slot" data-fade="0.32">
+              <span className="p3-screen-title" data-fade="-0.46"><b>365 Days</b><small>cũng không xem được</small></span>
+            </span>
+            <span className="p3-screen-slot" data-fade="0.52"><PaperBoatSprite className="p3-boat" /></span>
+          </div>
         </div>
-        <i className="p3-beam" data-parallax="-0.06" data-glow="1" />
-        <ProjectorSprite className="p3-projector" data-parallax="0.14" data-delay="0.18" />
-        <div className="p3-bed" data-parallax="0.2"><i className="p3-pillow" /><i className="p3-pillow is-two" /><i className="p3-blanket" /></div>
+        {/* The projector sits at the foot of the bed. Its beam leaves the lens bright and thins out toward the screen, dust
+            turning in it, and it moves with the projector, so the light never comes loose from the lens. */}
+        <i className="p3-beam" data-parallax="0.2" data-glow="1"><i className="p3-beam-dust" /></i>
+        <BedSprite className="p3-bed" data-parallax="0.2" />
+        <ProjectorSprite className="p3-projector" data-parallax="0.2" data-delay="0.18" />
         <MusicNoteSprite className="p3-note p3-note-one" data-float="0.5" data-wave="7" data-drift="0.16" />
         <MusicNoteSprite className="p3-note p3-note-two" data-float="0.72" data-wave="5" data-drift="-0.12" />
         <MusicNoteSprite className="p3-note p3-note-three" data-float="0.4" data-wave="8" data-drift="0.1" />
@@ -156,16 +169,23 @@ export function PartThreeScene({ chapter, isActive }: PartThreeSceneProps) {
     return (
       <div className={className} aria-hidden="true">
         <div className="scene-sky p3-afternoon" data-parallax="-0.34"><i className="p3-sun" /></div>
+        <FarRowSprite className="p3-far-blocks" data-parallax="-0.24" />
+        {/* Ngọc's office, its glass catching the afternoon, and a street tree lit from behind; the low sun's shafts fall
+            across both onto the pavement. */}
+        <OfficeTowerSprite className="p3-office" data-parallax="-0.16" />
+        <TreeSprite className="p3-tree p3-tree-street" data-parallax="-0.1" />
         <i className="p3-rays" data-parallax="-0.22" />
-        {/* Ngọc's office, its windows catching the afternoon. */}
-        <div className="p3-office" data-parallax="-0.16" />
+        <PlazaSprite className="p3-pavement" data-parallax="0.05" />
         <LeafSprite className="p3-leaf p3-leaf-one" data-sink="0.9" data-drift="0.35" data-spin="160" data-wave="10" />
         <LeafSprite className="p3-leaf p3-leaf-two" data-sink="1.2" data-drift="-0.3" data-spin="-220" data-wave="14" />
         {/* The stall beside the bench arrives, and the kissing has to stop; then the red car. */}
         <StallSprite className="p3-stall" data-parallax="0.08" data-fade="0.3" />
-        <StoneBenchSprite className="p3-bench" data-parallax="0.14" />
-        <CakeBoxSprite className="p3-cakes" data-parallax="0.2" data-delay="0.2" />
-        <div className="p3-tea" data-parallax="0.22" data-delay="0.28" data-tilt="-6"><FruitTeaSprite /><small>12/09 · 15:12</small></div>
+        {/* The cakes and the tea arrive on the bench and stay on its seat, so they share its frame. */}
+        <div className="p3-bench-set" data-parallax="0.14">
+          <StoneBenchSprite className="p3-bench" />
+          <CakeBoxSprite className="p3-cakes" data-delay="0.2" />
+          <div className="p3-tea" data-delay="0.28" data-tilt="-6"><FruitTeaSprite /><small>12/09 · 15:12</small></div>
+        </div>
         <HeartSprite className="p3-heart p3-heart-bench" data-rise="0.8" data-wave="5" data-fade="-0.3" />
         <HeartSprite className="p3-heart p3-heart-bench is-two" data-rise="1.1" data-wave="4" data-fade="-0.3" />
         <RedCarSprite className="p3-car" data-parallax="0.3" data-drift="0.18" data-sheen="1" />
@@ -181,15 +201,17 @@ export function PartThreeScene({ chapter, isActive }: PartThreeSceneProps) {
     return (
       <div className={className} aria-hidden="true">
         <div className="scene-sky p3-clear-sky" data-parallax="-0.34"><i className="p3-sun is-high" /></div>
-        <CloudSprite className="p3-cloud p3-cloud-one" data-drift="0.5" data-parallax="-0.1" />
-        <CloudSprite className="p3-cloud p3-cloud-two" data-drift="-0.4" data-parallax="-0.08" />
+        <CumulusSprite className="p3-cumulus is-one" data-drift="0.5" data-parallax="-0.1" />
+        <CumulusSprite className="p3-cumulus is-two" data-drift="-0.4" data-parallax="-0.08" />
         <BirdSprite className="p3-bird p3-bird-one" data-drift="0.9" data-wave="8" data-delay="0.2" />
         <BirdSprite className="p3-bird p3-bird-two" data-drift="0.75" data-wave="6" data-delay="0.3" />
+        {/* Ba Đình's trees fade into the morning haze behind the museum; the square runs up to its steps. */}
+        <TreelineSprite className="p3-treeline" data-parallax="-0.1" />
         <TreeSprite className="p3-tree p3-tree-far" data-parallax="-0.06" />
         <MuseumSprite className="p3-museum" data-parallax="-0.08" data-delay="0.05" />
+        <PlazaSprite className="p3-plaza" data-parallax="0.12" />
         <FlagSprite className="p3-flag" data-parallax="-0.06" data-sway="2.4" />
         <TreeSprite className="p3-tree p3-tree-near" data-parallax="0.06" />
-        <i className="p3-plaza" data-parallax="0.12" />
         <span className="p3-weather" data-parallax="-0.2" data-delay="0.3">thời tiết · siêu siêu mê</span>
         {caption}
         {mainPhoto(-5)}
@@ -202,11 +224,16 @@ export function PartThreeScene({ chapter, isActive }: PartThreeSceneProps) {
     return (
       <div className={className} aria-hidden="true">
         <div className="scene-sky p3-jade-sky" data-parallax="-0.3" />
+        <TreelineSprite className="p3-grove" data-parallax="-0.14" />
+        <TreeSprite className="p3-tree p3-tree-temple" data-parallax="-0.06" />
         <PrayerFlagsSprite className="p3-flags" data-parallax="-0.16" data-sway="1" />
         <PrayerFlagsSprite className="p3-flags is-two" data-parallax="-0.1" data-sway="1.4" />
-        <TreeSprite className="p3-tree p3-tree-temple" data-parallax="-0.06" />
-        <PagodaSprite className="p3-pagoda" data-parallax="-0.04" data-delay="0.05" />
-        <div className="p3-pond" data-parallax="0.1"><i className="p3-pond-glint" /></div>
+        <div className="p3-pond" data-parallax="0.04"><i className="p3-pond-glint" /></div>
+        {/* The pagoda stands in its pond, and the still water holds it upside down. */}
+        <div className="p3-pagoda" data-parallax="0.04" data-delay="0.05">
+          <PagodaSprite className="p3-pagoda-hall" />
+          <PagodaSprite className="p3-pagoda-reflection" />
+        </div>
         <LotusPadSprite className="p3-pad p3-pad-one" data-parallax="0.12" data-wave="2" />
         <LotusPadSprite className="p3-pad p3-pad-two" data-parallax="0.14" data-wave="3" />
         <LotusPadSprite className="p3-pad p3-pad-three" data-parallax="0.16" data-wave="2" />
@@ -235,11 +262,16 @@ export function PartThreeScene({ chapter, isActive }: PartThreeSceneProps) {
       <CloudSprite className="p3-cloud p3-cloud-dusk is-one" data-drift="0.6" data-parallax="-0.08" />
       <CloudSprite className="p3-cloud p3-cloud-dusk is-two" data-drift="-0.45" data-parallax="-0.05" />
       <CloudSprite className="p3-cloud p3-cloud-dusk is-three" data-drift="0.3" data-parallax="-0.1" />
-      {/* Triệu Việt Vương: a row of narrow houses, their windows lit, a street lamp, the wet road shining. */}
-      <i className="p3-rain-street" data-parallax="-0.14" />
-      <i className="p3-street-lamp" data-parallax="-0.1" />
+      {/* Triệu Việt Vương: a row of narrow houses, their windows lit, a street lamp, the wet road shining. At dusk the
+          rooftops warm with the sky behind them. */}
+      <FarRowSprite className="p3-far-row" data-parallax="-0.18" />
+      <StreetRowSprite className="p3-rain-street" data-parallax="-0.14" />
+      <i className="p3-dusk-light" data-parallax="-0.14" data-fade="0.45" />
+      <div className="p3-street-lamp" data-parallax="-0.1">
+        <StreetLampSprite />
+        <span className="p3-street-sign" data-delay="0.15">Triệu Việt Vương</span>
+      </div>
       <div className="p3-rain" data-fade="-0.42"><i /><i /></div>
-      <span className="p3-street-sign" data-parallax="-0.1" data-delay="0.15">Triệu Việt Vương</span>
       <div className="p3-table" data-parallax="0.16"><i /></div>
       <div className="p3-bowl" data-parallax="0.3" data-delay="0.2">
         <span className="p3-steam"><i /><i /><i /></span>

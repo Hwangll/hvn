@@ -51,6 +51,7 @@ export function DayClock({ from, to, note, dayStart, dayEnd }: DayClockProps) {
         data-spin={elapsed * 6}
       />
       <i className="date-clock-pin" />
+      <i className="date-clock-glass" />
       <small className="date-clock-label">{from} → {to}</small>
       <small className="day-clock-note">{note}</small>
     </div>

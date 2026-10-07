@@ -592,6 +592,17 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   background: radial-gradient(ellipse at 50% 28%, #ffffff07, transparent 70%);
   box-shadow: inset 0 0 0 1px #b8ccdb14, inset 0 -60px 90px -60px #02091660;
 }
+/* A film finish over every scene of Parts II and III: a soft vignette in the scene's own dark, a breath of light from
+   above and a little grain, so each diorama reads as one lit frame. It lies over the prints too, as a lens's vignette
+   would, and never takes the pointer. */
+.story-part-2 .together-scene::after {
+  content: ""; position: absolute; inset: 0; z-index: 40; pointer-events: none; border-radius: inherit;
+  background:
+    radial-gradient(ellipse 125% 100% at 50% 42%, transparent 58%, var(--scene-vignette, #0209167a) 100%),
+    radial-gradient(ellipse 85% 46% at 50% -8%, #ffffff14, transparent 72%),
+    var(--paper-grain);
+  background-size: auto, auto, 160px 160px;
+}
 /* Layers lean toward the cursor; --mx/--my come from usePointerParallax on the stage, --px is each layer's depth. */
 .story-part-2 .together-scene [data-parallax],
 .story-part-2 .together-scene .memory-photo,
@@ -670,61 +681,121 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .story-part-2 .night-scooter, .story-part-2 .offline-scene-caption { will-change: transform, opacity; }
 
 /* ---------- 7. Scene: the first ride through the night city ---------- */
-.night-sky { background: linear-gradient(180deg, #071223, #0c1d36 60%, transparent); }
-.night-moon {
-  --px: -0.5; position: absolute; top: 8%; right: 13%; z-index: 1; width: clamp(2.2rem, 9cqi, 3.4rem); aspect-ratio: 1; border-radius: 50%;
-  background: radial-gradient(circle at 36% 34%, #fffaf0, #eadfc4 62%, #cdbf9f); box-shadow: 0 0 26px 6px #f2e6c83a, 0 0 90px 30px #b9ccec1f;
-}
-.night-moon { overflow: hidden; }
-.night-moon i { position: absolute; inset: -8% -12% auto auto; width: 82%; height: 82%; border-radius: 50%; background: #0a1830; opacity: 1; }
-.night-skyline { --px: -0.25; position: absolute; left: -4%; bottom: 33%; z-index: 1; width: 108%; height: 22%; fill: #06101d; opacity: 0.95; }
-.night-skyline-far { --px: -0.32; left: -30%; width: 130%; bottom: 38%; height: 16%; fill: #0b1a2f; opacity: 0.7; }
-.night-skyline-far .skyline-windows { display: none; }
-.night-skyline .skyline-windows rect { fill: #f2dfb0; opacity: 0.55; }
-.together-scene-in-person.is-active .skyline-windows rect { animation: window-flicker 5s ease-in-out infinite alternate; }
-.together-scene-in-person.is-active .skyline-windows rect:nth-child(3n) { animation-delay: 1.4s; }
-.together-scene-in-person.is-active .skyline-windows rect:nth-child(4n) { animation-delay: 2.7s; animation-duration: 6.4s; }
+/* The key light is the moon over the rooftops; the street lamps answer it from below. Stars thin out towards the warm
+   haze the city breathes up behind its roofs. */
+.night-sky { background: linear-gradient(180deg, #040b18, #08152b 34%, #13233f 58%, #2a3555 76%, #463f5e 91%, #57485f); }
+.night-sky .star-layer { mask-image: linear-gradient(#000 26%, transparent 74%); }
+.night-moon { --px: -0.5; position: absolute; top: 8%; right: 13%; z-index: 1; width: clamp(2.2rem, 9cqi, 3.4rem); overflow: visible; }
+.moon-halo-core { stop-color: #f6ecd2; stop-opacity: 0.32; }
+.moon-halo-mid { stop-color: #b9ccec; stop-opacity: 0.09; }
+.moon-halo-edge { stop-color: #b9ccec; stop-opacity: 0; }
+.moon-ghost { fill: #1d2d4b; opacity: 0.6; }
+.moon-lit-hi { stop-color: #fffbf2; }
+.moon-lit-lo { stop-color: #dfcfa8; }
+.moon-maria { fill: #b9a986; opacity: 0.32; }
+.moon-wisp-hi { stop-color: #d3def2; stop-opacity: 0.4; }
+.moon-wisp-lo { stop-color: #18284a; stop-opacity: 0.5; }
+/* Near roofs are nearly black with a moonlit edge; the far line sits back, paler and softer, in the haze. */
+.night-skyline { --px: -0.25; position: absolute; left: -4%; bottom: 33%; z-index: 1; width: 108%; height: 22%; overflow: visible; }
+.night-skyline-far { --px: -0.32; left: -30%; width: 130%; bottom: 38%; height: 16%; }
+.skyline-mass-top { stop-color: #0a1426; }
+.skyline-mass-base { stop-color: #141f35; }
+.night-skyline-far .skyline-mass-top { stop-color: #1b2b47; }
+.night-skyline-far .skyline-mass-base { stop-color: #2b3756; }
+.skyline-rim { fill: #a3bbe0; opacity: 0.42; }
+.skyline-antenna { fill: none; stroke: #0a1426; stroke-width: 0.9; }
+.skyline-windows .is-warm { fill: #f6dca6; }
+.skyline-windows .is-cool { fill: #a6cbf0; opacity: 0.75; }
+.together-scene-in-person.is-active .skyline-windows .is-flicker { animation: window-flicker 5s ease-in-out infinite alternate; }
+.together-scene-in-person.is-active .skyline-windows .is-flicker:nth-child(2n) { animation-delay: -2.2s; animation-duration: 6.4s; }
+/* The pavement under the lamps, its kerb catching the light, then the wet road with the lamps running down it. */
 .night-road {
-  position: absolute; inset: 60% -40% -40%; z-index: 1; overflow: hidden;
-  background: linear-gradient(180deg, #1a2b44, #0d1829 65%);
-  transform: perspective(280px) rotateX(58deg); transform-origin: 50% 0;
-  box-shadow: inset 0 1px 0 #8ca7c766;
+  --px: 0.08; position: absolute; inset: 64% -6% -2%; z-index: 1;
+  background:
+    radial-gradient(ellipse 11% 7% at 17.9% 5%, #f7dfb35e, transparent 70%),
+    radial-gradient(ellipse 8% 6% at 83% 5%, #f7dfb347, transparent 70%),
+    radial-gradient(ellipse 6% 5% at 92% 5%, #f7dfb336, transparent 70%),
+    repeating-linear-gradient(180deg, #a9c1e406 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, #2b3956, #222f4a 11%, #93a9cc4a 11.6%, #18233b 12.6%, #0e172a 17%, #121c31 36%, #0b1426 68%, #070e1b);
+  box-shadow: inset 0 1px 0 #8ca7c759;
 }
-.night-road-lane {
-  position: absolute; left: 50%; top: -100%; width: 2px; height: 300%; margin-left: -1px; opacity: 0.5;
-  background: repeating-linear-gradient(180deg, #dfd0b1 0 4%, transparent 4% 12%);
+.night-road-shine {
+  position: absolute; left: 17.9%; top: 13%; width: 3.4%; height: 64%; margin-left: -1.7%; transform-origin: 50% 0;
+  background: radial-gradient(ellipse 50% 100% at 50% 0, #f7dfb35c, #f7dfb31f 44%, transparent 76%);
 }
-.night-road-edge { position: absolute; top: -10%; bottom: -10%; width: 1px; background: linear-gradient(180deg, #8ca7c700, #8ca7c766 40%, #8ca7c7aa); opacity: 0.85; }
-.night-road-edge-left { left: 22%; }
-.night-road-edge-right { right: 22%; }
-.together-scene-in-person.is-active .night-road-lane { animation: lane-roll 3.8s linear infinite; }
-.night-road-glow { position: absolute; inset: 0; background: radial-gradient(ellipse at 22% 10%, #f2dfc03a, transparent 32%), radial-gradient(ellipse at 84% 20%, #b9ccec2c, transparent 28%); }
+.night-road-shine:nth-child(2) { left: 83%; width: 2.6%; height: 52%; margin-left: -1.3%; }
+.night-road-shine:nth-child(3) { left: 92%; width: 2%; height: 42%; margin-left: -1%; }
+.night-road-lane { position: absolute; inset: 56% 0 auto; height: 0.16rem; background: repeating-linear-gradient(90deg, #e6d6b44d 0 2.4rem, transparent 2.4rem 4.8rem); }
+.together-scene-in-person.is-active .night-road-shine { animation: road-shine 4.2s ease-in-out infinite alternate; }
+.together-scene-in-person.is-active .night-road-shine:nth-child(2) { animation-delay: -1.6s; animation-duration: 5.2s; }
+/* Lens bokeh from lights out of focus: a soft disc with a slightly brighter rim, each in its own lamp's colour. */
 .night-bokeh { position: absolute; inset: 30% 0 25%; z-index: 2; pointer-events: none; }
-.night-bokeh i { position: absolute; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: #f2dfc0; opacity: 0.22; filter: blur(5px); }
-.night-bokeh i:nth-child(1) { left: 4%; top: 30%; }
-.night-bokeh i:nth-child(2) { left: 14%; top: 62%; width: 1rem; height: 1rem; background: #b9ccec; }
-.night-bokeh i:nth-child(3) { left: 78%; top: 20%; width: 2.2rem; height: 2.2rem; background: #f4b8b0; opacity: 0.16; }
-.night-bokeh i:nth-child(4) { left: 90%; top: 58%; width: 1.2rem; height: 1.2rem; }
-.night-bokeh i:nth-child(5) { left: 60%; top: 74%; width: 0.9rem; height: 0.9rem; background: #b9ccec; }
-.night-bokeh i:nth-child(6) { left: 30%; top: 8%; width: 1.1rem; height: 1.1rem; background: #f4b8b0; }
-.night-bokeh i:nth-child(7) { left: 95%; top: 84%; width: 2rem; height: 2rem; opacity: 0.14; }
-.together-scene-in-person.is-active .night-bokeh i { animation: bokeh-twinkle 5.5s ease-in-out infinite alternate; }
-.together-scene-in-person.is-active .night-bokeh i:nth-child(2n) { animation-delay: 1.3s; }
-.together-scene-in-person.is-active .night-bokeh i:nth-child(3n) { animation-delay: 2.6s; animation-duration: 7s; }
-.night-street-lamps { position: absolute; inset: 4% 0; z-index: 2; }
-/* Lamps stand on the skyline's pavement and pool their light on the road instead of fading into the sky. */
-.night-street-lamps i { position: absolute; left: 7%; bottom: 34%; height: 30%; width: 1px; background: linear-gradient(#8bcbd866, #8bcbd822); }
-.night-street-lamps i::before { position: absolute; top: 0; left: -2px; width: 12px; height: 4px; content: ''; background: #f6e5c8; border-radius: 2px; box-shadow: 0 0 16px 6px #f2dfc03a; }
-.night-street-lamps i::after {
-  position: absolute; bottom: -0.6rem; left: -3rem; width: 6rem; height: 1.6rem; content: ''; border-radius: 50%;
-  background: radial-gradient(ellipse, #f2dfc040, transparent 70%);
-  filter: blur(4px);
+.night-bokeh i {
+  --tone: #f2dfc0; position: absolute; width: 1.6rem; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--tone) 16%, transparent) 0 48%, color-mix(in srgb, var(--tone) 22%, transparent) 62%, transparent 72%);
 }
-.night-street-lamps i:nth-child(2) { left: 82%; height: 22%; }
-.night-street-lamps i:nth-child(3) { left: 93%; height: 16%; }
-.together-scene-in-person.is-active .night-street-lamps i::before { animation: lamp-flicker 7s ease-in-out infinite; }
-.together-scene-in-person.is-active .night-street-lamps i:nth-child(2)::before { animation-delay: 1.7s; }
-.night-scooter { --px: 0.5; position: absolute; left: 6%; bottom: 20%; z-index: 3; width: clamp(6rem, 28cqi, 9.5rem); overflow: visible; filter: drop-shadow(0 10px 16px #02091699) drop-shadow(0 0 10px #8bcbd826); }
+.night-bokeh i:nth-child(1) { left: 4%; top: 30%; }
+.night-bokeh i:nth-child(2) { --tone: #b9ccec; left: 13%; top: 62%; width: 1rem; }
+.night-bokeh i:nth-child(3) { --tone: #f4b8b0; left: 78%; top: 20%; width: 2.2rem; }
+.night-bokeh i:nth-child(4) { left: 90%; top: 58%; width: 1.2rem; }
+.night-bokeh i:nth-child(5) { --tone: #b9ccec; left: 60%; top: 74%; width: 0.9rem; }
+.night-bokeh i:nth-child(6) { --tone: #f4b8b0; left: 30%; top: 8%; width: 1.1rem; }
+.night-bokeh i:nth-child(7) { left: 95%; top: 84%; width: 2rem; }
+.together-scene-in-person.is-active .night-bokeh i { animation: bokeh-breathe 5.5s ease-in-out infinite alternate; }
+.together-scene-in-person.is-active .night-bokeh i:nth-child(2n) { animation-delay: -1.3s; }
+.together-scene-in-person.is-active .night-bokeh i:nth-child(3n) { animation-delay: -2.6s; animation-duration: 7s; }
+/* Street lamps on the pavement: iron with a moonlit edge; the light is its own layer, a halo and a cone to the kerb. */
+.night-street-lamps { position: absolute; inset: 4% 0; z-index: 2; pointer-events: none; }
+.night-lamp { position: absolute; left: 7%; bottom: 34%; height: 30%; aspect-ratio: 1 / 3; }
+.night-lamp:nth-child(2) { left: 82%; height: 22%; }
+.night-lamp:nth-child(3) { left: 93%; height: 16%; }
+.street-lamp-sprite { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.street-lamp-iron { fill: #091120; }
+.street-lamp-rim { fill: none; stroke: #a9c1e4; stroke-opacity: 0.45; stroke-width: 0.8; stroke-linecap: round; }
+.street-lamp-lens { fill: #fff4d8; }
+.night-lamp-light { position: absolute; left: 79%; top: 8%; bottom: 0; width: 0; }
+.night-lamp-light::before {
+  position: absolute; left: 0; top: 0; height: 64%; aspect-ratio: 1; content: ''; border-radius: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #fff3d6f0 0 3%, #ffdca266 9%, #ffcf8a24 28%, transparent 64%);
+}
+.night-lamp-light::after {
+  position: absolute; left: 0; top: 0; height: 100%; aspect-ratio: 0.62; content: ''; transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffe2ae38, #ffe2ae12 64%, transparent);
+  clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
+}
+.together-scene-in-person.is-active .night-lamp-light::before { animation: lamp-flicker 7s ease-in-out infinite; }
+.together-scene-in-person.is-active .night-lamp:nth-child(2) .night-lamp-light::before { animation-delay: 1.7s; }
+/* The two of them on the scooter: silhouettes with the moon on their edges, paint with a little gloss, a red tail light,
+   and a headlight that lays its beam and a pool of light on the road ahead. */
+.night-scooter { --px: 0.5; position: absolute; left: 5%; bottom: 10.5%; z-index: 3; width: clamp(7rem, 30cqi, 11.5rem); overflow: visible; }
+.sprite-contact-core { stop-color: #01050c; stop-opacity: 0.72; }
+.sprite-contact-edge { stop-color: #01050c; stop-opacity: 0; }
+.sprite-gloss-hi { stop-color: #ffffff; stop-opacity: 0.85; }
+.sprite-gloss-lo { stop-color: #ffffff; stop-opacity: 0; }
+.ride-silhouette { fill: #060c18; }
+.ride-rim { fill: #a3bde6; opacity: 0.6; }
+.ride-paint-hi { stop-color: #33496e; }
+.ride-paint-lo { stop-color: #0a1322; }
+.ride-seat { fill: #04080e; }
+.ride-gloss { fill: none; stroke: #c6d8f4; stroke-opacity: 0.5; stroke-width: 1.1; stroke-linecap: round; }
+.ride-tyre { fill: #03070d; }
+.ride-wheel-rim { fill: none; stroke: #4a5d7e; stroke-width: 1.6; }
+.ride-spokes { fill: none; stroke: #364764; stroke-width: 1.5; stroke-linecap: round; }
+.ride-hub { fill: #8597b6; }
+.ride-tyre-shine { fill: none; stroke: #a3bde6; stroke-opacity: 0.5; stroke-width: 1.1; stroke-linecap: round; }
+.ride-lens { fill: #fff7de; }
+.ride-lamp-core { stop-color: #fff7de; stop-opacity: 0.95; }
+.ride-lamp-edge { stop-color: #ffe2a8; stop-opacity: 0; }
+.ride-taillight { fill: #ff5e5e; }
+.ride-tail-core { stop-color: #ff6a5a; stop-opacity: 0.75; }
+.ride-tail-edge { stop-color: #ff3a3a; stop-opacity: 0; }
+.ride-beam-near { stop-color: #ffeac2; stop-opacity: 0.42; }
+.ride-beam-far { stop-color: #ffeac2; stop-opacity: 0; }
+.ride-pool-core { stop-color: #ffe6b4; stop-opacity: 0.34; }
+.ride-pool-edge { stop-color: #ffe6b4; stop-opacity: 0; }
+.together-scene-in-person.is-active .ride-body { animation: scooter-bob 1.5s ease-in-out infinite alternate; }
+.together-scene-in-person.is-active .ride-beam { animation: beam-flicker 3.4s ease-in-out infinite alternate; }
+/* Part III's streets still ride the plainer ScooterSprite, coloured per scene over these defaults. */
 .scooter-shadow { fill: #02091699; }
 .scooter-body { fill: #0c1526; stroke: #8ca7c74d; stroke-width: 1; stroke-linejoin: round; }
 .scooter-wheel { fill: #0c1526; stroke: #3b4b66; stroke-width: 3; }
@@ -732,66 +803,149 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .scooter-rider { fill: #111c30; }
 .scooter-headlight { fill: #fff2d0; }
 .scooter-beam { opacity: 0.9; }
-.together-scene-in-person.is-active .scooter-body { animation: scooter-bob 1.5s ease-in-out infinite alternate; }
-.together-scene-in-person.is-active .scooter-beam { animation: beam-flicker 3.4s ease-in-out infinite alternate; }
-.story-part-2 .together-scene-in-person .memory-photo { top: 11%; left: 16%; width: 60%; transform: rotate(-4deg); }
-@keyframes window-flicker { from { opacity: 0.35; } to { opacity: 0.75; } }
-@keyframes lane-roll { from { transform: translateY(0); } to { transform: translateY(12%); } }
-.story-part-2 .together-scene-in-person .together-photo-ride { top: 13%; left: 20%; transform: rotate(3deg); }
-@keyframes bokeh-twinkle { from { opacity: 0.12; transform: scale(0.92); } to { opacity: 0.3; transform: scale(1.1); } }
+.story-part-2 .together-scene-in-person .memory-photo { top: 10%; left: 16%; width: 60%; transform: rotate(-4deg); }
+.story-part-2 .together-scene-in-person .together-photo-ride { top: 12%; left: 20%; transform: rotate(3deg); }
+.story-part-2 .together-scene-in-person .offline-scene-caption { bottom: 3.5%; }
+@keyframes window-flicker { from { opacity: 0.35; } to { opacity: 0.85; } }
+@keyframes road-shine { from { opacity: 0.7; scale: 0.9 0.94; } to { opacity: 1; scale: 1.08 1.04; } }
+@keyframes bokeh-breathe { from { opacity: 0.55; scale: 0.92; } to { opacity: 1; scale: 1.08; } }
 @keyframes lamp-flicker { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
-@keyframes scooter-bob { from { transform: translateY(0); } to { transform: translateY(-2px); } }
+@keyframes scooter-bob { from { transform: translateY(0); } to { transform: translateY(-1.5px); } }
 @keyframes beam-flicker { from { opacity: 0.7; } to { opacity: 1; } }
 
 /* ---------- 8. Scene: two cups of Mixue, four hours, one in the morning ---------- */
-.date-sky { background: linear-gradient(180deg, #0b1630, #1c2547 55%, transparent); }
-/* The stop is a park bench at night: trees overhead, two lamps down the path. */
+.date-sky { inset: -12% -8% 22%; background: linear-gradient(180deg, #0a1430, #162248 50%, #262f56 78%, #34375b); }
+/* The stop is a flight of park steps at night: trees overhead, two lamps down the path, the nearer one the key light. */
 .date-park { --px: -0.2; position: absolute; inset: 0; z-index: 1; }
-.date-tree { position: absolute; border-radius: 50%; background: radial-gradient(ellipse at 40% 30%, #17402f, #0a2318 70%); box-shadow: inset 0 -1.5rem 2.5rem #05130ccc; }
-.date-tree-left { left: -22%; top: -26%; width: 60%; height: 58%; transform: rotate(-14deg); }
-.date-tree-right { right: -20%; top: -32%; width: 52%; height: 52%; transform: rotate(12deg); }
-/* Trunks reaching down behind the bench. */
-.date-tree::after { position: absolute; top: 76%; left: 46%; width: 0.5rem; height: 60%; content: ''; border-radius: 0 0 0.2rem 0.2rem; background: linear-gradient(#14281c, #0a1811); }
-.date-park-lamp { position: absolute; left: 26%; top: 26%; width: 3px; height: 46%; background: linear-gradient(#2c3d4e, #16222e); }
-.date-park-lamp::before { position: absolute; top: -0.5rem; left: -0.42rem; width: 1.1rem; height: 0.8rem; content: ''; border-radius: 50% 50% 40% 40%; background: #ffe9c0; box-shadow: 0 0 1.4rem 0.4rem #ffd89a4d, 0 0 3rem 1.2rem #ffd89a1f; }
-.date-park-lamp-two { left: auto; right: 3%; top: 32%; height: 38%; transform: scale(0.82); }
-.together-scene-dating.is-active .date-park-lamp::before { animation: lamp-flicker 7s ease-in-out infinite; }
-.date-clock { --px: -0.1; position: absolute; top: 12%; left: 7%; z-index: 3; width: clamp(3.6rem, 15cqi, 5rem); aspect-ratio: 1; filter: drop-shadow(0 12px 20px #02091680); }
-.date-clock-face {
-  position: absolute; inset: 0; border-radius: 50%; border: 3px solid #1c2a40;
-  background:
-    radial-gradient(circle, #fbf7ef 0 66%, transparent 67%),
-    repeating-conic-gradient(from -1.5deg, #2b3a52 0 3deg, transparent 3deg 90deg),
-    repeating-conic-gradient(from -0.75deg, #2b3a52 0 1.5deg, transparent 1.5deg 30deg),
-    #fbf7ef;
-  box-shadow: inset 0 0 0 2px #fbf7ef, inset 0 4px 10px #00000018;
+.date-tree { position: absolute; overflow: visible; }
+.date-tree-left { left: -22%; top: -24%; width: 60%; }
+.date-tree-right { right: -20%; top: -30%; width: 52%; scale: -1 1; }
+.canopy-back-lit { stop-color: #3f5a34; }
+.canopy-back-mid { stop-color: #16352b; }
+.canopy-back-dark { stop-color: #0a1b1b; }
+.canopy-front-lit { stop-color: #66753a; }
+.canopy-front-mid { stop-color: #1f4134; }
+.canopy-front-dark { stop-color: #0c221f; }
+.canopy-sky-rim { fill: #7d93b8; opacity: 0.32; }
+.canopy-lamp-rim { fill: #e9dc8e; opacity: 0.3; }
+.canopy-bark-dark { stop-color: #0a1411; }
+.canopy-bark-lit { stop-color: #3e3f2e; }
+.canopy-branch { fill: none; stroke: #0a1411; stroke-width: 3; stroke-linecap: round; }
+.date-lamp { position: absolute; left: 22.4%; top: 23%; height: 50%; aspect-ratio: 1 / 5; }
+.date-lamp-two { left: auto; right: 1.5%; top: 33%; height: 34%; }
+.park-lamp-sprite { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.park-lamp-iron-dark { stop-color: #0a1018; }
+.park-lamp-iron-lit { stop-color: #3d4250; }
+.park-lamp-flute { fill: none; stroke: #8a8f9e; stroke-opacity: 0.22; stroke-width: 0.5; }
+.park-lamp-glass-core { stop-color: #fff6d8; }
+.park-lamp-glass-edge { stop-color: #f4b860; }
+.park-lamp-bulb { fill: #fffdf2; }
+.park-lamp-frame { fill: none; stroke: #0d121a; stroke-width: 1.2; stroke-linejoin: round; }
+.park-lamp-cap { fill: #0d121a; }
+/* The lamp's light: a halo round the lantern and a soft cone down to the grass. */
+.date-lamp-glow { position: absolute; inset: 0; }
+.date-lamp-glow::before {
+  position: absolute; left: 50%; top: 13.5%; width: 440%; aspect-ratio: 1; content: ''; border-radius: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #fff2d2e6 0 2%, #ffda9c75 6%, #ffca7c2e 20%, #ffbf6a10 40%, transparent 66%);
 }
-.date-clock-hand { position: absolute; left: 50%; bottom: 50%; width: 3px; margin-left: -1.5px; border-radius: 2px; background: #1c2a40; transform-origin: 50% 100%; }
+.date-lamp-glow::after {
+  position: absolute; left: 50%; top: 18%; height: 82%; aspect-ratio: 0.9; content: ''; transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffe0a830, #ffe0a80c 70%, transparent);
+  clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%);
+}
+.date-lamp-two .date-lamp-glow::before { opacity: 0.75; }
+.together-scene-dating.is-active .date-lamp-glow::before { animation: lamp-flicker 7s ease-in-out infinite; }
+/* The park clock: an iron bezel, a face warmed on the side that faces the lamp, and glass over the hands. It stands
+   on the lawn's layer, so the grass drawn after it hides the foot of its post on every card size. */
+.date-clock { --px: -0.1; position: absolute; top: 12%; left: 7%; z-index: 2; width: clamp(3.6rem, 15cqi, 5rem); aspect-ratio: 1; }
+.date-clock-face {
+  position: absolute; inset: 0; border-radius: 50%; border: 0.2rem solid #1a2536;
+  background:
+    radial-gradient(circle, transparent 0 66%, #fbf6ea00 67%),
+    repeating-conic-gradient(from -1.5deg, #2b3a52 0 3deg, transparent 3deg 90deg),
+    repeating-conic-gradient(from -0.75deg, #2b3a52b3 0 1.5deg, transparent 1.5deg 30deg),
+    radial-gradient(circle at 64% 66%, #fffaee, #f4ebd8 58%, #e2d4b8);
+  box-shadow: inset 0 0 0 1px #ffffff59, inset 0 3px 8px #2b1e0a2e, 0 0 0 1px #4a5a72, 0 12px 20px -6px #020916a6, 0 0 26px 2px #ffd89a24;
+}
+.date-clock-face::before { position: absolute; inset: 14%; content: ''; border-radius: 50%; background: radial-gradient(circle at 64% 66%, #fffaee, #f4ebd8 70%, #ece1ca); }
+.date-clock-hand { position: absolute; left: 50%; bottom: 50%; width: 3px; margin-left: -1.5px; border-radius: 2px; background: #1c2a40; transform-origin: 50% 100%; box-shadow: 1px 1px 1px #2b1e0a33; }
 .date-clock-hand-hour { height: 30%; transform: rotate(270deg); }
 .date-clock-hand-minute { height: 42%; width: 2px; margin-left: -1px; background: #4a2a3a; transform: rotate(0deg); }
-.date-clock-post { position: absolute; top: 94%; left: 50%; z-index: -1; width: 0.4rem; height: 420%; margin-left: -0.2rem; border-radius: 0 0 0.2rem 0.2rem; background: linear-gradient(#33445a, #16222e); }
+.date-clock-post {
+  position: absolute; top: 94%; left: 50%; z-index: -1; width: 0.42rem; height: 420%; margin-left: -0.21rem; border-radius: 0 0 0.2rem 0.2rem;
+  background: linear-gradient(90deg, #0b111a, #3d4656 45%, #59606c 58%, #151c27 76%, #0a0f17);
+}
+.date-clock-post::before { position: absolute; top: 0; left: 50%; width: 1rem; height: 0.5rem; margin-left: -0.5rem; content: ''; border-radius: 0 0 0.3rem 0.3rem; background: linear-gradient(90deg, #0b111a, #4d5564 55%, #10161f); }
 .date-clock-pin { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: #e2a7bb; box-shadow: 0 0 0 2px #1c2a40; }
-.date-clock-label { position: absolute; bottom: 108%; left: 50%; white-space: nowrap; transform: translateX(-50%); padding: 0.16rem 0.55rem; border-radius: 999px; color: #fbf7ef; background: #0f1a30b8; font: 600 0.85rem/1 var(--hand); letter-spacing: 0.02em; box-shadow: 0 4px 12px #02091660; }
-.date-ground { position: absolute; inset: 72% -8% -24%; z-index: 2; border-radius: 50% 50% 0 0 / 26% 26% 0 0; background: linear-gradient(180deg, #1d3626, #102019 55%, #0a150f); box-shadow: inset 0 1px 0 #a8ddeb2b, 0 -20px 40px -20px #02091680; }
-.date-ground i { position: absolute; inset: 12% 14% auto; height: 26%; border-radius: 50%; background: radial-gradient(ellipse at 50% 0, #ffd89a1a, transparent 70%); }
-/* The bench the two cups sit on. */
-/* The flight of steps the two of them actually sat on, stacked front-on with the lamplight along each tread. */
+/* The glass: a soft window of light at the top left, a thin crescent of lamplight along the bottom right. */
+.date-clock-glass {
+  position: absolute; inset: 0.2rem; border-radius: 50%; pointer-events: none;
+  background:
+    radial-gradient(ellipse 62% 44% at 34% 24%, #ffffff5c, #ffffff14 58%, transparent 72%),
+    radial-gradient(circle at 50% 50%, transparent 0 86%, #ffe2b04d 92%, transparent 97%);
+  mask-image: linear-gradient(135deg, #000 0 30%, transparent 46% 58%, #000 78%);
+}
+/* Centred over the dial by its margins rather than a transform, which reduced motion drops. */
+.date-clock-label { position: absolute; bottom: 108%; left: -60%; right: -60%; width: max-content; margin-inline: auto; white-space: nowrap; padding: 0.16rem 0.55rem; border-radius: 999px; color: #fbf7ef; background: #0f1a30b8; font: 600 0.85rem/1 var(--hand); letter-spacing: 0.02em; box-shadow: 0 4px 12px #02091660, inset 0 1px 0 #ffffff14; }
+/* The lawn behind the steps, lamplit where the lamps stand. */
+.date-ground { position: absolute; inset: 70% -8% -26%; z-index: 2; width: 116%; height: 56%; overflow: visible; }
+.lawn-turf-top { stop-color: #29452c; }
+.lawn-turf-mid { stop-color: #142a1e; }
+.lawn-turf-deep { stop-color: #08140e; }
+.lawn-pool-core { stop-color: #ffd98f; stop-opacity: 0.3; }
+.lawn-pool-edge { stop-color: #ffd98f; stop-opacity: 0; }
+.lawn-blade-tip { stop-color: #8fb36a; }
+.lawn-blade-foot { stop-color: #1d3624; }
+/* The flight of steps the two of them actually sat on, stacked front-on: worn stone, each tread lit where the lamp
+   falls on it, a dark line of shade under every nosing. */
 .date-steps { --px: 0.2; position: absolute; inset: auto 0 4%; z-index: 3; height: 22%; }
-.date-steps i { position: absolute; left: 0; height: 34%; border-radius: 0 2px 0 0; background: linear-gradient(180deg, #6d7462 0 0.2rem, #3d453a 0.2rem, #242c25); box-shadow: 0 -1px 0 #ffe9c840 inset, 0 -10px 20px -14px #02091680; }
-.date-steps i:nth-child(1) { bottom: 66%; width: 62%; }
-.date-steps i:nth-child(2) { bottom: 33%; width: 80%; }
-.date-steps i:nth-child(3) { bottom: 0; width: 100%; }
-.date-cup { --px: 0.6; position: absolute; bottom: 25%; z-index: 4; width: clamp(2.6rem, 11cqi, 4.2rem); overflow: visible; filter: drop-shadow(0 10px 16px #02091680) drop-shadow(0 1.6rem 0.4rem #f6cfd633); }
+.date-steps i {
+  --pool: 26%;
+  position: absolute; left: 0; height: 34%; border-radius: 0 0.2rem 0 0;
+  background:
+    radial-gradient(ellipse 34% 70% at var(--pool) 0, #ffd9945c, transparent 72%),
+    radial-gradient(ellipse 44% 140% at var(--pool) 0, #ffd89a26, transparent 70%),
+    repeating-linear-gradient(90deg, #ffffff06 0 calc(19% - 1px), #00000038 calc(19% - 1px) 19%, #0000000f 19% calc(38% - 1px), #00000038 calc(38% - 1px) 38%),
+    linear-gradient(90deg, transparent calc(100% - 0.4rem), #00000033),
+    var(--paper-grain),
+    linear-gradient(180deg, #b7ad94, #8f8873 0.42rem, #22282a 0.42rem, #464b44 0.68rem, #3a3f3a 40%, #262b27 85%, #1e221f);
+  box-shadow: inset 0 1px 0 #ffeccb80, inset -1px 0 0 #ffe9c21c, 0 -10px 20px -14px #02091680;
+}
+.date-steps i:nth-child(1) { --pool: 42%; bottom: 66%; width: 62%; }
+.date-steps i:nth-child(2) { --pool: 32.5%; bottom: 33%; width: 80%; }
+.date-steps i:nth-child(3) { --pool: 26%; bottom: 0; width: 100%; }
+/* Two sundaes on the top step, glass lit on the side that faces the lamp between them. */
+.date-cup { --px: 0.6; position: absolute; bottom: 24.6%; z-index: 4; width: clamp(2.6rem, 11cqi, 4.2rem); overflow: visible; }
 .date-cup-one { left: 16%; }
 .date-cup-two { left: 31%; z-index: 3; }
-.drink-cup { fill: #fbf5f2; opacity: 0.94; }
-.drink-fill { fill: #f6cfd6; }
-.date-cup-two .drink-fill { fill: #f2e2c8; }
-.drink-lid { fill: #ffffff; }
-.drink-swirl { fill: #fff8f2; stroke: #f3c9d2; stroke-width: 1.2; }
-.drink-straw { stroke: #e2a7bb; stroke-width: 4; stroke-linecap: round; }
-.date-cup-two .drink-straw { stroke: #a8ddeb; }
-.drink-shine { stroke: #ffffffaa; stroke-width: 2; stroke-linecap: round; }
+.drink-cup-edge { stop-color: #f6eef0; stop-opacity: 0.62; }
+.drink-cup-mid { stop-color: #ffffff; stop-opacity: 0.22; }
+.drink-fill-top { stop-color: #fbdbe2; }
+.drink-fill-deep { stop-color: #e590a6; }
+.date-cup-two .drink-fill-top { stop-color: #f5e6cb; }
+.date-cup-two .drink-fill-deep { stop-color: #c9a477; }
+.drink-bits { fill: #d64a64; opacity: 0.85; }
+.date-cup-two .drink-bits { fill: #3a2418; }
+.drink-surface { fill: none; stroke: #ffffff; stroke-opacity: 0.55; stroke-width: 0.8; }
+.drink-band { fill: #ffffff; opacity: 0.5; }
+.drink-print { fill: #e8475a; }
+.drink-rim { fill: none; stroke: #fff4dc; stroke-width: 1.1; stroke-linecap: round; opacity: 0.25; }
+.date-cup-one .drink-rim.is-right, .date-cup-two .drink-rim.is-left { opacity: 0.9; }
+.drink-beads { fill: #ffffff; opacity: 0.7; }
+.drink-lid { fill: #fdfbf8; }
+.drink-lid-shine { fill: none; stroke: #ffffff; stroke-width: 0.9; stroke-linecap: round; }
+.drink-swirl-hi { stop-color: #fffdf8; }
+.drink-swirl-lo { stop-color: #f2d9df; }
+.date-cup-two .drink-swirl-lo { stop-color: #eadcc4; }
+.drink-swirl-line { fill: none; stroke: #d9b2be; stroke-width: 0.8; stroke-linecap: round; opacity: 0.8; }
+.date-cup-two .drink-swirl-line { stroke: #cdb48e; }
+.drink-dome-top { stop-color: #ffffff; stop-opacity: 0.3; }
+.drink-dome-foot { stop-color: #ffffff; stop-opacity: 0.06; }
+.drink-dome-shine { fill: none; stroke: #ffffff; stroke-opacity: 0.85; stroke-width: 1.1; stroke-linecap: round; }
+.drink-straw { fill: none; stroke: #e2a7bb; stroke-width: 4.4; stroke-linecap: round; }
+.date-cup-two .drink-straw { stroke: #8fd0e2; }
+.drink-straw-stripe { fill: none; stroke: #ffffff; stroke-opacity: 0.7; stroke-width: 4.4; stroke-dasharray: 2.4 3.6; }
+.drink-straw-shine { fill: none; stroke: #ffffff; stroke-width: 1; stroke-linecap: round; opacity: 0.8; }
 .drink-drop { fill: #ffffffaa; }
 .together-scene-dating.is-active .drink-drop { animation: drop-slide 3.2s ease-in infinite; }
 .together-scene-dating.is-active .date-cup-two .drink-drop { animation-delay: 1.6s; }
@@ -824,47 +978,75 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .park-leaf-three .leaf-blade { fill: #5f9d84; }
 .story-part-2 .together-scene-dating .memory-photo { top: 12%; left: 37%; width: 56%; transform: rotate(3deg); }
 .story-part-2 .together-scene-dating .memory-photo.is-portrait { left: 44%; width: 44%; }
+/* The line of microcopy rests on the bottom step's dark riser rather than across its lit edge. */
+.story-part-2 .together-scene-dating .offline-scene-caption { bottom: 5.5%; }
 @keyframes drop-slide { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(26px); opacity: 0; } }
 
 /* ---------- 9. Scene: the aquarium, a tall glass arch full of slow light ---------- */
+/* A dark viewing room, so the tank is the light: the surface glows overhead, shafts of it slant down through the water,
+   a caustic net plays on the sand, and the room's edge catches the blue spilling out of the glass. */
+.story-part-2 .together-scene-aquarium { background: radial-gradient(ellipse 80% 70% at 50% 40%, #0b3556, #061a2e 70%, #04111f); }
 .aquarium-arch { position: absolute; inset: 3% 4% 6%; z-index: 0; }
 .aquarium-glass {
   position: absolute; inset: 0; border-radius: 46% 46% 1.5rem 1.5rem / 42% 42% 1.5rem 1.5rem; overflow: hidden;
-  background: linear-gradient(180deg, #0e5f8fb0, #073a5ecc 55%, #052a48e6); box-shadow: inset 0 0 70px #0b86b83a, inset 0 -40px 80px -30px #02142880;
+  background:
+    radial-gradient(ellipse 70% 20% at 42% 0, #d2f7ff99, #8fe0f533 52%, transparent 80%),
+    radial-gradient(ellipse 64% 54% at 42% 26%, #2fb2d94d, transparent 70%),
+    linear-gradient(180deg, #1c8fbf, #0e6797 22%, #0a4d7c 48%, #073a60 72%, #052b49);
+  box-shadow: inset 0 0 70px #0b86b84d, inset 0 -40px 80px -30px #021428a6;
 }
-.aquarium-glass::before { content: ''; position: absolute; inset: 9% 6% auto; height: 2px; z-index: 1; background: linear-gradient(90deg, transparent, #cdf3fb66, transparent); }
-.aquarium-glass::after { position: absolute; inset: -20% 55% -20% 30%; content: ''; background: linear-gradient(100deg, transparent, #bdeafb14 45%, #bdeafb22 50%, #bdeafb14 55%, transparent); transform: rotate(14deg); }
-.aquarium-rim { position: absolute; inset: -0.45rem; border: 0.4rem solid #0b2740; border-radius: 47% 47% 1.9rem 1.9rem / 43% 43% 1.9rem 1.9rem; box-shadow: 0 0 0 1px #8bcbd838, 0 24px 60px #02091680, inset 0 1px 0 #ffffff1c, inset 0 0 0 1px #8bcbd826; }
-.story-part-2 .aquarium-light {
-  position: absolute; top: -12%; width: 20%; height: 92%; z-index: 1;
-  filter: blur(7px); mix-blend-mode: screen; transform-origin: top;
+/* The surface seen from below, a bright wavering seam, and two long reflections on the glass. */
+.aquarium-glass::before {
+  position: absolute; inset: 8% 8% auto; height: 2px; z-index: 1; content: '';
+  background: linear-gradient(90deg, transparent, #e6fbff59 18%, #effdffa6 46%, #e6fbff59 80%, transparent);
+  box-shadow: 0 0 12px 2px #bdeafb33;
 }
-.story-part-2 .aquarium-light::before {
-  position: absolute; inset: 0; content: ''; opacity: 0.45; border-radius: 40%; transform-origin: top;
-  background: linear-gradient(180deg, #d6f4fd99, #bdeafb44 45%, transparent 82%);
+.aquarium-glass::after {
+  position: absolute; inset: -20% 52% -20% 26%; content: '';
+  background:
+    linear-gradient(100deg, transparent 20%, #bdeafb12 36%, #bdeafb26 42%, transparent 50%),
+    linear-gradient(100deg, transparent 62%, #bdeafb1f 66%, transparent 70%);
+  transform: rotate(14deg);
 }
+.aquarium-rim {
+  position: absolute; inset: -0.45rem; border: 0.4rem solid #0c2a45; border-radius: 47% 47% 1.9rem 1.9rem / 43% 43% 1.9rem 1.9rem;
+  box-shadow: 0 0 0 1px #8bcbd838, 0 24px 60px #02091680, 0 0 54px #0b86b833, inset 0 1px 0 #d6f4fd33, inset 0 0 0 1px #8bcbd833, inset 0 0 18px #0b86b840;
+}
+/* Shafts of light: soft-edged wedges fanning from the surface, fading as they sink. */
+.story-part-2 .aquarium-light { position: absolute; top: -12%; width: 20%; height: 92%; z-index: 1; mix-blend-mode: screen; transform-origin: top; }
+.story-part-2 .aquarium-light::before,
+.story-part-2 .aquarium-light::after {
+  position: absolute; inset: 0; content: ''; transform-origin: 50% 0;
+  background: conic-gradient(from 168deg at 50% 0, transparent, #d6f4fd85 7deg, #e8fbffa6 12deg, #d6f4fd85 17deg, transparent 24deg);
+  mask-image: linear-gradient(180deg, #000, #0009 46%, transparent 88%);
+}
+.story-part-2 .aquarium-light::after { inset: 0 -30% 0 30%; opacity: 0.55; background: conic-gradient(from 172deg at 50% 0, transparent, #d6f4fd5c 5deg, transparent 12deg); }
 .story-part-2 .aquarium-light-one { left: 22%; transform: rotate(13deg); }
 .story-part-2 .aquarium-light-two { right: 22%; width: 14%; transform: rotate(-11deg); }
-.story-part-2 .aquarium-light-two::before { opacity: 0.35; }
+.story-part-2 .aquarium-light-two::before { opacity: 0.7; }
 .together-scene-aquarium.is-active .aquarium-light-one::before { animation: ray-sway 9s ease-in-out infinite alternate; }
 .together-scene-aquarium.is-active .aquarium-light-two::before { animation: ray-sway 11s ease-in-out -4s infinite alternate-reverse; }
+/* The caustic net lies on the sand; its inner group drifts, never the layer the engine moves. */
 .aquarium-caustic {
-  position: absolute; inset: 52% 10% 8%; z-index: 1; opacity: 0.55; mix-blend-mode: screen; filter: blur(0.8px);
+  position: absolute; inset: 73% 9% 7%; z-index: 3; mix-blend-mode: screen; pointer-events: none;
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 56%, #000 30%, transparent 76%);
 }
-.aquarium-caustic::before {
-  position: absolute; inset: 0; content: '';
-  background:
-    radial-gradient(ellipse at 24% 40%, transparent 9%, #cdf3fb2e 10%, transparent 12.5%),
-    radial-gradient(ellipse at 62% 30%, transparent 8%, #cdf3fb26 9%, transparent 11%),
-    radial-gradient(ellipse at 44% 76%, transparent 12%, #cdf3fb2a 13%, transparent 15.5%),
-    radial-gradient(ellipse at 84% 66%, transparent 7%, #cdf3fb22 8%, transparent 10%);
-}
-.together-scene-aquarium.is-active .aquarium-caustic::before { animation: caustic-wobble 12s ease-in-out infinite alternate; }
-.fish-sprite { position: absolute; width: 3.2rem; overflow: visible; filter: drop-shadow(0 8px 14px #02142860); }
+.caustic-sprite { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.caustic-net path { fill: none; stroke: #cdf6ff; stroke-opacity: 0.26; stroke-width: 1.4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.caustic-net.is-second path { stroke-opacity: 0.16; }
+.together-scene-aquarium.is-active .caustic-net { animation: caustic-drift 13s ease-in-out infinite alternate; }
+.together-scene-aquarium.is-active .caustic-net.is-second { animation-duration: 17s; animation-direction: alternate-reverse; }
+/* Fish lit from above: their own colour under a sheen, a bright lateral line, translucent fins. */
+.fish-sprite { position: absolute; width: 3.2rem; overflow: visible; }
 .fish-body { fill: #17507c; }
 .fish-belly { fill: #3e8fbf; opacity: 0.55; }
-.fish-fin { fill: #114269; opacity: 0.9; }
+.fish-fin { fill: #114269; opacity: 0.8; }
 .fish-tail path { fill: #124569; transform-origin: 46px 16px; }
+.fish-shade-top { stop-color: #ffffff; stop-opacity: 0.34; }
+.fish-shade-mid { stop-color: #ffffff; stop-opacity: 0; }
+.fish-shade-low { stop-color: #021a2e; stop-opacity: 0.42; }
+.fish-line { fill: none; stroke: #ffffff; stroke-opacity: 0.38; stroke-width: 0.7; stroke-linecap: round; }
+.fish-gill { fill: none; stroke: #021a2e; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: round; }
 .fish-shape { transform-origin: 32px 16px; transform-box: view-box; }
 /* Fish face the way they travel: positive drift moves right, so those are mirrored. */
 .fish-one .fish-shape, .fish-three .fish-shape { transform: scaleX(-1); }
@@ -876,17 +1058,18 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .together-scene-aquarium.is-active .fish-five .fish-tail path { animation-duration: 2.3s; animation-delay: 0.5s; }
 .story-part-2 .aquarium-fish { --px: 0.4; z-index: 3; color: inherit; background: none; opacity: 0.95; }
 .story-part-2 .fish-one { top: 10%; left: 9%; width: clamp(2.4rem, 10cqi, 3.6rem); }
-.story-part-2 .fish-two { top: 22%; right: 7%; left: auto; width: clamp(1.8rem, 7cqi, 2.6rem); }
-.story-part-2 .fish-two .fish-body { fill: #1f6494; }
+.story-part-2 .fish-two { top: 30%; right: 15%; left: auto; width: clamp(1.8rem, 7cqi, 2.6rem); }
 .story-part-2 .fish-three { top: 68%; left: 5%; width: clamp(2rem, 8cqi, 3rem); }
 .story-part-2 .fish-three .fish-body { fill: #f0925f; }
 .story-part-2 .fish-three .fish-belly { fill: #ffd2b8; opacity: 0.75; }
 .story-part-2 .fish-three .fish-fin { fill: #d9703f; }
 .story-part-2 .fish-three .fish-tail path { fill: #e3824f; }
-.story-part-2 .fish-four { --px: 0.2; top: 56%; right: 12%; left: auto; width: clamp(1.3rem, 5cqi, 1.9rem); opacity: 0.6; filter: blur(0.5px) drop-shadow(0 8px 14px #02142860); z-index: 2; }
-.story-part-2 .fish-four .fish-body { fill: #123f63; }
-.story-part-2 .fish-five { --px: 0.15; top: 36%; right: 30%; left: auto; width: clamp(1.1rem, 4.5cqi, 1.6rem); opacity: 0.5; filter: blur(0.7px); z-index: 2; }
+/* The far fish sit back in the blue: smaller, softer and the colour of the water. */
+.story-part-2 .fish-four { --px: 0.2; top: 56%; right: 12%; left: auto; z-index: 2; width: clamp(1.3rem, 5cqi, 1.9rem); opacity: 0.7; filter: blur(0.5px); }
+.story-part-2 .fish-four .fish-body { fill: #1d5a86; }
+.story-part-2 .fish-five { --px: 0.15; top: 36%; right: 30%; left: auto; z-index: 2; width: clamp(1.1rem, 4.5cqi, 1.6rem); opacity: 0.7; filter: blur(0.7px); }
 .story-part-2 .fish-five .fish-body { fill: #1a4f78; }
+:is(.fish-four, .fish-five) .fish-line { display: none; }
 /* Fish in the diary's own palette: a pale sky-blue lead, a paper-cream companion, silhouettes that still read. */
 .story-part-2 .fish-one .fish-body { fill: #9fd8ee; }
 .story-part-2 .fish-one .fish-belly { fill: #e6f7ff; opacity: 0.85; }
@@ -894,29 +1077,47 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .story-part-2 .fish-two .fish-body { fill: #e9cfa3; }
 .story-part-2 .fish-two .fish-belly { fill: #fbf1df; opacity: 0.8; }
 .story-part-2 .fish-two .fish-fin, .story-part-2 .fish-two .fish-tail path { fill: #c9a86f; }
-.story-part-2 .fish-four { opacity: 0.7; }
-.story-part-2 .fish-four .fish-body { fill: #1d5a86; }
-.story-part-2 .fish-five { opacity: 0.7; }
 .aquarium-school { --px: 0.1; position: absolute; top: 46%; left: 6%; z-index: 2; width: clamp(4rem, 20cqi, 7rem); opacity: 0.55; overflow: visible; filter: blur(0.4px); }
-.aquarium-school .school-fish { fill: #7fc6e8; transform-box: view-box; transform-origin: 52px 17px; transform: scaleX(-1); }
+.aquarium-school .school-fish { fill: #8fd0ec; transform-box: view-box; transform-origin: 52px 17px; transform: scaleX(-1); }
 .together-scene-aquarium.is-active .aquarium-school .school-fish { animation: school-flick 1.6s ease-in-out calc(var(--k) * -0.2s) infinite alternate; }
-.aquarium-jelly { --px: 0.3; position: absolute; z-index: 3; width: clamp(2rem, 8cqi, 3rem); overflow: visible; filter: drop-shadow(0 0 14px #f0c6e066); }
+/* Moon jellies make their own light: an aura round each, a bell that glows from within, tentacles that fade out. */
+.aquarium-jelly { --px: 0.3; position: absolute; z-index: 3; width: clamp(2rem, 8cqi, 3rem); overflow: visible; }
 .jelly-one { top: 38%; right: 10%; }
 .jelly-two { top: 58%; left: 12%; width: clamp(1.5rem, 6cqi, 2.3rem); opacity: 0.8; }
-.jelly-bell { fill: #efc3dcb8; }
-.jelly-shine { fill: #ffffff66; }
-.jelly-spot { fill: #ffffff8c; }
-.jelly-tentacles path { fill: none; stroke: #f7d9e8; stroke-width: 1.4; stroke-linecap: round; opacity: 0.8; }
+.jelly-aura-core { stop-color: #f6c8e2; stop-opacity: 0.3; }
+.jelly-aura-edge { stop-color: #f6c8e2; stop-opacity: 0; }
+.jelly-bell-core { stop-color: #fff3f9; stop-opacity: 0.95; }
+.jelly-bell-mid { stop-color: #f2bcd8; stop-opacity: 0.72; }
+.jelly-bell-rim { stop-color: #d98fbc; stop-opacity: 0.55; }
+.jelly-inner { fill: none; stroke: #ffffff; stroke-opacity: 0.38; stroke-width: 0.9; }
+.jelly-frill { fill: none; stroke: #ffe6f2; stroke-opacity: 0.85; stroke-width: 1; stroke-linejoin: round; }
+.jelly-shine { fill: #ffffff; opacity: 0.45; }
+.jelly-spot { fill: #ffffff; opacity: 0.55; }
+.jelly-arms { fill: #f7cfe2; opacity: 0.4; }
+.jelly-tentacles path { fill: none; stroke-width: 1.4; stroke-linecap: round; }
+.jelly-trail-top { stop-color: #fbe0ee; stop-opacity: 0.85; }
+.jelly-trail-end { stop-color: #fbe0ee; stop-opacity: 0; }
 .together-scene-aquarium.is-active .jelly-bell { transform-box: fill-box; transform-origin: 50% 90%; animation: jelly-pulse 3.2s ease-in-out infinite; }
 .together-scene-aquarium.is-active .jelly-two .jelly-bell { animation-delay: -1.4s; animation-duration: 3.8s; }
 .together-scene-aquarium.is-active .jelly-tentacles { transform-box: fill-box; transform-origin: 50% 0; animation: tentacle-sway 3.2s ease-in-out infinite alternate; }
+/* The floor of the tank: a sand bank lit where the shafts land, rocks and kelp reaching for the light. */
 .aquarium-floor { position: absolute; inset: auto 7% 7% 7%; height: 28%; z-index: 2; pointer-events: none; }
-/* A sand bank with a couple of pebbles instead of a dark ellipse. */
-.aquarium-floor::before { position: absolute; inset: auto -6% -4% -6%; height: 34%; content: ''; border-radius: 50% 50% 0 0 / 100% 100% 0 0; background: linear-gradient(180deg, #2a6f8c, #144a66 60%, #0b3350); box-shadow: inset 0 2px 0 #8fd0ec33; }
-.aquarium-floor::after { content: ''; position: absolute; inset: auto 0 2% 0; height: 30%; background: radial-gradient(ellipse 14% 8% at 30% 88%, #1d5c7a, transparent 70%), radial-gradient(ellipse 10% 6% at 70% 92%, #1d5c7a, transparent 70%); }
+.aquarium-seabed { position: absolute; inset: 0; width: 100%; height: 100%; }
+.seabed-sand-top { stop-color: #3d8fab; }
+.seabed-sand-mid { stop-color: #1d6083; }
+.seabed-sand-deep { stop-color: #0b3758; }
+.seabed-sun-core { stop-color: #c9f3ff; stop-opacity: 0.36; }
+.seabed-sun-edge { stop-color: #c9f3ff; stop-opacity: 0; }
+.seabed-ripples { fill: none; stroke: #bdeefa; stroke-opacity: 0.26; stroke-width: 1; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.seabed-rock-hi { stop-color: #5592a8; }
+.seabed-rock-lo { stop-color: #10344d; }
+.seabed-pebbles { fill: #2f7590; }
 .kelp-sprite { position: absolute; bottom: 0; width: clamp(2rem, 8cqi, 3.2rem); height: auto; overflow: visible; transform-origin: 50% 100%; }
-.kelp-blade { fill: #2a8f7a; opacity: 0.9; stroke: #7fd6c4; stroke-opacity: 0.6; stroke-width: 0.8; }
-.kelp-blade-back { fill: #1a6b5e; opacity: 0.75; stroke-opacity: 0.35; }
+.kelp-tip { stop-color: #86dcb8; }
+.kelp-root { stop-color: #135549; }
+.kelp-blade { stroke: #a6ead6; stroke-opacity: 0.45; stroke-width: 0.8; }
+.kelp-blade-back { fill: #0f4943; opacity: 0.85; stroke-opacity: 0.2; }
+.kelp-rib { fill: none; stroke: #c9f7e6; stroke-opacity: 0.42; stroke-width: 0.9; stroke-linecap: round; }
 .kelp-one { left: 4%; height: 78%; }
 .kelp-two { left: 15%; height: 56%; }
 .kelp-three { right: 12%; height: 70%; }
@@ -927,7 +1128,7 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .together-scene-aquarium.is-active .kelp-four { animation-delay: -0.8s; animation-duration: 7s; }
 .story-part-2 .aquarium-bubble {
   position: absolute; z-index: 3; width: 0.8rem; height: 0.8rem; border-radius: 50%; border: 1px solid #d7f2fa88; opacity: 0.85;
-  background: radial-gradient(circle at 34% 30%, #ffffffb8 0 18%, #bfe9f640 45%, transparent 62%); box-shadow: inset -2px -2px 4px #9fd8ee40;
+  background: radial-gradient(circle at 34% 30%, #ffffffc4 0 16%, #bfe9f640 44%, transparent 62%); box-shadow: inset -2px -2px 4px #9fd8ee40, 0 0 6px #bfe9f633;
 }
 .story-part-2 .bubble-one { left: 23%; bottom: 22%; }
 .story-part-2 .bubble-two { right: 25%; bottom: 34%; width: 0.52rem; height: 0.52rem; }
@@ -935,13 +1136,20 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .story-part-2 .bubble-four { left: 40%; bottom: 4%; width: 0.6rem; height: 0.6rem; }
 .story-part-2 .bubble-five { left: 82%; bottom: 14%; width: 0.36rem; height: 0.36rem; }
 .story-part-2 .bubble-six { left: 12%; bottom: 8%; width: 0.5rem; height: 0.5rem; }
+/* The ticket: printed card with a teal stub, paper grain and a little foil seal that catches the tank's light. */
 .story-part-2 .aquarium-ticket {
-  --px: 0.9; position: absolute; left: 7%; bottom: 9%; z-index: 5; display: grid; grid-template-columns: auto 1fr; gap: 0.12rem 0.55rem; align-items: center; width: min(40%, 12rem); padding: 0.7rem 2rem 0.7rem 0.8rem;
-  color: #17455d; background: linear-gradient(180deg, #e3f1f4, #cfe4ea); border: 0; border-radius: 0.3rem; box-shadow: 0 14px 30px #06172a4d, inset 0 1px 0 #ffffffb0; transform: rotate(-4deg);
+  --px: 0.9; position: absolute; left: 7%; bottom: 9%; z-index: 5; display: grid; grid-template-columns: auto 1fr; gap: 0.12rem 0.55rem; align-items: center; width: min(40%, 12rem); padding: 0.7rem 2rem 0.7rem 0.95rem;
+  color: #17455d; border: 0; border-radius: 0.3rem; transform: rotate(-4deg);
+  background:
+    radial-gradient(circle at calc(100% - 0.72rem) 50%, #ffffffd9 0 0.12rem, #b6f0ff99 0.16rem, #f6c8e299 0.26rem, #c9f3b799 0.34rem, transparent 0.4rem),
+    linear-gradient(90deg, #0b86b8 0 0.28rem, transparent 0.28rem),
+    var(--paper-grain),
+    linear-gradient(180deg, #eef8fa, #d4e8ee);
+  box-shadow: 0 14px 30px #06172a59, 0 2px 4px #06172a40, inset 0 1px 0 #ffffffc4, inset 0 -1px 0 #17455d1a;
   font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em;
 }
 .story-part-2 .aquarium-ticket::before,
-.story-part-2 .aquarium-ticket::after { position: absolute; right: 1.3rem; width: 0.7rem; height: 0.7rem; content: ''; border-radius: 50%; background: #062b45; }
+.story-part-2 .aquarium-ticket::after { position: absolute; right: 1.3rem; width: 0.7rem; height: 0.7rem; content: ''; border-radius: 50%; background: #062b45; box-shadow: inset 0 0 0 1px #8bcbd826; }
 .story-part-2 .aquarium-ticket::before { top: -0.35rem; }
 .story-part-2 .aquarium-ticket::after { bottom: -0.35rem; }
 .story-part-2 .aquarium-ticket svg { grid-row: span 2; color: #0b86b8; }
@@ -950,8 +1158,8 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .story-part-2 .together-scene-aquarium .memory-photo { width: 62%; left: 18%; top: 16%; transform: rotate(-2deg); background: var(--paper-grain), linear-gradient(165deg, #f3f5f2, #e4e8e4); }
 .story-part-2 .together-scene-aquarium .offline-scene-caption { left: auto; right: 8%; bottom: 10%; max-width: 20ch; text-align: right; padding: 0 1.4rem 0 0; }
 .story-part-2 .together-scene-aquarium .offline-scene-caption::before { left: auto; right: 0; }
-@keyframes ray-sway { from { transform: rotate(-3deg); opacity: 0.35; } to { transform: rotate(3deg); opacity: 0.55; } }
-@keyframes caustic-wobble { from { transform: translate3d(-2%, 0, 0) scale(1); } to { transform: translate3d(2%, -3%, 0) scale(1.08); } }
+@keyframes ray-sway { from { transform: rotate(-3deg); opacity: 0.6; } to { transform: rotate(3deg); opacity: 1; } }
+@keyframes caustic-drift { from { transform: translate(-4px, 1px) scale(1); } to { transform: translate(4px, -1px) scale(1.04); } }
 @keyframes tail-wag { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
 @keyframes school-flick { from { transform: scaleX(-1) translateY(0); } to { transform: scaleX(-1) translateY(-1.5px); } }
 @keyframes jelly-pulse { 0%, 100% { transform: scale(1, 1); } 45% { transform: scale(0.92, 1.08); } 65% { transform: scale(1.04, 0.96); } }
@@ -959,47 +1167,104 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 @keyframes kelp-sway { from { transform: rotate(-4deg) skewX(2deg); } 50% { transform: rotate(1deg) skewX(-1deg); } to { transform: rotate(4deg) skewX(-2deg); } }
 
 /* ---------- 10. Scene: café, a pool of lamplight over a wooden table ---------- */
-/* Café Hồ Tây is a garden café: open sky, the lake past the hedge, lights strung overhead. */
-.cafe-garden { --px: -0.34; position: absolute; inset: 0; z-index: 0; background: linear-gradient(180deg, #f0c79a 0%, #e5ab81 22%, #c8a099 38%, #93a9bd 48%, #6f8ba6 56%, #2c3a33 57%); }
-.cafe-garden-lake { position: absolute; inset: 42% 0 43%; background: repeating-linear-gradient(180deg, #ffffff1c 0 1px, transparent 1px 7px), linear-gradient(180deg, #9db6c9, #61839f); }
-.cafe-garden-lake::after { position: absolute; inset: 0 46% 0 40%; content: ''; background: linear-gradient(180deg, #ffe6c2a6, #ffe6c200); filter: blur(3px); }
-/* The hedge that closes the garden off from the water. */
-.cafe-garden-hedge { position: absolute; inset: 52% -4% 30% -4%; border-radius: 45% 45% 0 0 / 60% 60% 0 0; background: radial-gradient(ellipse at 30% 20%, #2c5a3c, #143024 72%); box-shadow: inset 0 -1.5rem 2rem #08170ecc; }
-.cafe-garden-hedge::before { position: absolute; inset: -6% 8% auto 12%; height: 26%; content: ''; border-radius: 50%; background: #2c5a3c99; }
-/* A string of bulbs across the garden. */
+/* Café Hồ Tây is a garden café: open sky over the lake, the far shore and Trấn Quốc in the haze, the hedge, lights
+   strung overhead. Two lights meet on the table: the warm pendant on the left and the afternoon glare off the water. */
+.cafe-garden {
+  --px: -0.34; position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(circle at 80% 30%, #fff7e4 0 2.4%, #ffe7c28c 7%, #ffd9a633 18%, transparent 42%),
+    linear-gradient(180deg, #91aac6, #b9bdcb 14%, #e1c5b2 28%, #f3d0aa 38%, #f8ddb8 43%);
+}
+.cafe-shore { position: absolute; left: -4%; bottom: 57.6%; width: 108%; height: 7.6%; overflow: visible; }
+.cafe-shore .shore-line { fill: #a79bb2; opacity: 0.9; }
+.cafe-shore .shore-lights { display: none; }
+/* The lake: hazy at the far shore, bluer towards the hedge, the sun laid on it as a road of glitter. */
+.cafe-garden-lake {
+  position: absolute; inset: 42% 0 40%;
+  background:
+    radial-gradient(ellipse 15% 80% at 80% 0, #fff4ddc4, #ffe4bc47 52%, transparent 82%),
+    repeating-linear-gradient(180deg, #ffffff1c 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, #ddd6d6, #adbccb 28%, #839fb7 66%, #5f7f9c);
+}
+.cafe-garden-lake::before {
+  position: absolute; inset: 0 8% 30% 66%; content: '';
+  background: repeating-linear-gradient(180deg, #fffaf0d9 0 1px, transparent 1px 5px);
+  mask-image: radial-gradient(ellipse 50% 70% at 56% 20%, #000 10%, transparent 72%);
+}
+.together-scene-cafe.is-active .cafe-garden-lake::before { animation: water-glitter 3.6s ease-in-out infinite alternate; }
+.cafe-garden-hedge { position: absolute; left: -4%; top: 49%; width: 108%; height: 19%; overflow: visible; }
+.hedge-sunlit { stop-color: #a9c46c; }
+.hedge-mid { stop-color: #4d8644; }
+.hedge-deep { stop-color: #1d4229; }
+.hedge-rim { fill: #fff0c8; opacity: 0.55; }
+.hedge-bracts { fill: #d64b8f; }
+.hedge-bracts.is-light { fill: #f590bf; opacity: 0.7; }
+/* A string of bulbs across the garden, hung from the same sag as its wire (by top, not translate, so reduced motion
+   keeps them on it). */
 .cafe-string { --px: -0.14; position: absolute; inset: 5% 4% auto; z-index: 2; height: 4.5rem; }
-.cafe-string::before { position: absolute; inset: 0 0 auto; height: 3.2rem; content: ''; border-bottom: 1px solid #f2d7ad66; border-radius: 0 0 48% 48% / 0 0 100% 100%; }
-.cafe-string i { position: absolute; top: 0; width: 0.42rem; height: 0.6rem; border-radius: 0 0 50% 50%; background: #ffe9c0; box-shadow: 0 0 0.7rem 0.2rem #ffd89a66; }
-.cafe-string i:nth-child(1) { left: 2%; translate: 0 0.5rem; }
-.cafe-string i:nth-child(2) { left: 18%; translate: 0 1.7rem; }
-.cafe-string i:nth-child(3) { left: 34%; translate: 0 2.6rem; }
-.cafe-string i:nth-child(4) { left: 50%; translate: 0 3rem; }
-.cafe-string i:nth-child(5) { left: 66%; translate: 0 2.6rem; }
-.cafe-string i:nth-child(6) { left: 82%; translate: 0 1.7rem; }
-.cafe-string i:nth-child(7) { left: 98%; translate: 0 0.5rem; }
+.cafe-string::before { position: absolute; inset: 0 0 auto; height: 3.2rem; content: ''; border-bottom: 1px solid #5c463699; border-radius: 0 0 48% 48% / 0 0 100% 100%; }
+.cafe-string i {
+  --sag: 0; position: absolute; top: calc(var(--sag) * 3.2rem); width: 0.44rem; height: 0.62rem; margin-left: -0.22rem; border-radius: 0.12rem 0.12rem 50% 50%;
+  background: radial-gradient(ellipse at 50% 70%, #fffbea, #ffe3a6 58%, #f2b866);
+  box-shadow: 0 -0.16rem 0 -0.04rem #3a2c22, 0 0 0.55rem 0.16rem #ffd89a75, 0 0 1.5rem 0.45rem #ffd89a26;
+}
+.cafe-string i:nth-child(1) { left: 2%; }
+.cafe-string i:nth-child(2) { --sag: 0.745; left: 18%; }
+.cafe-string i:nth-child(3) { --sag: 0.943; left: 34%; }
+.cafe-string i:nth-child(4) { --sag: 1; left: 50%; }
+.cafe-string i:nth-child(5) { --sag: 0.943; left: 66%; }
+.cafe-string i:nth-child(6) { --sag: 0.745; left: 82%; }
+.cafe-string i:nth-child(7) { left: 98%; }
 .together-scene-cafe.is-active .cafe-string i { animation: lamp-flicker 7s ease-in-out infinite; }
 .together-scene-cafe.is-active .cafe-string i:nth-child(2n) { animation-delay: 2.2s; }
-/* Potted greenery framing the garden table. */
-.cafe-plant { position: absolute; bottom: 24%; z-index: 3; width: 13%; aspect-ratio: 3 / 4; }
-.cafe-plant::before { position: absolute; inset: 0 0 32%; content: ''; border-radius: 52% 52% 38% 38%; background: radial-gradient(ellipse at 38% 26%, #367049, #16301f 74%); }
-.cafe-plant::after { position: absolute; inset: auto 26% 0; height: 34%; content: ''; border-radius: 0.15rem 0.15rem 0.5rem 0.5rem; background: linear-gradient(180deg, #8a5f3e, #4a3122); }
-.cafe-plant-left { left: 3%; }
-.cafe-plant-right { right: 3%; bottom: 26%; width: 11%; }
-/* Two silhouettes at the garden table, leaning into each other. */
-.story-part-2 .cafe-couple {
-  --px: 0.18; position: absolute; right: 20%; bottom: 30%; z-index: 3; display: block; overflow: visible;
-  width: clamp(4rem, 17cqi, 6.2rem); fill: #16241b; filter: drop-shadow(0 6px 14px #02091666);
+/* A potted plant on the corner of the table, under the lamp. */
+.cafe-plant { --px: 0.12; position: absolute; left: 1%; bottom: 21%; z-index: 3; width: 16%; overflow: visible; }
+.plant-leaf-tip { stop-color: #8fc06a; }
+.plant-leaf-base { stop-color: #1f4a2c; }
+.plant-rib { fill: none; stroke: #d6efb0; stroke-opacity: 0.5; stroke-width: 0.9; stroke-linecap: round; }
+.plant-soil { fill: #2a1a12; }
+.plant-pot-shade { stop-color: #7a3f26; }
+.plant-pot-lit { stop-color: #e09a6a; }
+.plant-pot-mid { stop-color: #b8653f; }
+.plant-pot-shine { fill: none; stroke: #ffd2ad; stroke-opacity: 0.7; stroke-width: 1; stroke-linecap: round; }
+/* The two of them on the bench by the water, dark against the glare, a bright line round them where it catches. */
+.story-part-2 .cafe-couple { --px: 0.18; position: absolute; right: 5%; bottom: 33%; z-index: 2; display: block; width: clamp(5rem, 24cqi, 9rem); overflow: visible; }
+.couple-cast, .couple-bench { display: none; }
+.couple-rim { fill: none; stroke-width: 2.6; stroke-linejoin: round; }
+.couple-strands { fill: none; stroke-width: 0.7; stroke-linecap: round; }
+.cafe-couple .couple-body { fill: #2b2a33; }
+.cafe-couple .couple-rim-top { stop-color: #fff2d6; stop-opacity: 0.95; }
+.cafe-couple .couple-rim-low { stop-color: #ffe4b8; stop-opacity: 0.25; }
+.cafe-couple .couple-strands { stroke: #ffe8c8; stroke-opacity: 0.35; }
+.cafe-couple .couple-bench { display: inline; }
+.cafe-couple .couple-bench-slat { fill: #4a3628; }
+.cafe-couple .couple-bench-post { fill: #2c2019; }
+/* The rattan pendant: the table's key light, a halo round the bulb and a cone of light to the wood. */
+.cafe-lamp { --px: -0.2; position: absolute; top: 0; left: 11%; z-index: 2; width: 3.8rem; margin-left: -1.9rem; height: 31%; transform-origin: 50% 0; pointer-events: none; }
+.cafe-lamp::before { position: absolute; left: 50%; top: -1rem; bottom: 50%; width: 1px; content: ''; background: #4a3a2e; }
+.cafe-lamp-shade { position: absolute; left: 0; bottom: 0; width: 100%; height: auto; overflow: visible; }
+.pendant-cord { fill: none; stroke: #4a3a2e; stroke-width: 1; }
+.pendant-cap { fill: #3a2c22; }
+.pendant-shade-core { stop-color: #ffcf86; }
+.pendant-shade-mid { stop-color: #b8743a; }
+.pendant-shade-edge { stop-color: #5a3418; }
+.pendant-weave { fill: none; stroke: #3a1f0c; stroke-opacity: 0.55; stroke-width: 0.9; }
+.pendant-sheen { fill: none; stroke: #ffe9c8; stroke-opacity: 0.55; stroke-width: 1.2; stroke-linecap: round; }
+.pendant-mouth { fill: #ffe6b0; }
+.pendant-bulb-core { stop-color: #fffdf2; }
+.pendant-bulb-edge { stop-color: #ffe2a0; stop-opacity: 0; }
+.cafe-lamp-glow { position: absolute; left: 50%; bottom: 9%; width: 0; height: 0; }
+.cafe-lamp-glow::before {
+  position: absolute; left: 0; top: 0; width: 13rem; aspect-ratio: 1; content: ''; border-radius: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #fff2d0d9 0 3%, #ffd99a6b 9%, #ffcb7c26 26%, transparent 62%);
 }
-.story-part-2 .cafe-couple .couple-hair { fill: #16241b; stroke: #f2d7ad55; stroke-width: 1; }
-
-.cafe-lamp { --px: -0.2; position: absolute; top: 2%; left: 11%; z-index: 2; width: 7rem; margin-left: -3.5rem; height: 64%; transform-origin: 50% 0; pointer-events: none; }
-.cafe-lamp-cord { position: absolute; top: 0; left: 50%; width: 1px; height: 24%; background: linear-gradient(#e9cfa366, #6b4c37); }
-.cafe-lamp-shade { position: absolute; top: 24%; left: 50%; width: 3.6rem; height: 1.9rem; margin-left: -1.8rem; background: linear-gradient(180deg, #2b2118, #1a140f 70%, #3d2d20); clip-path: polygon(34% 0, 66% 0, 100% 100%, 0 100%); box-shadow: 0 6px 12px #02091680; }
-.cafe-lamp-shade::after { position: absolute; inset: auto 0 0; height: 2px; content: ''; background: #f2d7ad; opacity: 0.9; }
-.cafe-lamp-bulb { position: absolute; top: calc(24% + 1.7rem); left: 50%; width: 0.8rem; height: 0.5rem; margin-left: -0.4rem; border-radius: 0 0 50% 50%; background: #fff2d0; box-shadow: 0 0 14px 5px #f2d7ad66; }
-.cafe-lamp-glow { position: absolute; top: calc(24% + 1.9rem); left: 50%; width: 14rem; height: 22rem; margin-left: -7rem; background: conic-gradient(from 150deg at 50% 0, transparent 0deg, #f2d7ad3a 30deg, #f2d7ad1a 45deg, transparent 60deg); mask-image: linear-gradient(#000 30%, transparent 100%); filter: blur(4px); mix-blend-mode: screen; }
-.together-scene-cafe.is-active .cafe-lamp-bulb { animation: lamp-flicker 6s ease-in-out infinite; }
-.cafe-dust { position: absolute; inset: 20% 30% 30%; z-index: 3; pointer-events: none; }
+.cafe-lamp-glow::after {
+  position: absolute; left: 0; top: 0; width: 17rem; height: 15rem; content: ''; transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffe2ae3d, #ffe2ae14 64%, transparent);
+  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+}
+.together-scene-cafe.is-active .pendant-bulb { animation: lamp-flicker 6s ease-in-out infinite; }
+.cafe-dust { position: absolute; inset: 30% 66% 34% 2%; z-index: 3; pointer-events: none; }
 .cafe-dust i { position: absolute; width: 3px; height: 3px; }
 .cafe-dust i::before { position: absolute; inset: 0; content: ''; border-radius: 50%; background: #ffe9c8; opacity: 0.75; box-shadow: 0 0 6px 1px #ffe9c866; }
 .cafe-dust i:nth-child(1) { left: 20%; top: 30%; }
@@ -1009,48 +1274,74 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .cafe-dust i:nth-child(5) { left: 32%; top: 84%; }
 .together-scene-cafe.is-active .cafe-dust i::before { animation: dust-twinkle 6s ease-in-out infinite alternate; }
 .together-scene-cafe.is-active .cafe-dust i:nth-child(2n)::before { animation-delay: 1.5s; }
-.story-part-2 .cafe-table {
-  position: absolute; inset: 62% -8% -24%; z-index: 2; border: 0; border-radius: 50% 50% 0 0 / 34% 34% 0 0;
-  background:
-    repeating-linear-gradient(94deg, transparent 0 22px, #ffffff08 22px 23px, transparent 23px 48px, #00000012 48px 49px),
-    linear-gradient(180deg, #6a4a35, #3f2a1c 45%, #2a1b12);
-  box-shadow: 0 -24px 48px -20px #02091680, inset 0 1px 0 #d9b98a66;
-}
-.story-part-2 .cafe-table i { position: absolute; inset: 0 0 auto; height: 3px; border-radius: 999px; background: linear-gradient(90deg, transparent, #f2d7ad77 40%, #f2d7ad77 60%, transparent); }
-/* The pendant's light actually lands on the wood. */
-.story-part-2 .cafe-table::after { content: ''; position: absolute; left: 6%; top: 0; width: 34%; height: 40%; border-radius: 50%; background: radial-gradient(ellipse at 50% 20%, #f2d7ad3a, transparent 70%); mix-blend-mode: screen; }
-.story-part-2 .cafe-cup { --px: 0.6; position: absolute; bottom: 20%; z-index: 4; display: grid; justify-items: center; gap: 0.3rem; width: clamp(3.6rem, 15cqi, 5.6rem); color: var(--offline-cream); background: none; box-shadow: none; overflow: visible; }
+/* The table: planks and grain, varnish holding the sky by the far edge, the lamp's pool and the lake's glare. */
+.story-part-2 .cafe-table { --px: 0.2; position: absolute; left: -8%; top: 62%; z-index: 2; width: 116%; height: 62%; overflow: visible; }
+.table-wood-far { stop-color: #8c5f40; }
+.table-wood-mid { stop-color: #5d3c27; }
+.table-wood-near { stop-color: #2a1a11; }
+.table-seams { fill: none; stroke: #1c1009; stroke-opacity: 0.6; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.table-grain { fill: none; stroke: #2a170d; stroke-opacity: 0.32; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.table-knot { fill: #2a170d; fill-opacity: 0.16; stroke: #2a170d; stroke-opacity: 0.2; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.table-varnish-hi { stop-color: #ffe9cc; stop-opacity: 0.34; }
+.table-varnish-lo { stop-color: #ffe9cc; stop-opacity: 0; }
+.table-pool-core { stop-color: #ffd9a0; stop-opacity: 0.4; }
+.table-pool-edge { stop-color: #ffd9a0; stop-opacity: 0; }
+.table-glare-core { stop-color: #fff1da; stop-opacity: 0.28; }
+.table-glare-edge { stop-color: #fff1da; stop-opacity: 0; }
+.table-edge { fill: none; stroke: #ffe7c6; stroke-opacity: 0.75; stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+/* Two cups of glazed porcelain, steam curling off them, each with a name written under it. */
+.story-part-2 .cafe-cup { --px: 0.6; position: absolute; bottom: 19%; z-index: 4; display: grid; justify-items: center; gap: 0.3rem; width: clamp(3.6rem, 15cqi, 5.6rem); color: var(--offline-cream); background: none; box-shadow: none; overflow: visible; }
 .story-part-2 .cafe-cup-one { left: 12%; }
 .story-part-2 .cafe-cup-two { right: 12%; --px: 0.7; }
-.coffee-sprite { width: 100%; overflow: visible; filter: drop-shadow(0 10px 16px #02091680); }
-.coffee-saucer { fill: #f1e6d3; }
-.coffee-saucer-ring { fill: #dccbb2; opacity: 0.6; }
-.coffee-cup { fill: #f7efe2; }
-.coffee-handle { fill: none; stroke: #f7efe2; stroke-width: 7; stroke-linecap: round; }
-.coffee-rim { fill: #fbf7ef; }
-.coffee-liquid { fill: #4a2a1a; }
-.coffee-heart { fill: #f1e6d3; opacity: 0.9; }
-.story-part-2 .cafe-cup b { font: 600 0.9rem/1 var(--hand); color: #f2d7ad; text-shadow: 0 2px 10px #02091680; }
-.cafe-steam { position: absolute; left: 50%; top: -1.9rem; display: flex; gap: 0.45rem; transform: translateX(-50%); pointer-events: none; filter: blur(1.2px); }
-.cafe-steam i { display: block; width: 0.3rem; height: 1.6rem; border-radius: 999px; background: linear-gradient(#f2e6d4aa, transparent); opacity: 0; }
-.together-scene-cafe.is-active .cafe-steam i { animation: steam-rise 3.6s ease-out infinite; }
-.together-scene-cafe.is-active .cafe-steam i:nth-child(2) { animation-delay: 1.1s; }
-.together-scene-cafe.is-active .cafe-steam i:nth-child(3) { animation-delay: 2.2s; }
+.coffee-sprite { width: 100%; overflow: visible; }
+.coffee-glaze-lo { stop-color: #dccdb6; }
+.coffee-glaze-hi { stop-color: #fffaf1; }
+.coffee-glaze-mid { stop-color: #f0e5d2; }
+.coffee-glaze-shade { stop-color: #b9a78d; }
+.coffee-saucer-hi { stop-color: #fbf6ec; }
+.coffee-saucer-lo { stop-color: #e0d2bc; }
+.coffee-saucer-lip { fill: #b5a489; }
+.coffee-saucer-ring { fill: none; stroke: #c9b89c; stroke-width: 0.8; }
+.coffee-cup-shadow { fill: #6b5a44; opacity: 0.3; }
+.coffee-handle { fill: none; stroke: #efe4d2; stroke-width: 7; stroke-linecap: round; }
+.coffee-handle-shade { fill: none; stroke: #b9a78d; stroke-width: 2; stroke-linecap: round; opacity: 0.6; }
+.coffee-rim { fill: #fffaf2; }
+.coffee-crema { stop-color: #c8915a; }
+.coffee-brew { stop-color: #4a2a17; }
+.coffee-heart { fill: #f6ead6; opacity: 0.92; }
+.coffee-glint { fill: none; stroke: #ffffff; stroke-opacity: 0.55; stroke-width: 1.1; stroke-linecap: round; }
+.coffee-rim-shine { fill: none; stroke: #ffffff; stroke-width: 1.2; stroke-linecap: round; opacity: 0.9; }
+.story-part-2 .cafe-cup b { font: 600 0.9rem/1 var(--hand); color: #ffe6c2; text-shadow: 0 2px 10px #1a0d06b3; }
+.cafe-steam { position: absolute; left: 27%; bottom: 72%; width: 46%; overflow: visible; pointer-events: none; }
+.steam-wisp { fill: none; stroke-width: 3.2; stroke-linecap: round; transform-box: fill-box; transform-origin: 50% 100%; }
+.steam-foot { stop-color: #fff6ea; stop-opacity: 0; }
+.steam-body { stop-color: #fff6ea; stop-opacity: 0.75; }
+.steam-top { stop-color: #fff6ea; stop-opacity: 0; }
+.together-scene-cafe.is-active .steam-wisp { animation: steam-curl 4.2s ease-in-out infinite; }
+.together-scene-cafe.is-active .steam-wisp:nth-child(2) { animation-delay: -1.4s; }
+.together-scene-cafe.is-active .steam-wisp:nth-child(3) { animation-delay: -2.8s; }
 .story-part-2 .cafe-note {
   --px: 0.9; position: absolute; bottom: 7%; left: 36%; z-index: 5; display: grid; gap: 0.3rem; width: min(36%, 12rem); padding: 1rem 0.9rem 0.8rem;
-  color: #3d2b1f; background: linear-gradient(180deg, #fbf5e8, #f1e7d2); border-radius: 2px; box-shadow: 0 14px 30px #02091666, inset 0 1px 0 #ffffffb0; transform: rotate(-4deg);
+  color: #3d2b1f; background: var(--paper-grain), linear-gradient(180deg, #fbf5e8, #efe4cd); border-radius: 2px; transform: rotate(-4deg);
+  box-shadow: 0 16px 30px -6px #1a0d0699, 0 2px 4px #1a0d0640, inset 0 1px 0 #ffffffb0, inset 0 -1px 0 #8a6a4a26;
 }
-.cafe-note-pin { position: absolute; top: -0.35rem; left: 50%; width: 0.75rem; height: 0.75rem; margin-left: -0.375rem; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffb5a7, #d9534f 70%); box-shadow: 0 3px 6px #00000040; }
+.cafe-note-pin { position: absolute; top: -0.35rem; left: 50%; width: 0.75rem; height: 0.75rem; margin-left: -0.375rem; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffd0c6, #e05a54 46%, #9e2e2a); box-shadow: 0 3px 5px #00000047, inset 0 -1px 1px #00000033; }
 .story-part-2 .cafe-note span { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #8a6a4a; white-space: nowrap; }
 .story-part-2 .cafe-note strong { font: 600 1rem/1.35 var(--hand); text-wrap: balance; }
 .story-part-2 .together-scene-cafe .memory-photo { left: 34%; top: 7%; width: 58%; transform: rotate(3deg); background: var(--paper-grain), linear-gradient(165deg, #f5efe1, #e8dfcd); }
 .story-part-2 .together-scene-cafe .memory-photo.is-portrait { left: 42%; width: 44%; }
 
-/* Stands in for the photo that was never taken at the café: a paper bill, torn along the bottom. */
+/* Stands in for the photo that was never taken at the café: a paper bill, torn along the bottom, a coffee ring on it
+   where a cup stood, catching the same light sweep as the prints. */
 .cafe-receipt {
-  position: absolute; left: 26%; top: 7%; z-index: 4; width: 34%; padding: 1rem 1rem 1.5rem;
-  color: #40301f; background: var(--paper-grain), linear-gradient(165deg, #f5efe1, #e6dcc6);
-  box-shadow: 0 18px 38px #02091666; transform: rotate(2.5deg);
+  position: absolute; left: 26%; top: 7%; z-index: 4; width: clamp(11.5rem, 34%, 15rem); padding: 1rem 1rem 1.5rem;
+  color: #40301f;
+  background:
+    radial-gradient(circle at 98% 62%, transparent 0 1.25rem, #8a5a2e14 1.3rem, #8a5a2e24 1.38rem, #8a5a2e0d 1.46rem, transparent 1.56rem),
+    linear-gradient(180deg, #ffffff2e, transparent 30%, #6b4a2a0f),
+    var(--paper-grain),
+    linear-gradient(165deg, #f6f0e2, #e6dcc6);
+  box-shadow: 0 18px 38px #1a0d0659; transform: rotate(2.5deg);
   font-family: var(--body); text-align: center; overflow: hidden; --sheen-x: -70%;
   /* Tear-off edge along the bottom. */
   -webkit-mask-image: linear-gradient(#000 0 0), radial-gradient(circle 0.42rem at 0.42rem 100%, transparent 98%, #000 100%);
@@ -1062,27 +1353,42 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   -webkit-mask-position: top, bottom;
   mask-position: top, bottom;
 }
+.cafe-receipt::after {
+  position: absolute; inset: -10%; content: ''; pointer-events: none; mix-blend-mode: screen;
+  background: linear-gradient(112deg, transparent 38%, #ffffff10 46%, #ffffff30 50%, #ffffff10 54%, transparent 62%);
+  transform: translateX(var(--sheen-x));
+}
 .cafe-receipt-head { margin: 0 0 0.7rem; display: grid; gap: 0.2rem; }
 .cafe-receipt-head strong { font: 700 0.86rem/1.2 var(--body); letter-spacing: 0.16em; }
 .cafe-receipt-head span { color: #8a7454; font-size: 0.6rem; letter-spacing: 0.1em; }
 .cafe-receipt-items { margin: 0; padding: 0.6rem 0; list-style: none; border-block: 1px dashed #b9a681; }
-.cafe-receipt-items li { display: flex; justify-content: space-between; gap: 0.6rem; font-size: 0.66rem; line-height: 2; text-align: left; }
+/* A size smaller on the narrower desktop cards, so each line item and its price stay on one line. */
+.cafe-receipt-items li { display: flex; justify-content: space-between; gap: 0.6rem; font-size: clamp(0.58rem, 1.75cqi, 0.66rem); line-height: 2; text-align: left; }
 .cafe-receipt-items b { flex: none; color: #8a7454; font-weight: 500; }
 .cafe-receipt-note { margin: 0.7rem 0 0; font-family: var(--memory-display); font-size: 0.76rem; line-height: 1.5; font-style: italic; }
 .cafe-receipt-note span { display: block; margin-bottom: 0.15rem; color: #8a7454; font-family: var(--body); font-size: 0.58rem; font-style: normal; letter-spacing: 0.12em; }
 .cafe-receipt-total { margin: 0.7rem 0 0; padding-top: 0.6rem; border-top: 1px dashed #b9a681; font-family: var(--memory-display); font-size: 0.82rem; line-height: 1.4; }
 .cafe-receipt-total span { display: block; margin-bottom: 0.15rem; color: #8a7454; font-family: var(--body); font-size: 0.58rem; letter-spacing: 0.12em; }
 @keyframes dust-twinkle { from { opacity: 0.35; transform: scale(0.9); } to { opacity: 0.9; transform: scale(1.15); } }
-@keyframes steam-rise { 0% { opacity: 0; transform: translateY(0.5rem) scaleY(0.6); } 30% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(-1.8rem) translateX(0.3rem) scaleY(1.25); } }
+@keyframes steam-curl { 0% { opacity: 0; transform: translateY(5px) scaleY(0.8); } 35% { opacity: 1; } 100% { opacity: 0; transform: translateY(-9px) scaleY(1.15); } }
 
-/* ---------- 11. Scene: hoàng hôn, the sun settling behind two people on a hill ---------- */
-.sunset-sky { --px: -0.3; background: linear-gradient(180deg, #0f2440, #3b4a6b 42%, #a56d7c 70%, #f0b590 90%, #ffd3a8); }
+/* ---------- 11. Scene: hoàng hôn, the sun settling over Hồ Tây behind the two of them ---------- */
+/* The key light is the sun itself: it sinks just left of the big lakeside tree, lays a road of light on the water and
+   gilds every edge that faces it (the cloud bellies, the tree, the coping of the embankment, the two of them). */
+.sunset-sky { --px: -0.3; background: linear-gradient(180deg, #0f2440, #33426a 28%, #7a5f84 50%, #c77b80 66%, #f0a07a 78%, #ffcd96 88%, #ffe3b6); }
 .sunset-sky .star-layer { inset: 0 0 45%; opacity: 0.3; mask-image: linear-gradient(#000, transparent); }
+/* Part III's skies still use the plain lenticular cloud, coloured per scene over these defaults. */
 .cloud-sprite { position: absolute; width: 8rem; overflow: visible; fill: #7d6483; opacity: 0.6; filter: drop-shadow(0 1.5px 0 #f6c9b499) blur(0.3px); }
+.dusk-cloud-sprite { position: absolute; overflow: visible; }
 .sunset-cloud { --px: -0.2; z-index: 1; }
-.sunset-cloud-one { top: 8%; left: 6%; width: clamp(6rem, 26cqi, 10rem); }
-.sunset-cloud-two { top: 17%; right: 4%; width: clamp(4rem, 18cqi, 7rem); opacity: 0.45; }
-.sunset-cloud-three { top: 3%; left: 48%; width: clamp(3rem, 12cqi, 5rem); opacity: 0.35; }
+.sunset-cloud-one { top: 7%; left: 3%; width: clamp(7rem, 30cqi, 12rem); }
+.sunset-cloud-two { top: 33%; right: -6%; width: clamp(4.5rem, 19cqi, 7.5rem); }
+.sunset-cloud-three { top: 1%; left: 46%; width: clamp(3.5rem, 14cqi, 5.5rem); }
+.dusk-cloud-top { stop-color: #5b5480; stop-opacity: 0.5; }
+.dusk-cloud-mid { stop-color: #a6718c; stop-opacity: 0.72; }
+.dusk-cloud-base { stop-color: #ffc596; stop-opacity: 0.95; }
+.sunset-cloud-two .dusk-cloud-base, .sunset-cloud-three .dusk-cloud-base { stop-color: #f6b48f; stop-opacity: 0.8; }
+.dusk-cloud-lining { fill: none; stroke: #ffe2b4; stroke-width: 1.4; stroke-linecap: round; opacity: 0.85; }
 .bird-sprite { position: absolute; z-index: 2; width: 1rem; overflow: visible; fill: #2a2236; opacity: 0.85; }
 .sunset-bird-one { top: 22%; left: 12%; }
 .sunset-bird-two { top: 27%; left: 22%; width: 0.75rem; }
@@ -1093,25 +1399,67 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .together-scene-sunset.is-active .bird-wing-right { animation: wing-right 1.1s cubic-bezier(0.45, 0, 0.2, 1) infinite alternate; }
 .together-scene-sunset.is-active .sunset-bird-two .bird-wing { animation-delay: -0.3s; }
 .story-part-2 .sunset-disc {
-  --px: -0.3; position: absolute; top: 12%; right: 11%; z-index: 1; width: clamp(3.2rem, 14cqi, 5.2rem); aspect-ratio: 1; border-radius: 50%; opacity: 1; margin: 0; transform: none;
-  background: radial-gradient(circle at 42% 36%, #fff3da, #f7b986 55%, #e88b6a 100%);
-  box-shadow: 0 0 34px 10px #f0b07e4d, 0 0 120px 44px #d98a6330;
+  --px: -0.3; position: absolute; top: 12%; right: 16%; z-index: 1; width: clamp(3.2rem, 14cqi, 5.2rem); aspect-ratio: 1; border-radius: 50%; opacity: 1; margin: 0; transform: none;
+  background: radial-gradient(circle at 46% 42%, #fffbf2, #ffe8bc 30%, #ffc68a 64%, #f79c6c);
+  box-shadow: 0 0 30px 10px #ffc4884d, 0 0 110px 44px #f0906033;
 }
-.story-part-2 .sunset-disc i { position: absolute; inset: -34%; border-radius: 50%; border: 0; background: radial-gradient(circle, transparent 55%, #f7d5b826 60%, transparent 78%); opacity: 0.6; }
-.together-scene-sunset.is-active .sunset-disc i { animation: halo-breathe 6s ease-in-out infinite; }
-.sunset-sea { position: absolute; inset: 56% -6% 30%; z-index: 1; background: linear-gradient(180deg, #e8a085aa, #8a6478 55%, #2e3652); box-shadow: inset 0 1px 0 #ffe0c9aa; }
-.sunset-glitter { position: absolute; inset: 0 30%; opacity: 0.35; background: repeating-linear-gradient(180deg, #fff3e0aa 0 1px, transparent 1px 7px); mask-image: linear-gradient(90deg, transparent, #000 40%, #000 60%, transparent); }
-.sunset-glitter-two { inset: 10% 20%; opacity: 0.2; background: repeating-linear-gradient(180deg, #fff3e0aa 0 1px, transparent 1px 11px); }
-.together-scene-sunset.is-active .sunset-glitter { animation: glitter-shift 4s ease-in-out infinite alternate; }
+/* A halo that breathes, and a few soft rays fanning out round the disc. */
+.story-part-2 .sunset-halo { position: absolute; inset: -34%; border-radius: 50%; background: radial-gradient(circle, transparent 55%, #fff0d833 60%, transparent 78%); }
+.story-part-2 .sunset-rays {
+  position: absolute; left: 50%; top: 50%; z-index: -1; width: 720%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%);
+  background: conic-gradient(from 8deg, transparent 0 18deg, #ffe6c21f 23deg, transparent 29deg 62deg, #ffe6c217 68deg, transparent 75deg 128deg, #ffe6c21c 134deg, transparent 141deg 196deg, #ffe6c214 201deg, transparent 207deg 252deg, #ffe6c21f 258deg, transparent 265deg 312deg, #ffe6c217 318deg, transparent 325deg);
+  mask-image: radial-gradient(circle, #000 7%, #0008 24%, transparent 50%);
+}
+.together-scene-sunset.is-active .sunset-halo { animation: halo-breathe 6s ease-in-out infinite; }
+/* Hồ Tây: gold under the sky at the far shore, rose and violet towards the embankment, the sun's road across it. */
+.sunset-sea { position: absolute; inset: 56% -6% 22%; z-index: 1; background: linear-gradient(180deg, #ffd5a4, #f2a77f 12%, #b67688 38%, #5c4c6e 70%, #2e3352); box-shadow: inset 0 1px 0 #ffe9cf; }
+.sunset-sun-path { position: absolute; left: 74%; top: 0; width: 24%; height: 100%; margin-left: -12%; background: radial-gradient(ellipse 50% 100% at 50% 0, #fff0cca6, #ffd9a64d 42%, transparent 76%); }
+.sunset-glitter { position: absolute; inset: 3% 18% 12% 66%; background: repeating-linear-gradient(180deg, #fff6e6cc 0 1px, transparent 1px 6px); mask-image: radial-gradient(ellipse 50% 70% at 50% 18%, #000 18%, transparent 74%); }
+.sunset-glitter-two { inset: 12% 22% 22% 62%; background: repeating-linear-gradient(180deg, #fff6e699 0 1px, transparent 1px 9px); }
+.together-scene-sunset.is-active .sunset-glitter { animation: water-glitter 4s ease-in-out infinite alternate; }
 .together-scene-sunset.is-active .sunset-glitter-two { animation-duration: 5.5s; animation-delay: -2s; }
-.story-part-2 .sunset-hill { position: absolute; z-index: 2; border-radius: 50% 50% 0 0; }
-.story-part-2 .sunset-hill-back { inset: auto -10% 12% -10%; height: 30%; background: linear-gradient(180deg, #33324f, #1d2238); transform: none; }
-.story-part-2 .sunset-hill-front { --px: 0.4; inset: auto -12% -6% -12%; height: 28%; background: linear-gradient(180deg, #1c2440, #0b1120 70%); transform: none; box-shadow: 0 -20px 40px -20px #f0b59033; }
-.story-part-2 .sunset-hill-front::before { position: absolute; inset: 0 0 auto; height: 3px; content: ''; border-radius: 50%; background: linear-gradient(90deg, transparent, #f7b98688 30%, #f7b98688 70%, transparent); filter: blur(0.5px); }
-.story-part-2 .sunset-couple { --px: 0.5; position: absolute; bottom: 20%; left: 50%; z-index: 3; width: clamp(4.4rem, 20cqi, 7rem); margin-left: -3.5rem; overflow: visible; display: block; fill: #0b1120; filter: drop-shadow(0 0 10px #f7b98622); }
-/* Dusk: the engine fades this veil in over the second half of the scene, once the sun is behind the hills. */
+/* The far shore of the lake, its first windows coming on. */
+.sunset-shore { --px: -0.06; position: absolute; left: -4%; bottom: 43.4%; z-index: 1; width: 108%; height: 7.4%; overflow: visible; }
+.sunset-shore .shore-line { fill: #57445f; }
+.sunset-shore .shore-lights rect { fill: #ffdca8; opacity: 0.85; }
+/* Dusk: the engine fades this veil in over the second half of the scene, once the sun is behind the far shore. */
 .story-part-2 .sunset-dusk { position: absolute; inset: 0; z-index: 1; opacity: 0.8; background: linear-gradient(180deg, #0f2440e6, #3a3350b3 55%, transparent 84%); mix-blend-mode: multiply; pointer-events: none; }
-.story-part-2 .sunset-couple .couple-hair { fill: #0b1120; stroke: #f7b98644; stroke-width: 1; }
+/* The big tree on the shore, dark against the sky, gold along the side that faces the sun. */
+.sunset-tree { --px: 0.1; position: absolute; right: -14%; bottom: 19%; z-index: 2; width: 34%; overflow: visible; }
+.lake-tree-lit { stop-color: #4b3048; }
+.lake-tree-dark { stop-color: #191523; }
+.lake-tree-trunk { fill: #17121f; }
+.lake-tree-rim { fill: #ffb98c; opacity: 0.6; }
+/* The embankment they sat on: lit coping, a shadowed face, the promenade's paving with the sunset on it. */
+.sunset-promenade { --px: 0.4; position: absolute; left: -6%; bottom: -4%; z-index: 2; width: 112%; height: 30%; overflow: visible; }
+.promenade-near-wall { stop-color: #4b3651; }
+.promenade-mid { stop-color: #251e34; }
+.promenade-deep { stop-color: #0d0d1a; }
+.promenade-sheen-core { stop-color: #ffb88a; stop-opacity: 0.34; }
+.promenade-sheen-edge { stop-color: #ffb88a; stop-opacity: 0; }
+.promenade-paving { fill: none; stroke: #ffd9b8; stroke-opacity: 0.08; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.promenade-face-top { stop-color: #2c2338; }
+.promenade-face-foot { stop-color: #1b1627; }
+.promenade-joints { fill: none; stroke: #0d0b14; stroke-opacity: 0.55; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.promenade-coping-dim { stop-color: #6b4b5c; }
+.promenade-coping-lit { stop-color: #ffd1a2; }
+.promenade-grass { fill: #1b1627; }
+.sunset-lamp { --px: 0.4; position: absolute; left: -1.5%; bottom: 17%; z-index: 2; height: 42%; aspect-ratio: 1 / 5; }
+.sunset-lamp .park-lamp-iron-lit { stop-color: #4a3a4e; }
+.sunset-lamp-glow { position: absolute; inset: 0; }
+.sunset-lamp-glow::before {
+  position: absolute; left: 50%; top: 13.5%; width: 360%; aspect-ratio: 1; content: ''; border-radius: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #fff2d2e6 0 2.4%, #ffd99a6b 7%, #ffc47a26 22%, transparent 62%);
+}
+/* The two of them on the parapet, the sun in front of them: a gold line round them and their shadow laid out behind. */
+.story-part-2 .sunset-couple { --px: 0.5; position: absolute; bottom: 24.2%; left: calc(50% - clamp(2.5rem, 11cqi, 4rem)); z-index: 3; display: block; width: clamp(5rem, 22cqi, 8rem); overflow: visible; }
+.sunset-couple .couple-body { fill: #120e1c; }
+.sunset-couple .couple-rim-top { stop-color: #ffd6a6; stop-opacity: 0.95; }
+.sunset-couple .couple-rim-low { stop-color: #ff9e7a; stop-opacity: 0.18; }
+.sunset-couple .couple-strands { stroke: #ffcf9e; stroke-opacity: 0.4; }
+.sunset-couple .couple-cast { display: inline; }
+.couple-cast-near { stop-color: #05030a; stop-opacity: 0.5; }
+.couple-cast-far { stop-color: #05030a; stop-opacity: 0; }
 .story-part-2 .sunset-place { display: none; }
 .story-part-2 .together-scene-sunset .memory-photo { left: 8%; top: 12%; width: 58%; transform: rotate(-2deg); }
 .story-part-2 .together-scene-sunset .memory-photo.is-portrait { left: 12%; width: 44%; }
@@ -1124,7 +1472,7 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 @keyframes wing-left { from { transform: rotate(-18deg); } to { transform: rotate(14deg); } }
 @keyframes wing-right { from { transform: rotate(18deg); } to { transform: rotate(-14deg); } }
 @keyframes halo-breathe { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 0.3; } }
-@keyframes glitter-shift { from { transform: translateY(0); opacity: 0.25; } to { transform: translateY(3px); opacity: 0.45; } }
+@keyframes water-glitter { from { opacity: 0.55; transform: translateY(0); } to { opacity: 1; transform: translateY(2px); } }
 @keyframes heart-beat { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.18); } 28% { transform: scale(1); } 42% { transform: scale(1.12); } }
 
 /* ---------- 12. Keepsake box and the ending under blue-hour light ---------- */
@@ -1184,7 +1532,7 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 /* The last page: a full-bleed night that mirrors the title page — thread, centred words, one photo left on the table. */
 /* ---------- The one-day clock shared by the three Saturday stops ---------- */
 /* Same dial as the Mixue chapter; the ring around it marks this scene's hours inside the whole day (10:30 → 19:00). */
-.day-clock { --px: -0.1; position: absolute; right: 5%; top: 7%; z-index: 6; width: clamp(3.2rem, 13cqi, 4.4rem); aspect-ratio: 1; filter: drop-shadow(0 12px 20px #02091680); }
+.day-clock { --px: -0.1; position: absolute; right: 5%; top: 7%; z-index: 6; width: clamp(3.2rem, 13cqi, 4.4rem); aspect-ratio: 1; }
 .day-clock-ring {
   position: absolute; inset: -24%; border-radius: 50%; opacity: 0.95;
   background:
@@ -1193,8 +1541,9 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   -webkit-mask: radial-gradient(circle, transparent 0 66%, #000 67% 78%, transparent 79%);
   mask: radial-gradient(circle, transparent 0 66%, #000 67% 78%, transparent 79%);
 }
-.day-clock .date-clock-label { bottom: auto; top: -2.2rem; }
-.day-clock-note { position: absolute; top: 122%; left: 50%; width: max-content; max-width: 10rem; transform: translateX(-50%); color: #dcecf7; font: 500 0.72rem/1.35 var(--memory-display); font-style: italic; text-align: center; text-shadow: 0 2px 10px #020916cc; }
+/* Label and note hang from the dial's right edge, so neither runs off the frame. */
+.day-clock .date-clock-label { bottom: auto; top: -2.2rem; left: auto; right: -0.3rem; }
+.day-clock-note { position: absolute; top: 124%; right: -0.3rem; width: max-content; max-width: 10rem; color: #dcecf7; font: 500 0.72rem/1.35 var(--memory-display); font-style: italic; text-align: right; text-wrap: balance; text-shadow: 0 2px 10px #020916cc; }
 .together-scene-sunset .day-clock { top: 6%; }
 
 /* ---------- The journey map: five real places on one stylised Hà Nội ---------- */
@@ -1452,8 +1801,16 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 @media (max-width: 900px) {
   .offline-reading-shade { background: #060d1f33; }
   .aurora { filter: none; opacity: 0.4; }
-  /* Every fourth window flickers: each is a shape inside the skyline's SVG, which is redrawn whole for every frame of it. */
-  .together-scene-in-person.is-active .skyline-windows rect:not(:nth-child(4n)) { animation: none; }
+  /* Loops that would redraw a whole drawing or a wide layer every frame rest on phones: the skyline's windows (each is a
+     shape inside its SVG), the caustic net, the water's glitter and the sun's rays; the blended light shafts stand still. */
+  .together-scene-in-person.is-active .skyline-windows rect,
+  .together-scene-aquarium.is-active .caustic-net,
+  .together-scene-cafe.is-active .cafe-garden-lake::before,
+  .together-scene-sunset.is-active .sunset-glitter,
+  .together-scene-aquarium.is-active .aquarium-light::before { animation: none; }
+  .story-part-2 .aquarium-light, .aquarium-caustic { mix-blend-mode: normal; }
+  .story-part-2 .sunset-rays, .caustic-net.is-second { display: none; }
+  .story-part-2 :is(.fish-four, .fish-five), .aquarium-school { filter: none; }
   .part-two-atmosphere::after { mix-blend-mode: normal; opacity: 0.045; }
   /* The toggle sits bottom-right, shrinks to its icon and tucks away while reading down, like the part navigation. */
   .app-part-two .sound-toggle { top: auto; right: 0.75rem; bottom: 0.75rem; width: 2.6rem; min-width: 0; min-height: 2.6rem; padding: 0; border-radius: 50%; background: #0c192a99; justify-content: center; transition: transform 0.42s var(--offline-ease), opacity 0.32s var(--offline-ease), background 0.3s var(--offline-ease); }
@@ -1472,8 +1829,10 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   .story-page-part-two .ending-actions > .replay-button:not(.is-quiet) { grid-column: 1 / -1; }
   /* After the one wide button, an even count would leave the last alone on half a row. */
   .story-page-part-two .ending-actions > :is(button, a):last-child:nth-child(even) { grid-column: 1 / -1; }
-  .story-part-2 .together-scene-in-person .night-scooter { left: 3%; bottom: 17%; }
-  .story-part-2 .together-scene-in-person .offline-scene-caption { bottom: 4%; max-width: 24ch; }
+  .story-part-2 .together-scene-in-person .night-scooter { left: 2%; bottom: 10%; width: clamp(5.5rem, 27cqi, 11rem); }
+  .story-part-2 .together-scene-in-person .offline-scene-caption { bottom: 2.5%; max-width: 24ch; }
+  /* Down onto the bottom step's dark riser, off its lit edge. */
+  .story-part-2 .together-scene-dating .offline-scene-caption { bottom: 3%; }
   .story-part-2 .together-scene .memory-photo.is-portrait figcaption { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 0.78rem; }
   .aurora-night-two, .aurora-park-two, .aurora-sunset-one, .part-transition-sky .aurora-three, .ending-sky .aurora-two { display: none; }
   .water-caustics, .water-specks, .park-shadows, .cafe-motes, .offline-pointer-glow { display: none; }
@@ -1481,7 +1840,7 @@ html:has(.app-part-two) { scroll-behavior: auto; }
      so one element restyles per frame rather than each of its words. */
   .story-part-2 .story-word { opacity: 1; transform: none; }
   .story-part-2 .story-step-body p[data-step-reveal="words"] { opacity: calc(0.72 + var(--reveal, 1) * 0.28) !important; }
-  .story-part-2 .together-scene .memory-photo::after { display: none; }
+  .story-part-2 .together-scene .memory-photo::after, .cafe-receipt::after { display: none; }
   .story-part-2 .story-part-transition.is-revealed .part-transition-numeral { animation: numeral-in-mobile 1.2s var(--offline-ease) both; }
   .story-part-2 .together-scene .memory-photo, .story-part-2 .aquarium-fish, .story-part-2 .aquarium-jelly, .story-part-2 .aquarium-bubble,
   .story-part-2 .sunset-disc, .story-part-2 .cafe-cup, .story-part-2 .park-leaf, .story-part-2 .date-heart, .story-part-2 .night-scooter, .story-part-2 .offline-scene-caption { will-change: auto; }
@@ -1512,16 +1871,28 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   .story-part-2 .together-scene .memory-photo.is-portrait { width: 42%; left: 30%; top: 7%; }
   .story-part-2 .together-scene .memory-photo::before { width: 4rem; height: 1.1rem; }
   .story-part-2 .together-scene-in-person .memory-photo { left: 17%; width: 64%; top: 10%; }
-  .story-part-2 .together-scene-dating .memory-photo { left: 34%; width: 60%; top: 14%; }
+  .story-part-2 .together-scene-dating .memory-photo { left: 38%; width: 57%; top: 14%; }
+  .date-cup-one { left: 4%; }
+  .date-cup-two { left: 17%; }
+  .date-lamp { left: 26%; }
   .story-part-2 .together-scene-aquarium .offline-scene-caption { display: none; }
-  .story-part-2 .together-scene-aquarium .memory-photo { width: 66%; left: 17%; top: 17%; }
+  .story-part-2 .together-scene-aquarium .memory-photo { width: 64%; left: 12%; top: 17%; }
   .story-part-2 .together-scene-cafe .memory-photo { left: 32%; width: 60%; top: 8%; }
   .cafe-string { inset: 4% 3% auto; height: 3.6rem; }
-  .story-part-2 .cafe-couple { right: 14%; bottom: 28%; }
-  .cafe-plant-left { left: 1%; width: 16%; }
-  .cafe-plant-right { right: 1%; width: 14%; }
-  .cafe-receipt { left: 18%; top: 5%; width: 46%; padding: 0.8rem 0.8rem 1.25rem; }
-  .cafe-receipt-items li, .cafe-receipt-note { font-size: 0.62rem; }
+  /* The bill takes the left half on a phone; on the right the bench, the two cups side by side under it, and the note
+     pinned at the bottom, clear of the bill so the staff's reminder and the total stay readable. */
+  .story-part-2 .cafe-couple { right: 3%; bottom: 48%; width: 28%; }
+  .story-part-2 .cafe-cup { bottom: 31%; width: clamp(3rem, 16cqi, 5.6rem); }
+  .story-part-2 .cafe-cup-one { left: auto; right: 24%; }
+  .story-part-2 .cafe-cup-two { right: 4%; }
+  .cafe-plant { display: none; }
+  /* A card as wide as a tablet's has room for the plant again, on the table well below the bill. */
+  @container (min-width: 28rem) {
+    .cafe-plant { display: block; left: 3%; bottom: 7%; width: 15%; }
+  }
+  .cafe-receipt { left: 4%; top: 6%; width: 55%; padding: 0.8rem 0.8rem 1.25rem; }
+  .cafe-receipt-items li { font-size: 0.58rem; }
+  .cafe-receipt-note { font-size: 0.62rem; }
   .cafe-receipt-total { font-size: 0.74rem; }
   .story-part-2 .together-scene-sunset .memory-photo { left: 8%; width: 60%; top: 11%; }
   .story-part-2 .memory-photo-fallback { padding: 1rem; }
@@ -1531,14 +1902,15 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   .story-part-2 .aquarium-ticket { width: min(58%, 12rem); bottom: 4%; padding: 0.55rem 1.8rem 0.55rem 0.7rem; font-size: 0.6rem; }
   .story-part-2 .aquarium-ticket strong { font-size: 0.62rem; white-space: nowrap; }
   .story-part-2 .aquarium-ticket small { font-size: 0.52rem; white-space: nowrap; }
-  .story-part-2 .cafe-note { width: 34%; left: 34%; bottom: 5%; padding: 0.8rem 0.7rem 0.6rem; }
+  .story-part-2 .cafe-note { width: 38%; left: auto; right: 3%; bottom: 3%; padding: 0.8rem 0.7rem 0.6rem; }
   .story-part-2 .cafe-note strong { font-size: 0.9rem; }
-  .story-part-2 .cafe-lamp { height: 56%; }
+  .story-part-2 .cafe-lamp { left: 9%; height: 26%; width: 3rem; margin-left: -1.5rem; }
   .date-clock-label { font-size: 0.75rem; }
   .story-part-2 .sunset-statement { font-size: 1.05rem; bottom: 3%; }
   .story-page-part-two .story-ending { padding-inline: 1.5rem; gap: 2.5rem; }
   .story-page-part-two .story-ending .polaroid { width: min(100%, 16rem); }
-  .day-clock { width: clamp(2.8rem, 12cqi, 3.6rem); right: 4%; top: 6%; }
+  /* Low enough that its label clears the top of a phone's card. */
+  .together-scene .day-clock { width: clamp(2.8rem, 12cqi, 3.6rem); right: 4%; top: 13%; }
   .day-clock-note { display: none; }
   .day-clock .date-clock-label { font-size: 0.72rem; top: -1.9rem; }
   .envelope-countdown li { min-width: 3.1rem; padding: 0.5rem 0.35rem; }
@@ -1570,6 +1942,16 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   .photo-lightbox-navigation button { padding-inline: 0.55rem; }
   .story-part-2 .together-scene .memory-photo { width: 74%; left: 13%; }
   .story-part-2 .together-scene .memory-photo.is-portrait { width: 40%; left: 31%; }
+  /* The narrowest cards give the bill a little more of the width and set it a size smaller. */
+  .cafe-receipt { left: 3%; top: 4%; width: 60%; padding: 0.7rem 0.7rem 1.1rem; }
+  .cafe-receipt-head strong { font-size: 0.74rem; letter-spacing: 0.1em; }
+  .cafe-receipt-items li { font-size: 0.56rem; }
+  .cafe-receipt-note { font-size: 0.6rem; }
+  .cafe-receipt-total { font-size: 0.66rem; }
+  .story-part-2 .cafe-note { width: 36%; }
+  .story-part-2 .cafe-cup { bottom: 33%; width: 3rem; }
+  .story-part-2 .cafe-cup-one { right: 22%; }
+  .story-part-2 .cafe-couple { bottom: 49%; width: 26%; }
 }
 
 @keyframes numeral-in-mobile { from { opacity: 0; } to { opacity: 1; } }
@@ -1586,11 +1968,10 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   .story-part-2 .aquarium-light-two { transform: rotate(-11deg) !important; }
   .part-two-atmosphere *, .part-two-atmosphere *::before, .part-two-atmosphere *::after { animation: none !important; transition: none !important; }
   .offline-pointer-glow { display: none; }
-  .cafe-steam i { opacity: 0.18; transform: scaleY(1.3); filter: blur(2px); }
-  .story-part-2 .sunset-dusk, .story-part-2 .together-photo-ride { display: none; }
+  .story-part-2 .sunset-dusk, .story-part-2 .sunset-lamp-glow, .story-part-2 .together-photo-ride { display: none; }
   .story-page-part-two .story-ending .title-word > span, .story-page-part-two .story-ending .descent-knot, .story-page-part-two .ending-ellipsis i { opacity: 1 !important; transform: none !important; animation: none !important; }
   .story-page-part-two .ending-descent .descent-thread { stroke-dashoffset: 0 !important; animation: none !important; }
-  .story-part-2 .together-scene .memory-photo::after { display: none; }
+  .story-part-2 .together-scene .memory-photo::after, .cafe-receipt::after { display: none; }
   .story-part-2 .part-transition-copy p, .story-part-2 .part-transition-eyebrow, .story-part-2 .part-transition-title p,
   .story-part-2 .part-transition-stops li, .story-part-2 .title-word > span, .story-part-2 .part-transition-numeral, .story-part-2 .part-transition-arrow, .story-part-2 .descent-knot { opacity: 1 !important; transform: none !important; }
   .story-part-2 .part-transition-eyebrow i, .story-part-2 .part-transition-stops li::after { transform: none !important; }

@@ -5,18 +5,33 @@ import { DayClock } from "../atoms/DayClock";
 import { MemoryPhoto } from "../atoms/MemoryPhoto";
 import {
   BirdSprite,
-  CloudSprite,
+  CafeTableSprite,
+  CanopySprite,
+  CausticSprite,
   CoffeeCupSprite,
   CoupleSittingSprite,
   DrinkCupSprite,
+  DuskCloudSprite,
+  FarShoreSprite,
   FishSprite,
+  GardenHedgeSprite,
   HeartSprite,
   JellyfishSprite,
   KelpSprite,
+  LakeTreeSprite,
+  LawnSprite,
   LeafSprite,
+  MoonSprite,
+  NightRideSprite,
+  ParkLampSprite,
+  PendantLampSprite,
+  PottedPlantSprite,
+  PromenadeSprite,
   SchoolSprite,
-  ScooterSprite,
+  SeabedSprite,
   SkylineSprite,
+  SteamSprite,
+  StreetLampSprite,
 } from "../atoms/SceneSprites";
 
 interface TogetherSceneProps {
@@ -56,15 +71,19 @@ export function TogetherScene({ chapter, isActive }: TogetherSceneProps) {
           <i className="star-layer star-layer-far" />
           <i className="star-layer star-layer-near" />
         </div>
-        <span className="night-moon" data-parallax="-0.55" data-delay="0.05"><i /></span>
-        <SkylineSprite className="night-skyline night-skyline-far" data-parallax="-0.28" />
+        <MoonSprite className="night-moon" data-parallax="-0.55" data-delay="0.05" />
+        <SkylineSprite far className="night-skyline night-skyline-far" data-parallax="-0.28" />
         <SkylineSprite className="night-skyline" data-parallax="-0.2" />
-        <div className="night-road" data-parallax="0.06"><i className="night-road-edge night-road-edge-left" /><i className="night-road-lane" /><i className="night-road-edge night-road-edge-right" /><i className="night-road-glow" /></div>
+        {/* The pavement, then the road after rain: each lamp pools on the kerb and runs down the asphalt as a reflection. */}
+        <div className="night-road" data-parallax="0.06"><i className="night-road-shine" /><i className="night-road-shine" /><i className="night-road-shine" /><i className="night-road-lane" /></div>
         <div className="night-bokeh" data-parallax="0.18"><i /><i /><i /><i /><i /><i /><i /></div>
+        {/* The lamps stand on the pavement; only their light comes on as the scene arrives. */}
         <div className="night-street-lamps" data-parallax="0.1">
-          <i data-glow="1" data-delay="0.15" /><i data-glow="1" data-delay="0.3" /><i data-glow="1" data-delay="0.45" />
+          <span className="night-lamp"><StreetLampSprite /><i className="night-lamp-light" data-glow="1" data-delay="0.15" /></span>
+          <span className="night-lamp"><StreetLampSprite /><i className="night-lamp-light" data-glow="1" data-delay="0.3" /></span>
+          <span className="night-lamp"><StreetLampSprite /><i className="night-lamp-light" data-glow="1" data-delay="0.45" /></span>
         </div>
-        <ScooterSprite className="night-scooter" data-drift="1.6" data-wave="3" data-delay="0.25" />
+        <NightRideSprite className="night-scooter" data-drift="1.6" data-wave="3" data-delay="0.25" />
         <span className="offline-scene-caption" data-parallax="0.7" data-delay="0.55">{chapter.microcopy}</span>
         {/* The roses wait at the tower; halfway through the chapter the ride photo takes over as the two set off. */}
         <MemoryPhoto src={chapter.image} alt={chapter.imageAlt} caption={photoCaption} placeholderLabel={chapter.imageNote} size="medium" tilt="none" className="together-main-photo" attributes={{ ...photoFx(-7), ...(ridePhoto ? { "data-fade": -0.48 } : {}) }} />
@@ -79,23 +98,25 @@ export function TogetherScene({ chapter, isActive }: TogetherSceneProps) {
     return (
       <div className={className} aria-hidden="true">
         <div className="scene-sky date-sky" data-parallax="-0.35"><i className="star-layer star-layer-far" /></div>
-        {/* Two cups of Mixue on a park bench, so the scene stays in the park all the way to one in the morning. */}
+        {/* Two cups of Mixue on the park steps, so the scene stays in the park all the way to one in the morning. The
+            nearer lamp is the scene's light: it warms the leaves above it, the grass and the steps the cups stand on. */}
         <div className="date-park" data-parallax="-0.18">
-          <i className="date-tree date-tree-left" />
-          <i className="date-tree date-tree-right" />
-          <i className="date-park-lamp" />
-          <i className="date-park-lamp date-park-lamp-two" />
+          <CanopySprite className="date-tree date-tree-left" />
+          <CanopySprite className="date-tree date-tree-right" />
+          <span className="date-lamp"><ParkLampSprite /><i className="date-lamp-glow" data-glow="1" /></span>
+          <span className="date-lamp date-lamp-two"><ParkLampSprite /><i className="date-lamp-glow" data-glow="1" data-delay="0.2" /></span>
         </div>
-        {/* The wall clock turns with the reader: hands travel from nine in the evening to one in the morning. */}
+        {/* The park clock turns with the reader: hands travel from nine in the evening to one in the morning. */}
         <div className="date-clock" data-parallax="-0.08" data-delay="0.1">
           <i className="date-clock-face" />
           <i className="date-clock-hand date-clock-hand-hour" data-spin="120" />
           <i className="date-clock-hand date-clock-hand-minute" data-spin="720" />
           <i className="date-clock-pin" />
+          <i className="date-clock-glass" />
           <i className="date-clock-post" />
           <small className="date-clock-label">21:00 → 01:00</small>
         </div>
-        <div className="date-ground" data-parallax="0.16"><i /></div>
+        <LawnSprite className="date-ground" data-parallax="0.16" />
         <div className="date-steps" data-parallax="0.2"><i /><i /><i /></div>
         <DrinkCupSprite className="date-cup date-cup-one" data-parallax="0.3" data-delay="0.15" data-tilt="-4" />
         <DrinkCupSprite className="date-cup date-cup-two" data-parallax="0.34" data-delay="0.25" data-tilt="4" />
@@ -123,7 +144,7 @@ export function TogetherScene({ chapter, isActive }: TogetherSceneProps) {
         <div className="aquarium-arch" data-parallax="-0.04"><i className="aquarium-glass" /><i className="aquarium-rim" /></div>
         <div className="aquarium-light aquarium-light-one" data-parallax="-0.25" />
         <div className="aquarium-light aquarium-light-two" data-parallax="-0.15" />
-        <div className="aquarium-caustic" data-parallax="-0.1" />
+        <div className="aquarium-caustic" data-parallax="-0.1"><CausticSprite /></div>
         <SchoolSprite className="aquarium-school" data-drift="0.85" data-wave="6" data-delay="0.2" />
         <FishSprite className="aquarium-fish fish-one" data-drift="1" data-wave="9" data-delay="0.1" />
         <FishSprite className="aquarium-fish fish-two" data-drift="-1.3" data-wave="7" data-delay="0.25" />
@@ -133,6 +154,7 @@ export function TogetherScene({ chapter, isActive }: TogetherSceneProps) {
         <JellyfishSprite className="aquarium-jelly jelly-one" data-float="0.35" data-wave="8" data-sway="6" data-delay="0.15" />
         <JellyfishSprite className="aquarium-jelly jelly-two" data-float="0.5" data-wave="6" data-sway="8" data-delay="0.3" />
         <div className="aquarium-floor" data-parallax="0.12">
+          <SeabedSprite className="aquarium-seabed" />
           <KelpSprite className="aquarium-kelp kelp-one" />
           <KelpSprite className="aquarium-kelp kelp-two" />
           <KelpSprite className="aquarium-kelp kelp-three" />
@@ -157,32 +179,34 @@ export function TogetherScene({ chapter, isActive }: TogetherSceneProps) {
     return (
       <div className={className} aria-hidden="true">
         <DayClock {...dayTimeline.stops.cafe} dayStart={dayTimeline.start} dayEnd={dayTimeline.end} />
-        {/* A garden café by the lake: open sky, the water beyond the hedge, no walls. */}
+        {/* A garden café by the lake: open sky, the far shore and Trấn Quốc in the haze, the water beyond the hedge. */}
         <div className="cafe-garden" data-parallax="-0.34">
+          <FarShoreSprite className="cafe-shore" />
           <i className="cafe-garden-lake" />
-          <i className="cafe-garden-hedge" />
+          <GardenHedgeSprite className="cafe-garden-hedge" />
         </div>
         <div className="cafe-string" data-parallax="-0.14" data-delay="0.08">
           <i /><i /><i /><i /><i /><i /><i />
         </div>
-        <i className="cafe-plant cafe-plant-left" data-parallax="0.12" data-delay="0.24" />
-        <i className="cafe-plant cafe-plant-right" data-parallax="0.16" data-delay="0.34" />
-        {/* "hai kẻ ngốc cứ vậy mà tựa vào nhau" — the two of them at the garden table, leaning together. */}
+        <PottedPlantSprite className="cafe-plant" data-parallax="0.12" data-delay="0.24" />
+        {/* "hai kẻ ngốc cứ vậy mà tựa vào nhau": the two of them on the bench by the water (the bill's "ghế ngồi sát
+            nhau"), leaning together against the afternoon glare off the lake. */}
         <CoupleSittingSprite className="cafe-couple" data-parallax="0.18" data-delay="0.5" />
+        {/* The pendant is the table's key light: its glow and the cone it lays on the wood come on with the scene. */}
         <div className="cafe-lamp" data-parallax="-0.3" data-sway="1.6" data-delay="0.05">
-          <i className="cafe-lamp-cord" /><i className="cafe-lamp-shade" /><i className="cafe-lamp-bulb" /><i className="cafe-lamp-glow" data-glow="1" />
+          <PendantLampSprite className="cafe-lamp-shade" /><i className="cafe-lamp-glow" data-glow="1" />
         </div>
         <div className="cafe-dust" data-parallax="0.05">
           <i data-float="0.25" data-wave="6" /><i data-float="0.4" data-wave="4" /><i data-float="0.3" data-wave="7" /><i data-float="0.5" data-wave="5" /><i data-float="0.35" data-wave="6" />
         </div>
-        <div className="cafe-table" data-parallax="0.2"><i /></div>
+        <CafeTableSprite className="cafe-table" data-parallax="0.2" />
         <div className="cafe-cup cafe-cup-one" data-parallax="0.45" data-delay="0.2">
-          <span className="cafe-steam"><i /><i /><i /></span>
+          <SteamSprite className="cafe-steam" />
           <CoffeeCupSprite />
           <b>Hắt</b>
         </div>
         <div className="cafe-cup cafe-cup-two" data-parallax="0.55" data-delay="0.32">
-          <span className="cafe-steam"><i /><i /><i /></span>
+          <SteamSprite className="cafe-steam" />
           <CoffeeCupSprite />
           <b>Nờ</b>
         </div>
@@ -199,17 +223,21 @@ export function TogetherScene({ chapter, isActive }: TogetherSceneProps) {
     <div className={className} aria-hidden="true">
       <DayClock {...dayTimeline.stops.sunset} dayStart={dayTimeline.start} dayEnd={dayTimeline.end} />
       <div className="scene-sky sunset-sky" data-parallax="-0.15"><i className="star-layer star-layer-far" /></div>
-      <CloudSprite className="sunset-cloud sunset-cloud-one" data-drift="0.6" data-parallax="-0.08" />
-      <CloudSprite className="sunset-cloud sunset-cloud-two" data-drift="-0.45" data-parallax="-0.05" />
-      <CloudSprite className="sunset-cloud sunset-cloud-three" data-drift="0.3" data-parallax="-0.1" />
+      <DuskCloudSprite className="sunset-cloud sunset-cloud-one" data-drift="0.6" data-parallax="-0.08" />
+      <DuskCloudSprite className="sunset-cloud sunset-cloud-two" data-drift="-0.45" data-parallax="-0.05" />
+      <DuskCloudSprite className="sunset-cloud sunset-cloud-three" data-drift="0.3" data-parallax="-0.1" />
       <BirdSprite className="sunset-bird sunset-bird-one" data-drift="0.9" data-wave="8" data-delay="0.2" />
       <BirdSprite className="sunset-bird sunset-bird-two" data-drift="0.75" data-wave="6" data-delay="0.3" />
-      <div className="sunset-disc" data-sink="3.2" data-delay="0.05"><i /></div>
-      <div className="sunset-sea" data-parallax="-0.04"><i className="sunset-glitter" /><i className="sunset-glitter sunset-glitter-two" /></div>
-      {/* Dusk settles over sky and sea in the second half of the scene, once the sun has gone behind the hills. */}
+      {/* The key light: the sun with its halo and a few soft rays, sinking towards the far shore of Hồ Tây. */}
+      <div className="sunset-disc" data-sink="3.2" data-delay="0.05"><i className="sunset-rays" /><i className="sunset-halo" /></div>
+      <div className="sunset-sea" data-parallax="-0.04"><i className="sunset-sun-path" /><i className="sunset-glitter" /><i className="sunset-glitter sunset-glitter-two" /></div>
+      <FarShoreSprite className="sunset-shore" data-parallax="-0.06" />
+      {/* Dusk settles over sky and water in the second half of the scene, once the sun has gone behind the far shore. */}
       <i className="sunset-dusk" data-fade="0.5" />
-      <div className="sunset-hill sunset-hill-back" data-parallax="-0.08" />
-      <div className="sunset-hill sunset-hill-front" data-parallax="0.16" />
+      <LakeTreeSprite className="sunset-tree" data-parallax="0.08" />
+      <PromenadeSprite className="sunset-promenade" data-parallax="0.16" />
+      {/* One of Thanh Niên's lamps along the promenade; its light comes on with the dusk. */}
+      <span className="sunset-lamp" data-parallax="0.16"><ParkLampSprite /><i className="sunset-lamp-glow" data-fade="0.55" /></span>
       <CoupleSittingSprite className="sunset-couple" data-parallax="0.16" data-delay="0.3" />
       <MemoryPhoto src={chapter.image} alt={chapter.imageAlt} placeholderLabel={chapter.imageNote} size="warm" tilt="none" className="day-scene-photo sunset-photo" attributes={photoFx(-5)} />
       <p className="sunset-statement"><Heart aria-hidden="true" size={15} />{chapter.chapterTitle}.</p>

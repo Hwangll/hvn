@@ -1,5 +1,5 @@
 import { Heart } from "lucide-react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { StoryScrollItem } from "../../data/story";
 import { StoryPicture } from "../../../../shared/components/visuals/StoryPicture";
 import { HeartSprite, ScooterSprite } from "../atoms/SceneSprites";
@@ -11,7 +11,9 @@ import {
   ClawMachineSprite,
   CouchCoupleSprite,
   CurryKatsuSprite,
+  DeskLampSprite,
   FoldingChairSprite,
+  GiftSprite,
   GhostSprite,
   GuitarSprite,
   HerbSoupSprite,
@@ -23,8 +25,10 @@ import {
   LipsNoteSprite,
   MicSprite,
   MicStandSprite,
+  PalmSprite,
   PartyPopperSprite,
   PenSprite,
+  PharmacyBagSprite,
   PhoneDownSprite,
   RaincoatSprite,
   RedLanternSprite,
@@ -34,7 +38,9 @@ import {
   StandFanSprite,
   StarFlagsSprite,
   StarLanternSprite,
+  StoolSprite,
   StormCloudSprite,
+  SunPatchSprite,
   TabletSprite,
   TacosSprite,
   XrayFootSprite,
@@ -83,9 +89,13 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
           <div className="scene-sky p3-kara-wall" data-parallax="-0.3"><i className="p3-kara-disco" /></div>
           {/* Outside, the rain on Nguyễn Văn Lộc and the pharmacy they stopped at first. */}
           <div className="p3-rainpane" data-parallax="-0.16">
-            <span className="p3-pharmacy"><i className="p3-pharmacy-cross" />Nhà thuốc</span>
-            <i className="p3-rainpane-rain" />
+            <span className="p3-rainpane-glass">
+              <i className="p3-rainpane-street" />
+              <span className="p3-pharmacy"><i className="p3-pharmacy-cross" />Nhà thuốc</span>
+              <i className="p3-rainpane-rain" />
+            </span>
           </div>
+          <i className="p3-coat-rail" data-parallax="-0.1" />
           <RaincoatSprite className="p3-raincoat is-one" data-parallax="-0.1" data-sway="2" />
           <RaincoatSprite className="p3-raincoat is-two" data-parallax="-0.1" data-sway="2.6" />
           <i className="p3-drip is-one" data-sink="1.4" data-delay="0.2" />
@@ -94,6 +104,7 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
           <i className="p3-kara-table" data-parallax="0.18" />
           <TabletSprite className="p3-tablet" data-parallax="0.24" data-delay="0.18" data-tilt="-6" />
           <MicSprite className="p3-mic" data-parallax="0.3" data-delay="0.26" data-tilt="10" />
+          <PharmacyBagSprite className="p3-pharmacy-bag" data-parallax="0.28" data-delay="0.3" />
           <MusicNoteSprite className="p3-note p3-kara-note is-one" data-float="0.6" data-wave="7" data-drift="0.14" />
           <MusicNoteSprite className="p3-note p3-kara-note is-two" data-float="0.8" data-wave="5" data-drift="-0.1" />
           <MusicNoteSprite className="p3-note p3-kara-note is-three" data-float="0.5" data-wave="8" data-drift="0.08" />
@@ -108,6 +119,8 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
       return (
         <div className={className} aria-hidden="true">
           <div className="scene-sky p3-clinic-wall" data-parallax="-0.3"><i className="p3-clinic-window" /></div>
+          {/* The afternoon at 59A comes in through the window, low and warm, across the sofa. */}
+          <i className="p3-clinic-sun" data-parallax="-0.2" />
           {/* The morning, pinned to the wall: the clinic's X-ray, "không bị gì hết". */}
           <div className="p3-xray" data-parallax="-0.14" data-delay="0.08" data-tilt="-6">
             <XrayFootSprite />
@@ -137,17 +150,23 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
     case "lakeside":
       return (
         <div className={className} aria-hidden="true">
-          <div className="scene-sky p3-lake-sky" data-parallax="-0.34"><i className="p3-lake-towers" /></div>
+          <div className="scene-sky p3-lake-sky" data-parallax="-0.34"><i className="p3-lake-far" /><i className="p3-lake-towers" /></div>
           <i className="p3-lake" data-parallax="-0.12"><i className="p3-lake-shimmer" /></i>
+          {/* The café's railing over the water, palms along it, and its lamp hung from the string of flags over the table. */}
+          <i className="p3-lake-rail" data-parallax="-0.06" />
+          <PalmSprite className="p3-palm is-one" data-parallax="-0.16" data-sway="1.2" />
+          <PalmSprite className="p3-palm is-two" data-parallax="-0.14" data-sway="1.6" />
           <StarFlagsSprite className="p3-starflags" data-parallax="-0.2" data-sway="1" />
-          <i className="p3-lake-leaves" data-parallax="-0.22" />
-          {/* The rain comes in harder as they talk. */}
-          <div className="p3-rain p3-lake-rain" data-fade="0.36"><i /><i /></div>
+          <i className="p3-lake-lamp" data-parallax="-0.2" />
+          <i className="p3-lake-cone" data-parallax="-0.12" />
+          {/* The rain comes in harder as they talk, and catches the lamp's light on its way down. */}
+          <div className="p3-rain p3-lake-rain" data-fade="0.36"><i /><i /><span className="p3-rain-lit"><i /></span></div>
           <i className="p3-stone-table" data-parallax="0.18" />
           <SnailDishSprite className="p3-snails" data-parallax="0.22" data-delay="0.12" />
           <SmoothieSprite className="p3-smoothie is-avocado" data-parallax="0.26" data-delay="0.2" />
           <YogurtCupSprite className="p3-yogurt" data-parallax="0.26" data-delay="0.26" />
           <SeedsDishSprite className="p3-seeds is-one" data-parallax="0.3" data-delay="0.3" />
+          <SeedsDishSprite className="p3-seeds is-three" data-parallax="0.32" data-delay="0.34" />
           {/* And the ride home, laughing all the way. */}
           <ScooterSprite className="p3-lake-scooter" data-drift="1.2" data-wave="2" data-fade="0.48" />
           <span className="p3-laugh" data-parallax="-0.12" data-fade="0.5">ha hả</span>
@@ -162,8 +181,10 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
       const message = chapter.gallery.find((photo) => photo.screen);
       return (
         <div className={className} aria-hidden="true">
-          <div className="scene-sky p3-tiny-wall" data-parallax="-0.3"><i className="p3-tiny-sun" /></div>
+          <div className="scene-sky p3-tiny-wall" data-parallax="-0.3"><i className="p3-tiny-window" /></div>
+          {/* The low sun through the café's window, in long beams with dust turning in them. */}
           <i className="p3-tiny-rays" data-parallax="-0.2" />
+          <i className="p3-tiny-motes" data-parallax="-0.16" />
           <span className="p3-tiny-napkin" data-parallax="-0.12" data-delay="0.1">Tiny Cafe<small>Chúng tôi bán Bình yên</small></span>
           <div className="p3-chat" data-parallax="-0.06" data-delay="0.14" data-tilt="5">
             {message?.src ? <span className="p3-chat-phone"><StoryPicture src={message.src} alt="" loading="lazy" /></span> : null}
@@ -171,6 +192,8 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
           </div>
           <i className="p3-rug" data-parallax="0.12" />
           <i className="p3-wood-table" data-parallax="0.18" />
+          {/* The window again, laid across the tabletop by the sun. */}
+          <SunPatchSprite className="p3-tiny-patch" data-parallax="0.18" />
           <KissNotebookSprite className="p3-notebook" data-parallax="0.24" data-delay="0.18" data-tilt="-4" />
           <PenSprite className="p3-pen" data-parallax="0.28" data-delay="0.26" data-tilt="12" />
           <LegoSprite className="p3-lego" data-parallax="0.3" data-delay="0.3" />
@@ -198,8 +221,12 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
           <span className="p3-song-slot" data-fade="0.42"><span className="p3-song is-two">Em Là Không Thể</span></span>
           <FoldingChairSprite className="p3-chair is-one" data-parallax="0.22" />
           <FoldingChairSprite className="p3-chair is-two" data-parallax="0.24" />
+          {/* The low table in front of the stage, where the tray sat and then the seeds and the matcha. */}
+          <i className="p3-cafe-table" data-parallax="0.28" />
           <ChickenTraySprite className="p3-tray" data-parallax="0.34" data-delay="0.24" data-fade="-0.36" />
           <SeedsDishSprite className="p3-seeds is-two" data-parallax="0.34" data-delay="0.3" />
+          {/* At Cúc cu, the seeds came with a matcha latte. */}
+          <SmoothieSprite className="p3-smoothie is-matcha" data-parallax="0.32" data-fade="0.4" />
           <MusicNoteSprite className="p3-note p3-stage-note is-one" data-float="0.6" data-wave="7" data-drift="0.12" />
           <MusicNoteSprite className="p3-note p3-stage-note is-two" data-float="0.75" data-wave="6" data-drift="-0.1" />
           {caption}
@@ -227,7 +254,10 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
           <StormCloudSprite className="p3-storm" data-parallax="-0.2" data-fade="-0.34" data-wave="4" />
           <div className="p3-calm" data-parallax="-0.2" data-fade="0.44"><HeartSprite /><small>như không có chuyện gì</small></div>
           <i className="p3-desk" data-parallax="0.16" />
-          <i className="p3-gift" data-parallax="0.2" data-delay="0.24" />
+          {/* The lamp she planned by, and its light on the desk. */}
+          <i className="p3-lamp-light" data-parallax="0.16" />
+          <DeskLampSprite className="p3-desklamp" data-parallax="0.2" data-delay="0.1" />
+          <GiftSprite className="p3-gift" data-parallax="0.2" data-delay="0.24" />
           <PhoneDownSprite className="p3-phone-down is-desk" data-parallax="0.24" data-delay="0.2" />
           <PenSprite className="p3-pen is-desk" data-parallax="0.26" data-delay="0.26" data-tilt="-14" />
           <span className="p3-tay" data-parallax="-0.1" data-fade="0.5">thế mới tày</span>
@@ -238,14 +268,19 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
     case "lantern":
       return (
         <div className={className} aria-hidden="true">
-          <div className="scene-sky p3-autumn-sky" data-parallax="-0.34"><i className="p3-full-moon" /></div>
+          {/* The full moon over Hà Đông, thin cloud drifting across it, and the far towers in its haze. */}
+          <div className="scene-sky p3-autumn-sky" data-parallax="-0.34"><i className="p3-full-moon" /><i className="p3-moon-cloud" /><i className="p3-hadong-far" /></div>
           <i className="p3-hadong" data-parallax="-0.16" />
+          <i className="p3-lantern-bokeh" data-parallax="-0.1" />
+          <i className="p3-lantern-string" data-parallax="-0.1" />
           <RedLanternSprite className="p3-redlantern is-one" data-parallax="-0.1" data-sway="3" />
           <RedLanternSprite className="p3-redlantern is-two" data-parallax="-0.08" data-sway="2.4" />
           <RedLanternSprite className="p3-redlantern is-three" data-parallax="-0.12" data-sway="3.4" />
           <StarLanternSprite className="p3-starlantern" data-parallax="0.12" data-sway="2" data-delay="0.14" />
           <ClawMachineSprite className="p3-claw" data-parallax="0.08" data-delay="0.2" data-fade="0.3" />
+          {/* The stall in ngõ Ao Sen: a low blue table, a red stool, and three tacos. */}
           <i className="p3-street-table" data-parallax="0.2" />
+          <StoolSprite className="p3-stool" data-parallax="0.24" data-delay="0.12" />
           <TacosSprite className="p3-tacos" data-parallax="0.28" data-delay="0.16" />
           <span className="p3-alley" data-parallax="-0.1" data-delay="0.1">ngõ Ao Sen</span>
           {/* The night ends at a hotel "như ma". */}
@@ -285,12 +320,16 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
         </div>
       );
 
-    default:
+    default: {
+      // The banner's letters hang along a drooping string: --k runs from -1 at one end to 1 at the other.
+      const banner = "SINH NHẬT ANH IU".split("");
       return (
         <div className={className} aria-hidden="true">
           <div className="scene-sky p3-party-wall" data-parallax="-0.3"><i className="p3-party-spot" /></div>
           <ol className="p3-bunting" data-parallax="-0.16" data-sway="1">
-            {"SINH NHẬT ANH IU".split("").map((letter, index) => <li key={`${letter}-${index}`}>{letter.trim()}</li>)}
+            {banner.map((letter, index) => (
+              <li key={`${letter}-${index}`} style={{ "--k": ((index / (banner.length - 1)) * 2 - 1).toFixed(3) } as CSSProperties}>{letter.trim()}</li>
+            ))}
           </ol>
           <i className="p3-confetti" data-parallax="-0.08" />
           <i className="p3-balloon is-one" data-parallax="-0.1" data-wave="5" />
@@ -316,5 +355,6 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
           <p className="sunset-statement p3-statement is-birthday"><Heart aria-hidden="true" size={15} />Em iu Anh.</p>
         </div>
       );
+    }
   }
 }

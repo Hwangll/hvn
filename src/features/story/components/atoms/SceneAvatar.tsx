@@ -12,7 +12,11 @@ export function SceneAvatar({ src, alt, initials, className = "" }: SceneAvatarP
   const [failed, setFailed] = useState(false);
   return (
     <span className={`scene-avatar ${className}`.trim()}>
-      {src && !failed ? <StoryPicture src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} /> : <span>{initials}</span>}
+      {src && !failed ? (
+        <StoryPicture src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} />
+      ) : (
+        <span className="scene-avatar-mark">{initials}</span>
+      )}
     </span>
   );
 }
