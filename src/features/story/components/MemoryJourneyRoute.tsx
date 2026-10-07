@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { StoryScrollItem } from "../data/story";
 import { jumpToStoryTarget } from "../utils/jumpToStoryTarget";
-import { RouteCar, RouteSpeedometer } from "./film/RouteDashboard";
+import { partThreeKit } from "../../../app/pageKits";
 import { stopDay } from "./film/slateShots";
 import { routeIcons, routeLabels } from "./routeStops";
 
@@ -40,9 +40,9 @@ export function MemoryJourneyRoute({ activeId, items, visitedStoryIds = new Set(
         </span>
         <strong>{String(activeIndex + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}</strong>
       </div>
-      {driven && active ? <RouteSpeedometer redline={redline} date={stopDay(active)} /> : null}
+      {driven && active && partThreeKit.RouteSpeedometer ? <partThreeKit.RouteSpeedometer redline={redline} date={stopDay(active)} /> : null}
       <div className="memory-route-track">
-        {driven ? <><i className="memory-route-road" aria-hidden="true" /><RouteCar /></> : <span className="memory-route-traveler" aria-hidden="true"><i /></span>}
+        {driven ? <><i className="memory-route-road" aria-hidden="true" />{partThreeKit.RouteCar ? <partThreeKit.RouteCar /> : null}</> : <span className="memory-route-traveler" aria-hidden="true"><i /></span>}
         <ol>
         {items.map((item, index) => {
           const Icon = routeIcons[item.threadState as keyof typeof routeIcons];

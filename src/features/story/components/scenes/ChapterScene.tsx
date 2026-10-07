@@ -7,7 +7,7 @@ import { ParallelScene } from "./ParallelScene";
 import { ReconnectingScene } from "./ReconnectingScene";
 import { StayingScene } from "./StayingScene";
 import { TogetherScene } from "./TogetherScene";
-import { PartThreeScene } from "./PartThreeScene";
+import { partThreeKit } from "../../../../app/pageKits";
 
 interface ChapterSceneProps {
   chapter: StoryScrollItem;
@@ -49,7 +49,7 @@ export const ChapterScene = memo(function ChapterScene({ chapter, isActive, redu
       case "lantern":
       case "bento":
       case "birthday":
-        return <PartThreeScene chapter={chapter} isActive={isActive} />;
+        return partThreeKit.Scene ? <partThreeKit.Scene chapter={chapter} isActive={isActive} /> : null;
       default:
         return null;
     }

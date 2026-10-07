@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { StoryScrollItem } from "../data/story";
 import { jumpToStoryTarget } from "../utils/jumpToStoryTarget";
-import { RouteCar } from "./film/RouteDashboard";
+import { partThreeKit } from "../../../app/pageKits";
 
 interface ChapterProgressProps {
   items: StoryScrollItem[];
@@ -34,7 +34,7 @@ export function ChapterProgress({ items, activeId, visitedStoryIds = new Set(), 
         aria-label="Tiến độ chương"
       >
         <span className="story-chapter-progress-fill" style={{ "--progress": progress } as CSSProperties} />
-        {vehicle ? <span className="story-chapter-progress-car" style={{ "--progress": progress, "--route-progress": progress } as CSSProperties}><RouteCar /></span> : null}
+        {vehicle && partThreeKit.RouteCar ? <span className="story-chapter-progress-car" style={{ "--progress": progress, "--route-progress": progress } as CSSProperties}><partThreeKit.RouteCar /></span> : null}
         <ol className="story-chapter-progress-dots">
           {chapters.map((chapter) => {
             const chapterItems = items.filter((item) => item.chapterId === chapter.chapterId);

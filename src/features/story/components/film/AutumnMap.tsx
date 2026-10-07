@@ -1,5 +1,5 @@
 import { ArrowRight, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type RefObject } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { autumnMapCopy, autumnMapPlaces, type AutumnMapPlace, type StoryScrollItem } from "../../data/story";
 import { jumpToStoryTarget } from "../../utils/jumpToStoryTarget";
@@ -32,7 +32,7 @@ const ROAD = "M48 312 C104 276 166 228 238 166 C262 146 280 136 300 128";
  * little lake at Văn Quán), the parks round Ba Đình, a few roads (Nguyễn Trãi named along its curve), the districts, a
  * compass, and a postmark in the corner. The ink wavers a little, as a pen's does.
  */
-function MapArt() {
+const MapArt = memo(function MapArt() {
   const id = useIds();
   return (
     <>
@@ -88,7 +88,7 @@ function MapArt() {
       </g>
     </>
   );
-}
+});
 
 interface AutumnMapPocketProps {
   items: readonly StoryScrollItem[];

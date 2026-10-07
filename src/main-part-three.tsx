@@ -1,6 +1,7 @@
 // Part III (`/part-3/`). It goes on with Part II's diary, so it ships Part II's stylesheets (the `?page=three` copies
 // drop the rules scoped to Part I, see pageScopedCss in vite.config.ts) and then its own palette and scenes on top.
 import { mountStory } from "./app/mountStory";
+import "./app/kits/partThree";
 import "./styles/index.css?page=three";
 import "./styles/diary-design.css?page=three";
 import "./styles/memory-opening.css?page=three";

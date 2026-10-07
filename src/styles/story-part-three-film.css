@@ -82,9 +82,12 @@
 .route-speedometer.is-redline .speedo-fill { stroke: #ff5a6e; filter: drop-shadow(0 0 2px #ff3b4e); }
 .route-speedometer.is-redline .speedo-lamp path:first-child { opacity: 1; filter: drop-shadow(0 0 2.5px #ff3b4e); }
 
+/* The needle and the lamp are drawn inside the dial's SVG, where every frame of a loop would repaint the page, so they
+   tremble and blink for a few seconds as the dial runs into the red and then hold there. On a phone they play as the
+   birthday's chapter comes up. */
 @media (prefers-reduced-motion: no-preference) {
-  .route-speedometer.is-redline .speedo-needle path { animation: speedo-tremble 0.11s linear infinite alternate; }
-  .route-speedometer.is-redline :is(.speedo-warning, .speedo-lamp) { animation: speedo-blink 0.9s steps(1, end) infinite; }
+  :is(.memory-journey-route, .mobile-chapter-block.is-active) .route-speedometer.is-redline .speedo-needle path { animation: speedo-tremble 0.11s linear 24 alternate; }
+  :is(.memory-journey-route, .mobile-chapter-block.is-active) .route-speedometer.is-redline :is(.speedo-warning, .speedo-lamp) { animation: speedo-blink 0.9s steps(1, end) 4; }
   .memory-journey-route.is-redline .route-car-streaks { animation: car-streaks 0.36s linear infinite; }
   .memory-journey-route.is-redline .route-car svg { animation: car-rumble 0.12s steps(2, end) infinite; }
 }
@@ -109,6 +112,11 @@
   position: relative; width: min(66cqi, 26rem); font-size: min(2.4cqi, 0.94rem); rotate: -3deg;
   filter: drop-shadow(0 1.3em 1.5em #0a0206d9) drop-shadow(0 0.2em 0.3em #0a020673);
 }
+/* On a phone the scene behind only dims: a backdrop blur over the whole card costs every frame of the clap. */
+@media (max-width: 900px) { .chapter-slate { backdrop-filter: none; background: radial-gradient(ellipse 72% 62% at 50% 52%, #0a0206cc, #0a020680 72%, #0a020659); } }
+/* A phone's scene card holds its slate's frame from the start; until a take comes up it is not there at all, rather than
+   an empty layer over the scene. */
+.mobile-scene-canvas > .chapter-slate-frame:empty { display: none; }
 /* The two striped sticks, their stripes leaning opposite ways: the arm rests on the base when shut and swings up on the
    steel pivot at its left end. */
 .clapper-sticks { position: relative; height: 3.3em; }
@@ -355,6 +363,8 @@
 /* ---------- 4. After the credits: the dark, a whisper, and a short scene for whoever stayed ---------- */
 /* Above the page's drifting air (z-index 4): the theatre is dark and still now. */
 main.story-experience > .post-credits {
+  /* Nothing of it is styled, painted or animated until the reader is nearly there (about its height until then). */
+  content-visibility: auto; contain-intrinsic-size: auto 160vh;
   /* Drawn once for the scene and its last card: a heart, a fallen leaf. */
   --pc-heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 30'%3E%3Cdefs%3E%3ClinearGradient id='g' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffa0ae'/%3E%3Cstop offset='.55' stop-color='%23ff4a64'/%3E%3Cstop offset='1' stop-color='%23d81e44'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M16 28.4 C6.4 21.6 1.6 15.4 3.1 9.4 C4.6 3.6 11.6 2.2 16 7.8 C20.4 2.2 27.4 3.6 28.9 9.4 C30.4 15.4 25.6 21.6 16 28.4 Z' fill='url(%23g)'/%3E%3Cpath d='M8.4 7.4 C6.6 8.2 5.6 10 6 11.9' fill='none' stroke='%23fff' stroke-opacity='.7' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
   --pc-leaf: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23c8561c'/%3E%3Cstop offset='1' stop-color='%23f4b23c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M4.5 19.5 C3.6 11.6 9.4 4.2 20.4 3.4 C20.6 13.6 13.6 20.4 4.5 19.5 Z' fill='url(%23g)'/%3E%3Cpath d='M2 22 L5 19 L17 7' fill='none' stroke='%237a3010' stroke-width='.9' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -693,7 +703,7 @@ main.story-experience > .post-credits {
 .moment-candles:not(.is-blown) .moment-button { border-color: #fff3d6; color: #6a1020; background: linear-gradient(180deg, #fffaf0, #ffdca0); box-shadow: 0 10px 24px -6px #0a0206cc, inset 0 1px 0 #ffffff, 0 0 20px #ffcf7a73; }
 .moment-candles:not(.is-blown) .moment-button svg { color: #c3304b; }
 @media (hover: hover) { .moment-candles:not(.is-blown) .moment-button:hover { background: linear-gradient(180deg, #ffffff, #ffe6b8); } }
-.moment-candles:not(.is-blown) .moment-button::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; animation: wish-call 2.4s ease-out infinite; }
+.moment-candles:not(.is-blown) .moment-button::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; box-shadow: 0 0 0 4px #ffd24a8c; opacity: 0; animation: wish-call 2.4s ease-out infinite; }
 /* What rises from the wicks once the candles are out: three curls of smoke, drifting the way the breath went. */
 .p3-cake-smoke { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .p3-cake-smoke i {
@@ -841,7 +851,7 @@ main.story-experience > .post-credits {
   .moment-confetti, .moment-claw, .p3-cake-smoke { display: none; }
 }
 
-@keyframes wish-call { 0% { box-shadow: 0 0 0 0 #ffd24a99; } 70%, 100% { box-shadow: 0 0 0 14px #ffd24a00; } }
+@keyframes wish-call { 0% { opacity: 1; scale: 1 1; } 70%, 100% { opacity: 0; scale: 1.12 1.5; } }
 @keyframes flame-out { 0% { visibility: visible; opacity: 1; scale: 1 1; rotate: 0deg; translate: 0 0; } 30% { opacity: 1; scale: 0.95 0.85; rotate: 30deg; translate: 18% 0; } 60% { opacity: 0.9; scale: 0.7 0.5; rotate: 38deg; translate: 30% 4%; } 99% { visibility: visible; } 100% { visibility: hidden; opacity: 0; scale: 0.1 0.1; rotate: 40deg; translate: 34% 8%; } }
 @keyframes flame-on { 0% { opacity: 0; scale: 0.1 0.1; filter: brightness(2.2); } 60% { opacity: 1; scale: 1.15 1.25; } 100% { opacity: 1; scale: 1 1; filter: none; } }
 @keyframes smoke-rise { 0% { opacity: 0; translate: 0 8%; scale: 0.5 0.25; } 16% { opacity: 0.9; } 100% { opacity: 0; translate: 26% -42%; scale: 1.25 1.15; } }

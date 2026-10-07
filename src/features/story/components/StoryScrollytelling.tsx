@@ -12,7 +12,7 @@ import { StoryPartNavigation } from "./StoryPartNavigation";
 import { StoryPartTransition } from "./StoryPartTransition";
 import { PartOneChapterIndex } from "./PartOneChapterIndex";
 import { StoryStep } from "./StoryStep";
-import { AutumnMapPocket } from "./film/AutumnMap";
+import { partThreeKit } from "../../../app/pageKits";
 
 /**
  * A part's title as words of single letters, so the scroll can flip them up one after another (useScrollChoreography).
@@ -149,8 +149,8 @@ export function StoryScrollytelling({
                 </div>
               )}
             </section>
-            {part.id === "too-fast" ? (
-              <AutumnMapPocket items={partItems} activeId={activeId} visitedStoryIds={visitedStoryIds} sectionRef={autumnChapters} />
+            {part.id === "too-fast" && partThreeKit.AutumnMapPocket ? (
+              <partThreeKit.AutumnMapPocket items={partItems} activeId={activeId} visitedStoryIds={visitedStoryIds} sectionRef={autumnChapters} />
             ) : null}
           </div>
         );

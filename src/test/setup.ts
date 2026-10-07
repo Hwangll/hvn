@@ -1,5 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
+import "../app/kits/memoryRoom";
+import "../app/kits/partThree";
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,

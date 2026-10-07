@@ -6,8 +6,7 @@ import { PartOneChapterIndex } from "./PartOneChapterIndex";
 import { ChapterProgress } from "./ChapterProgress";
 import { MemoryJourneyRoute } from "./MemoryJourneyRoute";
 import { ChapterScene } from "./scenes/ChapterScene";
-import { StageSlate } from "./film/ChapterSlate";
-import { SceneMoment } from "./film/SceneMoment";
+import { partThreeKit } from "../../../app/pageKits";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import { usePointerParallax } from "../../../shared/hooks/usePointerParallax";
 
@@ -81,11 +80,11 @@ export function StickyMemoryStage({ chapter, chapters, activeIndex, playCue, red
                 {/* Every stage panel stays live: idle loops breathe through the dissolve and pause via .is-hidden when a panel is gone. */}
                 <ChapterScene chapter={item} isActive reducedMotion={reducedMotion} />
                 {/* Part III's scenes with something to touch: the birthday candles, the claw machine at Playik. */}
-                {item.partId === "too-fast" ? <SceneMoment chapter={item} playCue={playCue} /> : null}
+                {item.partId === "too-fast" && partThreeKit.SceneMoment ? <partThreeKit.SceneMoment chapter={item} playCue={playCue} /> : null}
               </div>
             ))}
             {/* Part III is a film: a slate claps in front of the stage as each of its chapters begins. */}
-            {chapter.partId === "too-fast" && !reducedMotion ? <StageSlate items={chapters} activeIndex={activeIndex} /> : null}
+            {chapter.partId === "too-fast" && !reducedMotion && partThreeKit.StageSlate ? <partThreeKit.StageSlate items={chapters} activeIndex={activeIndex} /> : null}
           </div>
         ) : (
           <div className="memory-canvas-scene" ref={contentRef} key={chapter.id}>

@@ -1755,9 +1755,12 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .story-part-2 .mobile-chapter-block { display: grid; gap: 1.75rem; scroll-margin-top: 7rem; }
 .story-part-2 .mobile-chapter-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; padding-block: 0 1rem; border-bottom: 1px solid var(--offline-border); color: #b6c7dd; font-size: 0.7rem; }
 .story-part-2 .mobile-chapter-meta p { margin: 0; color: #8bcbd8; font-size: 0.62rem; letter-spacing: 0.08em; }
+/* A scene card off screen is neither styled nor painted (its size comes from its width and aspect ratio alone), so the
+   page only ever renders the one or two scenes in view; the engine measures on refresh, not per frame. */
 .story-part-2 .mobile-scene-canvas {
   position: relative; height: auto; min-height: 0; aspect-ratio: 1 / 1.06; padding: 0; border: 0; border-radius: 1.4rem; overflow: hidden;
   background: linear-gradient(180deg, #0c1c31, #0a1626); box-shadow: 0 30px 70px -30px #02091699, inset 0 0 0 1px #b8ccdb1f; backdrop-filter: none;
+  content-visibility: auto;
 }
 .story-part-2 .mobile-scene-canvas:has(.together-scene-dating) { background: linear-gradient(180deg, #0f1a36, #14263f); }
 .story-part-2 .mobile-scene-canvas:has(.together-scene-aquarium) { background: linear-gradient(180deg, #0a5a86, #063457 70%, #042a48); }

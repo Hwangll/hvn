@@ -1,4 +1,5 @@
 import { TriangleAlert } from "lucide-react";
+import { memo } from "react";
 import { url, useIds } from "../atoms/spriteIds";
 
 /*
@@ -34,7 +35,7 @@ interface RouteSpeedometerProps {
  * zone at the end, a warning lamp, and the needle on its hub. Beside it a small readout gives the day of the stop in
  * hand; at the birthday it gives way to the warning, and the needle slams into the red and trembles there.
  */
-export function RouteSpeedometer({ redline, date }: RouteSpeedometerProps) {
+export const RouteSpeedometer = memo(function RouteSpeedometer({ redline, date }: RouteSpeedometerProps) {
   const id = useIds();
   return (
     <div className={`route-speedometer ${redline ? "is-redline" : ""}`.trim()} aria-hidden="true">
@@ -92,10 +93,10 @@ export function RouteSpeedometer({ redline, date }: RouteSpeedometerProps) {
       </svg>
     </div>
   );
-}
+});
 
 /** The red car of chapter 3, side on and facing the way the route runs; its wheels turn as far as it has driven. */
-export function RouteCar() {
+export const RouteCar = memo(function RouteCar() {
   const id = useIds();
   return (
     <span className="route-car" aria-hidden="true">
@@ -131,4 +132,4 @@ export function RouteCar() {
       <i className="route-car-beam" />
     </span>
   );
-}
+});

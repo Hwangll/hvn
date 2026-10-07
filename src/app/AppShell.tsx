@@ -6,10 +6,10 @@ import { useSoundToggle } from "../shared/hooks/useSoundToggle";
 import { SoundToggle } from "../shared/components/SoundToggle";
 import { AmbientPetals } from "../shared/components/AmbientPetals";
 import { ReadingProgress } from "../shared/components/ReadingProgress";
-import { MemoryIntro } from "../features/intro/components/MemoryIntro";
 import { MemoryTransitionOverlay } from "../features/intro/components/MemoryTransitionOverlay";
 import { StoryExperience } from "../features/story/components/StoryExperience";
 import { pageScopes, type StoryPage } from "./storyPage";
+import { memoryRoomKit } from "./pageKits";
 
 export type ExperienceState = "intro" | "focusing" | "transitioning" | "story-reveal" | "story-ready";
 
@@ -123,7 +123,7 @@ export function AppShell({ page = "part-one" }: AppShellProps) {
       {/* A hairline of reading progress with a heart rolling at its tip; CSS drives both from the page's own scroll. */}
       {storyVisible ? <ReadingProgress variant={page === "part-one" ? "day" : page === "part-two" ? "night" : "ember"} /> : null}
       <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
-      {introVisible ? <MemoryIntro onEnterStory={runToStory} phase={experienceState} reducedMotion={prefersReducedMotion} /> : null}
+      {introVisible && memoryRoomKit.MemoryIntro ? <memoryRoomKit.MemoryIntro onEnterStory={runToStory} phase={experienceState} reducedMotion={prefersReducedMotion} /> : null}
       {storyVisible ? (
         <StoryExperience
           onReturnToIntro={returnToIntro}

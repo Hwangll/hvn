@@ -4,9 +4,7 @@ import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import { ChapterProgress } from "./ChapterProgress";
 import { StoryStep } from "./StoryStep";
 import { ChapterScene } from "./scenes/ChapterScene";
-import { CanvasSlate } from "./film/ChapterSlate";
-import { RouteSpeedometer } from "./film/RouteDashboard";
-import { SceneMoment } from "./film/SceneMoment";
+import { partThreeKit } from "../../../app/pageKits";
 import { opensChapter } from "./film/slateShots";
 
 interface MobileChapterJourneyProps {
@@ -48,18 +46,18 @@ export function MobileChapterJourney({
               {` · ${chapter.shortTitle.toUpperCase()}`}
             </p>
             <span>{chapter.year}</span>
-            {driven ? (
+            {driven && partThreeKit.RouteSpeedometer ? (
               <span className="mobile-speedometer" style={{ "--route-progress": index / Math.max(1, items.length - 1) } as CSSProperties}>
-                <RouteSpeedometer redline={index === items.length - 1} />
+                <partThreeKit.RouteSpeedometer redline={index === items.length - 1} />
               </span>
             ) : null}
           </header>
           {/* The canvas is its own idle zone: it scrolls away well before the reader leaves the chapter's copy. */}
           <div className="mobile-scene-canvas" data-idle-zone>
             <ChapterScene chapter={chapter} isActive={chapter.id === activeId} reducedMotion={reducedMotion} />
-            {chapter.partId === "too-fast" ? <SceneMoment chapter={chapter} playCue={playCue} /> : null}
+            {chapter.partId === "too-fast" && partThreeKit.SceneMoment ? <partThreeKit.SceneMoment chapter={chapter} playCue={playCue} /> : null}
             {/* Part III's chapters each open on a slate that claps over their first scene. */}
-            {chapter.partId === "too-fast" && !reducedMotion && opensChapter(items, index) ? <CanvasSlate item={chapter} /> : null}
+            {chapter.partId === "too-fast" && !reducedMotion && opensChapter(items, index) && partThreeKit.CanvasSlate ? <partThreeKit.CanvasSlate item={chapter} /> : null}
           </div>
           <StoryStep
             chapter={chapter}
