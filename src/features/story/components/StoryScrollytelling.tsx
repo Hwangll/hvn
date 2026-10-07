@@ -12,6 +12,7 @@ import { StoryPartNavigation } from "./StoryPartNavigation";
 import { StoryPartTransition } from "./StoryPartTransition";
 import { PartOneChapterIndex } from "./PartOneChapterIndex";
 import { StoryStep } from "./StoryStep";
+import { AutumnMapPocket } from "./film/AutumnMap";
 
 /**
  * A part's title as words of single letters, so the scroll can flip them up one after another (useScrollChoreography).
@@ -67,6 +68,8 @@ export function StoryScrollytelling({
   });
   const activeItem = items.find((item) => item.id === activeId) ?? items[0];
   const scope = useRef<HTMLDivElement | null>(null);
+  // Part III's chapters, while which its map waits in a pocket at the corner of the screen.
+  const autumnChapters = useRef<HTMLElement | null>(null);
   usePartTwoScroll(scope, isMobile, reducedMotion);
   const activeSoundSource = activeItem?.partId === navigationPartId ? activeItem.optionalSound : undefined;
   useActiveStorySound(activeSoundSource, soundEnabled);
@@ -106,7 +109,12 @@ export function StoryScrollytelling({
               <StoryPartTransition onInView={setNavigationPartId} part={part} />
             )}
 
-            <section className="story-scrollytelling" aria-label={`${part.eyebrow}: ${part.title}`} data-idle-zone>
+            <section
+              className="story-scrollytelling"
+              aria-label={`${part.eyebrow}: ${part.title}`}
+              data-idle-zone
+              ref={part.id === "too-fast" ? autumnChapters : undefined}
+            >
               {isMobile || (reducedMotion && part.number > 1) ? (
                 <MobileChapterJourney
                   items={partItems}
@@ -122,6 +130,7 @@ export function StoryScrollytelling({
                     chapter={partActiveItem}
                     chapters={partItems}
                     activeIndex={activePartIndex}
+                    playCue={playCue}
                     reducedMotion={reducedMotion}
                     visitedStoryIds={visitedStoryIds}
                   />
@@ -140,6 +149,9 @@ export function StoryScrollytelling({
                 </div>
               )}
             </section>
+            {part.id === "too-fast" ? (
+              <AutumnMapPocket items={partItems} activeId={activeId} visitedStoryIds={visitedStoryIds} sectionRef={autumnChapters} />
+            ) : null}
           </div>
         );
       })}

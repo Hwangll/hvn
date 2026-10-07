@@ -2,6 +2,7 @@ import { Heart } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 import type { StoryScrollItem } from "../../data/story";
 import { StoryPicture } from "../../../../shared/components/visuals/StoryPicture";
+import { RainWipe } from "../film/RainWipe";
 import { HeartSprite, ScooterSprite } from "../atoms/SceneSprites";
 import { MusicNoteSprite } from "../atoms/PartThreeSprites";
 import {
@@ -93,6 +94,8 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
               <i className="p3-rainpane-street" />
               <span className="p3-pharmacy"><i className="p3-pharmacy-cross" />Nhà thuốc</span>
               <i className="p3-rainpane-rain" />
+              {/* Misted over from inside, to be wiped clear. */}
+              <RainWipe />
             </span>
           </div>
           <i className="p3-coat-rail" data-parallax="-0.1" />
@@ -341,14 +344,21 @@ export function PartThreeAutumnScene({ chapter, parts }: { chapter: StoryScrollI
           <i className="p3-party-table" data-parallax="0.18" />
           <div className="p3-cake" data-parallax="0.24" data-delay="0.18">
             <span className="p3-flames"><i /><i /><i /></span>
+            {/* What rises from the wicks once the candles are blown out (SceneMoment). */}
+            <span className="p3-cake-smoke"><i /><i /><i /></span>
             <BirthdayCakeSprite />
           </div>
-          {/* The page she left for him ("Tadaaaa"), now in his hand. */}
+          {/* The page she left for him ("Tadaaaa"), now in his hand. It stays folded until the candles are out. */}
           <div className="p3-his-letter" data-parallax="0.3" data-delay="0.3" data-tilt="-5" data-fade="0.36">
             <small>01.10.2026</small>
             <b>Tadaaaa</b>
-            <p>ngày tuyệt vời nhất trên đời</p>
-            <p className="is-sign">tuyệt ơi là tuyệt hêhhe</p>
+            <div className="p3-letter-fold">
+              <div>
+                <p>ngày tuyệt vời nhất trên đời</p>
+                <p className="is-sign">tuyệt ơi là tuyệt hêhhe</p>
+              </div>
+            </div>
+            <i className="p3-letter-seal" />
             <PenSprite className="p3-pen is-letter" />
           </div>
           {caption}

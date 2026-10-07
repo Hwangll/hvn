@@ -74,6 +74,8 @@ export interface StoryScrollItem extends Omit<StoryChapter, "scenes"> {
   chapterId: string;
   /** Title of the parent chapter, shown above scenes that belong to the same day. */
   chapterTitle: string;
+  /** The parent chapter's date: a stop inside a day of stops carries "Điểm dừng 01" as its own year. */
+  chapterYear: string;
   chapterIndex: number;
   chapterCount: number;
   sceneIndex?: number;
@@ -1281,6 +1283,7 @@ export function createStoryScrollItems(parts: readonly StoryPart[]): StoryScroll
         partTitle: part.title,
         chapterId: chapter.id,
         chapterTitle: chapter.title,
+        chapterYear: chapter.year,
         chapterIndex: chapter.index,
         chapterCount: part.chapters.length,
       };
@@ -1374,10 +1377,10 @@ export const partThreeCopy: EnvelopeCopy = {
   link: { href: partHrefs["too-fast"], label: "Đọc Phần III" },
 };
 
-/** The envelope that closes Part III: the chapter after it, sealed until the date Part II's envelope used to wait for. */
+/** The envelope that closes Part III: the chapter after it, sealed until the first moment of 2027, the day Hát và Nờ return. */
 export const nextPartCopy: EnvelopeCopy = {
   ...partThreeCopy,
-  opensAt: "2026-12-20T20:00:00+07:00",
+  opensAt: "2027-01-01T00:00:00+07:00",
   openTitle: "Chương tiếp theo",
   link: undefined,
 };
@@ -1470,6 +1473,86 @@ export const partThreeEndingCopy = {
   footnote: "Hai đứa, phản chiếu trên chiếc xe đỏ.",
   image: "/images/story/part-three/red-car-reflection-two.jpg",
   imageAlt: "Hai người ngồi tựa vào nhau, phản chiếu trên cửa một chiếc ô tô màu đỏ",
+};
+
+/**
+ * Part III plays as the film it is named after: a leader counting down before it, a rating card, a slate before each
+ * chapter and a scene after the credits. The rating card's reasons are lines from the chapters (the stone bench in
+ * Hoàng Mai, the rain on Nguyễn Văn Lộc, the sore leg and the first night's "tiếng yêu").
+ */
+export const partThreeFilmCopy = {
+  production: "Quá nhanh, quá nguy hiểm",
+  presents: "Hát & Nờ trình chiếu",
+  rating: {
+    kicker: "Phim sau đây đã được duyệt",
+    audience: "Phim dành cho: 2\u00a0người",
+    badge: "2",
+    badgeUnit: "người",
+    reasons: "Phân loại vì: hôn nhau trên ghế đá, mưa thâm lặng giời, một cái chân đau và tiếng yêu lúc nào cũng sến sẩm.",
+  },
+  skip: "Bỏ qua phần mở màn",
+  start: "Phim bắt đầu",
+  slate: { production: "Phim", chapter: "Chương", scene: "Cảnh", take: "Take", date: "Ngày", director: "Đạo diễn", crew: "Hát & Nờ" },
+  postCredits: {
+    hint: "Khoan, đừng rời rạp vội…",
+    label: "Cảnh sau danh đề",
+    production: "Chương tiếp theo",
+    note: "đang quay…",
+    names: "Hát và Nờ",
+    returns: "sẽ trở lại",
+    on: "vào ngày",
+    replay: "Xem lại cảnh này",
+  },
+};
+
+export interface AutumnMapPlace {
+  name: string;
+  /** What happened there, in the chapter's own words. */
+  note: string;
+  /** The stop that tells it, where a pin on the map leads. */
+  stopId: string;
+  date: string;
+  /** On the map's 400 × 360 sheet. */
+  x: number;
+  y: number;
+}
+
+/**
+ * The thirteen places of Part III (its credits' "Bối cảnh"), in the order the story reaches them, on a hand-drawn map
+ * of Hà Nội. The map is drawn from memory and not to scale: Ba Đình, Hoàn Kiếm and Hoàng Mai sit roughly where they
+ * are, and Hà Đông, where most of these days happened, is drawn larger than it is. Some places sit just so: Tiny cf by
+ * the main road at Văn Quán (in the SDU Tower), Cúc cu on the shore of hồ Văn Quán, and Playik on Nguyễn Trãi in Thanh
+ * Xuân (at Tiến Thọ bookstore).
+ */
+export const autumnMapPlaces: AutumnMapPlace[] = [
+  { name: "Hà Đông", note: "ăn tối, rồi chiếc home đầu tiên", stopId: "first-homestay", date: "08.09", x: 62, y: 318 },
+  { name: "Hoàng Mai", note: "bánh ngọt ở công ty em", stopId: "hoang-mai-afternoon", date: "12.09", x: 318, y: 268 },
+  { name: "Lăng Bác", note: "thời tiết siêu siêu mê", stopId: "lang-bac", date: "13.09", x: 214, y: 104 },
+  { name: "Chùa Một Cột", note: "cùng ước nguyện", stopId: "chua-mot-cot", date: "13.09", x: 184, y: 128 },
+  { name: "Triệu Việt Vương", note: "bát bún riêu Hà Lội", stopId: "rain-and-dusk", date: "13.09", x: 292, y: 178 },
+  { name: "Nguyễn Văn Lộc", note: "đội áo mưa đi hát", stopId: "rainy-karaoke", date: "15.09", x: 98, y: 244 },
+  { name: "59A Yên Bình", note: "2 bộ phim lận", stopId: "clinic-day", date: "16.09", x: 34, y: 268 },
+  { name: "Văn Quán", note: "deep talk với màn mưa", stopId: "van-quan-rain", date: "16.09", x: 138, y: 276 },
+  { name: "Tiny cf", note: "nắng vàng gió mát người xinh", stopId: "tiny-cafe", date: "19.09", x: 162, y: 246 },
+  { name: "Cúc cu", note: "ngồi nghe hát cùng nhau", stopId: "cuc-cu-night", date: "19.09", x: 176, y: 284 },
+  { name: "ngõ Ao Sen", note: "tacos đêm trung thu", stopId: "mid-autumn", date: "24.09", x: 96, y: 296 },
+  { name: "Playik", note: "chơi game", stopId: "mid-autumn", date: "24.09", x: 194, y: 198 },
+  { name: "Phùng Khoang", note: "saku siêu ngon siêu ưng", stopId: "phung-khoang", date: "26.09", x: 158, y: 206 },
+];
+
+export const autumnMapCopy = {
+  open: "Bản đồ",
+  eyebrow: "Bản đồ mùa thu · Hà Nội",
+  title: "13 nơi mình đã đi",
+  lead: "Sợi chỉ đỏ tự nối dần khi mình đọc. Chạm vào một nơi để quay về đúng đoạn đó.",
+  note: "vẽ tay theo trí nhớ, không đúng tỉ lệ đâu nha =)))",
+  close: "Đóng bản đồ",
+  ahead: "chưa tới",
+  /** Where the thread ends once the birthday is read: the one day of the month with no place on the map. */
+  end: "01.10 · sinh nhật anh",
+  places: "nơi",
+  go: "Quay về đoạn này",
+  stamp: "HÀ NỘI · THU 2026 · HÁT & NỜ ·",
 };
 
 /** The day Hoàng and Ngọc set in Inlove as the day they fell for each other (Part III, Chương 02). */

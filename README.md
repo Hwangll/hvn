@@ -45,7 +45,7 @@ Trong đoạn văn, cụm chữ bọc trong `==...==` được tô như bút d�
 Các mốc thời gian nằm trong cùng file:
 
 - `partThreeCopy.opensAt`: ngày phong bì cuối Phần II mở ra và dẫn sang `/part-3/` (nút "Đọc Phần III").
-- `nextPartCopy.opensAt`: phong bì niêm phong ở cuối Phần III, đếm ngược tới chương tiếp theo (20/12/2026).
+- `nextPartCopy.opensAt`: phong bì niêm phong ở cuối Phần III, đếm ngược tới chương tiếp theo (0h ngày 1/1/2027, ngày Hát và Nờ trở lại; cảnh sau danh đề cũng lấy ngày này). Ngày trên phong bì luôn hiện theo giờ Việt Nam.
 - `loveCounterStart`: ngày bắt đầu của bộ đếm Inlove ở chương "Yêu lại càng yêu nhiều hơn". Bộ đếm tính theo lịch Hà Nội: tháng đủ trước, rồi tuần và ngày, như app (`utils/loveCounter.ts`).
 
 Mỗi chapter có `id`, `year`, `title`, `shortTitle`, `paragraphs`, `quote`, `mood`, `accent`, `image`, `imageAlt`, `alignment`, `optionalSound` và `threadState`. Chương có nhiều cảnh dùng thêm `scenes`; mỗi cảnh cũng có `id` ổn định để theo dõi active/visited và mở đúng kỷ vật.
@@ -193,13 +193,36 @@ Khi bật reduced motion, toàn bộ lớp này tắt.
 
 Phần kết của Phần III (`StoryPartThreeEnding.tsx`) như cuối một bộ phim: rèm nhung khép vào từ hai bên, "Còn tiếp..." hiện từng chữ, rồi danh sách credits (bối cảnh, phim định xem và phim xem được, nhạc nền, ứng dụng, Bi và Bơ, thực đơn, đạo cụ, thời tiết, khách mời; đều lấy từ thư của Ngọc trong `partThreeEndingCopy`) cuộn lên từng dòng theo scroll timeline. Sau đó là phong bì của chương tiếp theo và các nút quay lại.
 
+Cả Phần III cũng được dựng như một bộ phim (`components/film/`, style ở `story-part-three-film.css`):
+
+- Mở màn (`FilmLeader.tsx`): rèm nhung khép dưới đèn rạp, đèn tắt và rèm kéo sang hai bên; cuộn phim chạy dọc màn hình, đếm ngược 5-4-3-2-1 qua cửa sổ máy chiếu (hạt phim, bụi, sợi tóc, vết xước, chớp trắng ở số 2), một khung đen, rồi thẻ phân loại "Phim dành cho: 2 người"; cuối cùng một vòng iris mở ra trang. Chỉ chạy một lần mỗi lượt ghé (`sessionStorage`). Nút "Bỏ qua" có vạch cho biết còn bao lâu, bỏ qua thì iris mở nhanh hơn.
+- Clapperboard (`ChapterSlate.tsx`, `Clapperboard.tsx`): mỗi chương mở bằng một tấm bảng đen viết phấn ghi tên phim, chương, cảnh, take, ngày của chương, đạo diễn "Hát & Nờ" và tên cảnh. Cần sọc đóng "cạch!", bụi phấn bay ra, và cảnh phía sau tối và nhòe đi trong lúc bảng còn giơ lên. Trên desktop bảng đóng trên sân khấu khi cuộn xuống tới điểm dừng đầu chương, và mỗi lần quay lại chương đó take tăng một; trên điện thoại bảng đóng trên khung cảnh đầu chương khi hơn nửa khung đã vào màn hình.
+- Xe đỏ và đồng hồ tốc độ (`RouteDashboard.tsx`): thanh hành trình thành một con đường có vạch giữa, đỏ dần theo quãng xe đã đi. Chiếc xe đỏ chạy tới điểm đang đọc, bánh quay đúng quãng đã chạy, đèn pha chiếu phía trước. Bảng đồng hồ gồm ô ngày của điểm dừng và một mặt đồng hồ viền chrome có kim đi từ 8/9 tới 1/10. Tới sinh nhật, ô ngày nhường chỗ cho cảnh báo "Quá nguy hiểm", đèn báo sáng, kim run trong vạch đỏ và xe kéo vệt tốc độ. Trên điện thoại xe chạy trên thanh tiến độ của từng chương, đồng hồ nằm cạnh ngày.
+- Khoảnh khắc chạm được (`SceneMoment.tsx`, `RainWipe.tsx`):
+  - Sinh nhật: bấm "Ước đi rồi thổi nến" hoặc chạm vào bánh. Hơi thổi lướt qua, từng ngọn nến nghiêng rồi tắt, khói cuộn theo hướng thổi; đèn dịu xuống rồi bừng lên, hai ống pháo bắn ruy băng và giấy màu, con dấu sáp hình tim vỡ ra và lá thư "Tadaaaa" mở. Chạm lần nữa thì nến bén lửa lại.
+  - Trung thu: "Gắp thú · còn 1 lượt" mở cận cảnh máy gắp ở Playik thành một trò chơi nhỏ. Càng gắp đung đưa trên đống thú, bấm "Thả gắp!" thì càng đáp xuống, kẹp Bơ và đưa qua cửa nhận quà; sau đó Bơ nằm lại cạnh máy trong cảnh. Đóng máy trước khi thả thì lượt chơi vẫn còn.
+  - Buổi đi hát: ô kính mờ hơi ấm ghi "lau kính đi". Rê chuột hay vuốt ngang để lau (vuốt dọc vẫn cuộn trang), phía sau là phố đêm với đèn nhòe và cửa sổ sáng, vài giọt nước chảy xuống kính. Để yên một lúc thì kính mờ lại.
+- Bản đồ mùa thu (`AutumnMap.tsx`; dữ liệu `autumnMapPlaces` và `autumnMapCopy` trong `story.ts`): nút "Bản đồ" hình tấm bản đồ gấp nằm ở góc màn hình khi đang đọc các chương, có đếm số nơi đã tới.
+  - Mở ra là Hà Nội vẽ tay bằng mực và màu nước trên giấy kem gấp tư dán băng keo, với 13 nơi của mục "Bối cảnh" trong credits: sông Hồng, hồ Tây, hồ Gươm, hồ Văn Quán, đường Nguyễn Trãi, la bàn và dấu bưu điện "HÀ NỘI · THU 2026".
+  - Sợi chỉ đỏ nối tới nơi xa nhất đã đọc, đoạn mới tự khâu mỗi lần mở lại, cây kim ở đầu chỉ hướng về nơi tiếp theo, và chỉ thắt nút khi đọc tới sinh nhật.
+  - Chạm vào ghim để xem thẻ của nơi đó (ngày, ghi chú, nút "Quay về đoạn này"). Danh sách bên cạnh có icon của từng điểm dừng (`routeStops.ts`, dùng chung với thanh hành trình) và dẫn về đúng điểm dừng đó.
+  - Vị trí các nơi vẽ theo trí nhớ (`x` trong 0–400, `y` trong 0–360), chỉnh thẳng trong `autumnMapPlaces`.
+- Cảnh sau danh đề (`PostCreditsScene.tsx`): dưới phong bì và các nút quay lại có dòng "Khoan, đừng rời rạp vội…" với mũi tên gật xuống. Khi khung phim vào màn hình:
+  1. Tấm bảng của chương tiếp theo đóng "cạch" (ngày lấy từ `nextPartCopy.opensAt`).
+  2. Một con phố đêm khung hình rộng, có hạt phim: trăng rằm, sao, Hà Nội với đèn đỏ nhấp nháy trên các tòa tháp, hàng đèn đường trôi qua theo xe.
+  3. Xe đỏ phanh lại dưới một cột đèn. Một trái tim bay lên, đập hai nhịp cùng hai lần xe nháy đèn.
+  4. Xe rồ máy rồi phóng đi, để lại trái tim, làn khói và lá cuốn theo.
+  5. Cuối cùng là thẻ "Hát và Nờ sẽ trở lại vào ngày 01.01.2027", kèm nút xem lại.
+
+Khi bật reduced motion, mở màn và clapperboard không có, xe và kim đứng yên ở chỗ của từng chương, cảnh sau danh đề là một tấm thẻ tĩnh, còn pháo giấy, khói nến và máy gắp thú ẩn đi; thổi nến, lau kính và bản đồ vẫn dùng được.
+
 ## Cấu Trúc Chính
 
 ```text
 src/
   main.tsx                # Điểm vào Phần I (/)
   main-part-two.tsx       # Điểm vào Phần II (/part-2/), cùng app nhưng CSS riêng
-  main-part-three.tsx     # Điểm vào Phần III (/part-3/): CSS của Phần II cộng story-part-three.css và story-part-three-autumn.css
+  main-part-three.tsx     # Điểm vào Phần III (/part-3/): CSS của Phần II cộng story-part-three.css, story-part-three-autumn.css và story-part-three-film.css
   app/                    # Điều phối trạng thái trải nghiệm
   assets/fonts/           # Font tự host và fonts.css
   features/
@@ -236,7 +259,7 @@ Build command: `npm run build`, publish directory: `dist`. Header cache nằm tr
 ## Hiệu Năng
 
 - **Font tự host** trong `src/assets/fonts` (đúng các file Google Fonts trước đây, giấy phép OFL): không còn round trip sang bên thứ ba, và font tiêu đề Literata được preload nên tiêu đề không nhảy dòng khi font về. Các file `*-vietnamese-ext` chỉ chứa ~12 chữ Việt (ă, đ, ơ, ư…) cắt ra từ file latin-ext, nên mỗi trang không phải tải cả latin-ext (đã giảm ~110 kB) mà chữ vẫn dựng y hệt. Chi tiết thứ tự khai báo ở đầu `fonts.css`.
-- **CSS theo trang**: các trang dùng chung các file CSS theo cùng thứ tự; Phần II import bản `?page=two` (`src/main-part-two.tsx`), Phần III bản `?page=three` cộng `story-part-three.css` và `story-part-three-autumn.css`. Khi build, plugin `pageScopedCss` trong `vite.config.ts` bỏ các selector chỉ khớp được ở trang khác (`.story-part-2`, `.story-page-part-two`, `.app-part-two`, bản Phần I và bản `-3`/`-three` của Phần III). Trang Phần III mang cả class của Phần II, nên ở đó chỉ selector của Phần I bị bỏ. Style dành riêng cho một trang nên được scope bằng các class này để được tách tự động.
+- **CSS theo trang**: các trang dùng chung các file CSS theo cùng thứ tự; Phần II import bản `?page=two` (`src/main-part-two.tsx`), Phần III bản `?page=three` cộng `story-part-three.css`, `story-part-three-autumn.css` và `story-part-three-film.css`. Khi build, plugin `pageScopedCss` trong `vite.config.ts` bỏ các selector chỉ khớp được ở trang khác (`.story-part-2`, `.story-page-part-two`, `.app-part-two`, bản Phần I và bản `-3`/`-three` của Phần III). Trang Phần III mang cả class của Phần II, nên ở đó chỉ selector của Phần I bị bỏ. Style dành riêng cho một trang nên được scope bằng các class này để được tách tự động.
 - **Three.js tải khi cần**: hộp kỷ vật render chữ và nút ngay, còn scene 3D (`src/features/memories/three/keepsakeScene.ts`) chỉ tải khi hộp còn cách khoảng một màn hình. Canvas do React giữ chỗ sẵn nên layout không nhảy.
 - **Engine cuộn**: `usePartTwoScroll` bỏ qua cảnh đã mờ hẳn hoặc chưa đổi tiến độ, không ghi lại giá trị không đổi, và `--reveal` là custom property không kế thừa (`@property`), được đưa tới từng chữ đang chuyển thay vì cả đoạn văn. Các biến hiệu ứng của sân khấu Phần II (`--vblur`, `--leak`…) cũng không kế thừa.
 - **Motion tải theo nhu cầu**: phần lõi của `m` component nằm trong bundle chính; tính năng animation/layout (`domMax`) và hiệu ứng con trỏ là chunk riêng, chỉ tải khi trình duyệt rảnh nên không tranh băng thông với ảnh màn hình đầu.

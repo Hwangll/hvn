@@ -7,7 +7,8 @@ import { useRevealOnce } from "../../../shared/motion/useRevealOnce";
 import { CircularText } from "../../../shared/components/motion/CircularText";
 import { RollingNumber } from "../../../shared/components/motion/RollingNumber";
 
-const dateFormatter = new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+// The dates are Hà Nội's: an envelope that opens at midnight there shows that day wherever it is read.
+const dateFormatter = new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Asia/Ho_Chi_Minh" });
 
 /**
  * The next part arrives as a sealed envelope rather than a promise: until `copy.opensAt` it stays

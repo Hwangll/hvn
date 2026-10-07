@@ -1,14 +1,17 @@
 import type { CSSProperties } from "react";
 import type { StoryScrollItem } from "../data/story";
 import { jumpToStoryTarget } from "../utils/jumpToStoryTarget";
+import { RouteCar } from "./film/RouteDashboard";
 
 interface ChapterProgressProps {
   items: StoryScrollItem[];
   activeId: string;
   visitedStoryIds?: ReadonlySet<string>;
+  /** Part III's red car, standing on the line at the chapter in hand. */
+  vehicle?: boolean;
 }
 
-export function ChapterProgress({ items, activeId, visitedStoryIds = new Set() }: ChapterProgressProps) {
+export function ChapterProgress({ items, activeId, visitedStoryIds = new Set(), vehicle = false }: ChapterProgressProps) {
   const activeItem = items.find((item) => item.id === activeId) ?? items[0];
   const chapters = items.filter((item, index) => items.findIndex((candidate) => candidate.chapterId === item.chapterId) === index);
   const activeChapterIndex = Math.max(0, chapters.findIndex((item) => item.chapterId === activeItem.chapterId));
@@ -31,6 +34,7 @@ export function ChapterProgress({ items, activeId, visitedStoryIds = new Set() }
         aria-label="Tiến độ chương"
       >
         <span className="story-chapter-progress-fill" style={{ "--progress": progress } as CSSProperties} />
+        {vehicle ? <span className="story-chapter-progress-car" style={{ "--progress": progress, "--route-progress": progress } as CSSProperties}><RouteCar /></span> : null}
         <ol className="story-chapter-progress-dots">
           {chapters.map((chapter) => {
             const chapterItems = items.filter((item) => item.chapterId === chapter.chapterId);

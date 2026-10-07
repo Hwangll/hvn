@@ -6,6 +6,9 @@ import { PartOneChapterIndex } from "./PartOneChapterIndex";
 import { ChapterProgress } from "./ChapterProgress";
 import { MemoryJourneyRoute } from "./MemoryJourneyRoute";
 import { ChapterScene } from "./scenes/ChapterScene";
+import { StageSlate } from "./film/ChapterSlate";
+import { SceneMoment } from "./film/SceneMoment";
+import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import { usePointerParallax } from "../../../shared/hooks/usePointerParallax";
 
 /** What the stage is called in the parts written as a diary of days together; Part I's names each chapter's year. */
@@ -18,11 +21,12 @@ interface StickyMemoryStageProps {
   chapter: StoryScrollItem;
   chapters: StoryScrollItem[];
   activeIndex: number;
+  playCue?: (cue: SoundCue) => void;
   reducedMotion: boolean;
   visitedStoryIds?: ReadonlySet<string>;
 }
 
-export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotion, visitedStoryIds }: StickyMemoryStageProps) {
+export function StickyMemoryStage({ chapter, chapters, activeIndex, playCue, reducedMotion, visitedStoryIds }: StickyMemoryStageProps) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const previousIndexRef = useRef(activeIndex);
@@ -76,8 +80,12 @@ export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotio
               <div className="offline-scene-panel" data-offline-panel={item.id} key={item.id} style={{ opacity: index === 0 ? 1 : 0 }}>
                 {/* Every stage panel stays live: idle loops breathe through the dissolve and pause via .is-hidden when a panel is gone. */}
                 <ChapterScene chapter={item} isActive reducedMotion={reducedMotion} />
+                {/* Part III's scenes with something to touch: the birthday candles, the claw machine at Playik. */}
+                {item.partId === "too-fast" ? <SceneMoment chapter={item} playCue={playCue} /> : null}
               </div>
             ))}
+            {/* Part III is a film: a slate claps in front of the stage as each of its chapters begins. */}
+            {chapter.partId === "too-fast" && !reducedMotion ? <StageSlate items={chapters} activeIndex={activeIndex} /> : null}
           </div>
         ) : (
           <div className="memory-canvas-scene" ref={contentRef} key={chapter.id}>

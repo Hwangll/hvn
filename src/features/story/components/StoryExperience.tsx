@@ -24,6 +24,8 @@ import { useIdleZones } from "../../../shared/hooks/useIdleZones";
 import { useDepthParallaxFallback } from "../../../shared/hooks/useDepthParallaxFallback";
 import { useMediaQuery } from "../../../shared/hooks/useMediaQuery";
 import { StoryPartOneEnding } from "./StoryPartOneEnding";
+import { FilmLeader } from "./film/FilmLeader";
+import { PostCreditsScene } from "./film/PostCreditsScene";
 // The box's copy and controls render with the page; its three.js scene loads itself once the box is near.
 import { KeepsakePlayground } from "../../memories/components/KeepsakePlayground";
 
@@ -88,6 +90,8 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
       {page === "part-one" ? <PartOneAtmosphere moods={moods} reducedMotion={reducedMotion} /> : null}
       {page === "part-two" ? <PartTwoAtmosphere reducedMotion={reducedMotion} /> : null}
       {page === "part-three" ? <PartThreeAtmosphere reducedMotion={reducedMotion} /> : null}
+      {/* Part III is a film, and opens like one: lights down, a countdown and its rating card. */}
+      {page === "part-three" ? <FilmLeader reducedMotion={reducedMotion} /> : null}
       {page === "part-one" ? <PartOneDepth /> : page === "part-two" ? <PartTwoDepth /> : <PartThreeDepth />}
       {/* Part I's page-length thread, in the margins beside the chapters. A phone has no margins: there it would cross the
           words, and redrawing it as it unwinds would cost every frame of the scroll. Parts II and III carry their own
@@ -122,6 +126,7 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
         <>
           <ScrollRibbon tone="night" placement="stops" front={chapterNames} back={scrollRibbonCopy.partThreeStops.back} reducedMotion={reducedMotion} />
           <StoryPartThreeEnding onReturnToIntro={onReturnToIntro} playCue={playCue} />
+          <PostCreditsScene reducedMotion={reducedMotion} />
         </>
       ) : null}
       {page === "part-one" ? (

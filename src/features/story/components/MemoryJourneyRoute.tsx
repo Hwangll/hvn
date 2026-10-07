@@ -1,59 +1,15 @@
 import type { CSSProperties } from "react";
-import { CakeSlice, CalendarDays, CalendarHeart, CloudSunRain, Coffee, CupSoda, Film, Fish, Flower2, Gift, Guitar, HeartHandshake, Landmark, Mic, Moon, NotebookPen, Smartphone, Stethoscope, Sunset, Utensils } from "lucide-react";
-import type { StoryScrollItem, StoryThreadState } from "../data/story";
+import type { StoryScrollItem } from "../data/story";
 import { jumpToStoryTarget } from "../utils/jumpToStoryTarget";
+import { RouteCar, RouteSpeedometer } from "./film/RouteDashboard";
+import { stopDay } from "./film/slateShots";
+import { routeIcons, routeLabels } from "./routeStops";
 
 interface MemoryJourneyRouteProps {
   activeId: string;
   items: StoryScrollItem[];
   visitedStoryIds?: ReadonlySet<string>;
 }
-
-const routeLabels: Partial<Record<StoryThreadState, string>> = {
-  "in-person": "Đi lượn",
-  dating: "Mixue",
-  aquarium: "Thủy cung",
-  cafe: "Café",
-  sunset: "Hoàng hôn",
-  homestay: "Homestay",
-  apps: "Bi & Bơ",
-  office: "Hoàng Mai",
-  museum: "Lăng Bác",
-  pagoda: "Chùa",
-  rain: "Chiều tà",
-  karaoke: "Đi hát",
-  clinic: "Phòng khám",
-  lakeside: "Văn Quán",
-  notebook: "Tiny cf",
-  acoustic: "Cúc cu",
-  planner: "Lên lịch",
-  lantern: "Trung thu",
-  bento: "Phùng Khoang",
-  birthday: "Sinh nhật",
-};
-
-const routeIcons = {
-  "in-person": HeartHandshake,
-  dating: CalendarHeart,
-  aquarium: Fish,
-  cafe: Coffee,
-  sunset: Sunset,
-  homestay: Film,
-  apps: Smartphone,
-  office: CakeSlice,
-  museum: Landmark,
-  pagoda: Flower2,
-  rain: CloudSunRain,
-  karaoke: Mic,
-  clinic: Stethoscope,
-  lakeside: CupSoda,
-  notebook: NotebookPen,
-  acoustic: Guitar,
-  planner: CalendarDays,
-  lantern: Moon,
-  bento: Utensils,
-  birthday: Gift,
-} as const;
 
 /** Past this many stops the labels no longer fit under their icons; the route then reads like a strip of film. */
 const COMPACT_FROM = 9;
@@ -65,10 +21,14 @@ export function MemoryJourneyRoute({ activeId, items, visitedStoryIds = new Set(
   // heading, with its chapter.
   const compact = items.length >= COMPACT_FROM;
   const active = items[activeIndex];
+  // Part III ("Quá nhanh, quá nguy hiểm") drives its route: the red car on a road under the stops, and a speedometer.
+  const driven = items[0]?.partId === "too-fast";
+  // The birthday, the last stop: the needle in the red, the car at full tilt.
+  const redline = driven && activeIndex === items.length - 1;
 
   return (
     <nav
-      className={`memory-journey-route ${compact ? "is-compact" : ""}`.trim()}
+      className={`memory-journey-route ${compact ? "is-compact" : ""} ${driven ? "is-driven" : ""} ${redline ? "is-redline" : ""}`.replace(/\s+/g, " ").trim()}
       aria-label="Hành trình ngoài đời"
       style={{ "--route-progress": progress, "--route-stops": items.length } as CSSProperties}
     >
@@ -80,8 +40,9 @@ export function MemoryJourneyRoute({ activeId, items, visitedStoryIds = new Set(
         </span>
         <strong>{String(activeIndex + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}</strong>
       </div>
+      {driven && active ? <RouteSpeedometer redline={redline} date={stopDay(active)} /> : null}
       <div className="memory-route-track">
-        <span className="memory-route-traveler" aria-hidden="true"><i /></span>
+        {driven ? <><i className="memory-route-road" aria-hidden="true" /><RouteCar /></> : <span className="memory-route-traveler" aria-hidden="true"><i /></span>}
         <ol>
         {items.map((item, index) => {
           const Icon = routeIcons[item.threadState as keyof typeof routeIcons];

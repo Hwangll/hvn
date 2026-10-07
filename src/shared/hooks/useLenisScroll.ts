@@ -16,6 +16,15 @@ export function scrollStoryTo(target: HTMLElement) {
 }
 
 /**
+ * Holds the page still while something lies over it (Part III's map), and lets it go again. Wheel and touch inside an
+ * element marked `data-lenis-prevent` still scroll that element.
+ */
+export function holdStoryScroll(hold: boolean) {
+  if (hold) activeScroller?.stop();
+  else activeScroller?.start();
+}
+
+/**
  * Smooth wheel scrolling for the whole story, including Part II.
  *
  * Lenis and ScrollTrigger have to share one clock or the scene motion trails the page: Lenis is stepped

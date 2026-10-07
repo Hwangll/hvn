@@ -61,6 +61,10 @@ try {
   await page.waitForTimeout(400);
   assert.equal(await page.locator('.part-three-atmosphere').evaluate((el) => getComputedStyle(el).position), 'fixed');
   assert.equal(await page.locator('body').evaluate((el) => el.classList.contains('is-scroll-locked')), false);
+  // It opens like a film (lights down, a countdown, a rating card), and the skip button ends it.
+  assert.equal(await page.locator('.film-leader').count(), 1);
+  await page.getByRole('button', { name: 'Bỏ qua phần mở màn' }).click();
+  await page.locator('.film-leader').waitFor({ state: 'detached' });
   assert.equal(await page.locator('[data-offline-panel]').count(), 15);
   // Part III is its own page: none of Part II's chapters, and no keepsake box before its credits.
   assert.equal(await page.locator('#in-person-meeting').count(), 0);
@@ -91,6 +95,29 @@ try {
   assert.match(await page.locator('.memory-route-heading').innerText(), /CHƯƠNG 06\s*·\s*SINH NHẬT\s*15 \/ 15/i);
   assert.equal(await page.locator('[data-offline-panel="hoang-birthday"] .p3-lilies .lily-sprite').count(), 3);
   assert.equal(await page.locator('[data-offline-panel="hoang-birthday"] .p3-his-letter b').innerText(), 'Tadaaaa');
+  // The route drives into the red at the birthday; blowing the candles out opens the page she left for him.
+  assert.equal(await page.locator('.memory-journey-route .route-speedometer').evaluate((el) => el.classList.contains('is-redline')), true);
+  const letterFold = page.locator('[data-offline-panel="hoang-birthday"] .p3-letter-fold');
+  // The letter is tilted, so its layout height is read rather than its bounding box.
+  assert.equal(await letterFold.evaluate((el) => el.offsetHeight), 0);
+  await page.locator('[data-offline-panel="hoang-birthday"] .moment-button').click();
+  await expect.poll(() => letterFold.evaluate((el) => el.offsetHeight)).toBeGreaterThan(10);
+  assert.equal(await page.locator('[data-offline-panel="hoang-birthday"] .p3-flames i').first().evaluate((el) => getComputedStyle(el).visibility), 'hidden');
+  // One go on the claw machine at Playik: the machine up close, the claw let go, and it brings up Bơ.
+  await jump('mid-autumn', 120);
+  await settledPanel('mid-autumn');
+  await page.locator('[data-offline-panel="mid-autumn"] .moment-button').click();
+  await page.getByRole('group', { name: 'Máy gắp thú ở Playik' }).getByRole('button', { name: 'Thả gắp!' }).click();
+  await page.locator('[data-offline-panel="mid-autumn"] .moment-prize').waitFor({ timeout: 10000 });
+  assert.equal(await page.locator('[data-offline-panel="mid-autumn"] .moment-button').innerText(), 'Gắp được Bơ rồi!');
+  // The map in its pocket: thirteen places, and a place leads back to its stop.
+  await page.locator('.map-pocket').click();
+  const map = page.getByRole('dialog', { name: '13 nơi mình đã đi' });
+  await map.waitFor();
+  assert.equal(await map.locator('.autumn-map-list button').count(), 13);
+  await map.getByRole('button', { name: /^Lăng Bác/ }).click();
+  await settledPanel('lang-bac');
+  assert.equal(await page.locator('dialog.autumn-map[open]').count(), 0);
 
   // Handing one stop to the next never dips into an empty stage, and a photo stays the anchor.
   await jump('hoang-mai-afternoon');
@@ -113,10 +140,14 @@ try {
   // The credits close the curtains, and the next chapter waits in its envelope.
   await page.locator('.part-three-ending').scrollIntoViewIfNeeded();
   await page.waitForFunction(() => document.querySelector('.part-three-ending')?.classList.contains('is-revealed'));
-  await page.getByText('Mở vào ngày 20/12/2026', { exact: true }).waitFor();
+  await page.getByText('Mở vào ngày 01/01/2027', { exact: true }).waitFor();
   assert.equal(await page.getByRole('link', { name: 'Về Phần II' }).getAttribute('href'), '/part-2/');
   assert.equal(await page.getByRole('link', { name: 'Xem lại từ đầu' }).getAttribute('href'), '/');
   await noSideScroll();
+  // And for whoever stays in the dark after the credits, a scene.
+  await page.locator('.post-credits-film').evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 60, behavior: 'instant' }));
+  await page.waitForFunction(() => document.querySelector('.post-credits-film')?.classList.contains('is-playing'));
+  await page.locator('.post-credits-replay').waitFor({ timeout: 16000 });
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForSelector('.mobile-chapter-journey');
@@ -151,7 +182,7 @@ try {
   await next.scrollIntoViewIfNeeded();
   assert.equal(await next.getAttribute('href'), '/part-3/');
   assert.deepEqual(errors, []);
-  console.log('PASS: Part III desktop stops (15), love counter, slide-change photos, the birthday stop, handoffs, route jumps, credits and envelope, mobile 390/320px, reduced motion, Part II link, no runtime errors.');
+  console.log('PASS: Part III opening leader, desktop stops (15), love counter, slide-change photos, the birthday stop and its candles, the claw machine, the map, handoffs, route jumps, credits, envelope and the post-credits scene, mobile 390/320px, reduced motion, Part II link, no runtime errors.');
 } finally {
   await browser.close();
 }

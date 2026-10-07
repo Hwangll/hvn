@@ -81,7 +81,7 @@ describe("separate story pages", () => {
     expect(within(navigation).getByRole("link", { name: /^Phần IIIQuá nhanh/ })).toHaveAttribute("href", "#part-too-fast");
 
     expect(screen.getByRole("heading", { name: "Còn tiếp..." })).toBeInTheDocument();
-    expect(screen.getByText("Mở vào ngày 20/12/2026")).toBeInTheDocument();
+    expect(screen.getByText("Mở vào ngày 01/01/2027")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Về Phần II" })).toHaveAttribute("href", "/part-2/");
     expect(screen.getByRole("link", { name: "Xem lại từ đầu" })).toHaveAttribute("href", "/");
   });

@@ -15,5 +15,6 @@ import "./styles/part-two-depth.css?page=three";
 import "./styles/scroll-life.css?page=three";
 import "./styles/story-part-three.css?page=three";
 import "./styles/story-part-three-autumn.css?page=three";
+import "./styles/story-part-three-film.css?page=three";
 
 mountStory();

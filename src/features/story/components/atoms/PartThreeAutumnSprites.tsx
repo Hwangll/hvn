@@ -1185,10 +1185,9 @@ export function ClawMachineSprite({ className = "", ...rest }: SpriteProps) {
       <rect className="claw-marquee" x="8" y="6" width="64" height="14" rx="3" />
       <text className="claw-name" x="40" y="16.4" textAnchor="middle">PLAYIK</text>
       <rect className="claw-glass" fill={url(id("glass"))} x="10" y="24" width="60" height="56" rx="2" />
-      <path className="claw-arm" d="M40 24 V44 M34 50 L40 44 L46 50 M34 50 L32 56 M46 50 L48 56" />
       {[
         [24, 72, 7, "is-pink"],
-        [38, 74, 6, "is-gold"],
+        [38, 74, 6, "is-gold is-prize"],
         [54, 72, 7, "is-blue"],
         [46, 66, 5, "is-pink"],
       ].map(([cx, cy, r, tone]) => (
@@ -1197,6 +1196,18 @@ export function ClawMachineSprite({ className = "", ...rest }: SpriteProps) {
           <circle className="claw-plush-sheen" fill={url(id("plush"))} cx={cx} cy={cy} r={r} />
         </g>
       ))}
+      {/* The claw on its cable, in parts so a game can be played with it (SceneMoment): the rig runs along the top, the
+          cable pays out, the head comes down, its prongs close on the gold one and carry it to the chute. */}
+      <g className="claw-rig">
+        <path className="claw-arm claw-cable" d="M40 24 V44" />
+        <g className="claw-head">
+          <g className="claw-plush is-gold claw-catch">
+            <circle className="claw-plush-body" cx="40" cy="57" r="6" />
+            <circle className="claw-plush-sheen" fill={url(id("plush"))} cx="40" cy="57" r="6" />
+          </g>
+          <path className="claw-arm claw-prongs" d="M34 50 L40 44 L46 50 M34 50 L32 56 M46 50 L48 56" />
+        </g>
+      </g>
       <path className="claw-reflection" fill={url(id("gloss"))} d="M13 26 H30 L18 78 H13 Z" />
       <rect className="claw-panel" x="10" y="84" width="60" height="18" rx="2" />
       <circle className="claw-button-glow" cx="52" cy="93" r="7" />
