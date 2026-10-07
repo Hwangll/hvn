@@ -89,7 +89,8 @@ export function mountKeepsakeScene(
     return () => window.clearTimeout(unsupportedTimer);
   }
   // Phones render at 1.5x at most: the box shares the frame budget with the scroll engine.
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.matchMedia("(max-width: 900px)").matches ? 1.5 : 2));
+  const phone = window.matchMedia("(max-width: 900px)").matches;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, phone ? 1.5 : 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.08;
@@ -181,7 +182,22 @@ export function mountKeepsakeScene(
   // one or two unlocked pieces stood crowded at the left edge, half cut off. The whole arrangement glides along the
   // table so what is unlocked sits in the middle, and settles back to the authored layout once a row is complete.
   let arrangementShift = Number.NaN;
+  // While a phone's page is being scrolled past the box, it draws every other frame: its own motion is a slow bob that
+  // reads the same at half the rate, and the frame it gives back goes to the scroll. Taps only come once it is still.
+  let scrolledAt = Number.NEGATIVE_INFINITY;
+  let skipped = false;
+  const onScroll = () => {
+    scrolledAt = performance.now();
+  };
+  if (phone) window.addEventListener("scroll", onScroll, { passive: true });
   const animate = (time: number) => {
+    if (phone && time - scrolledAt < 160) {
+      skipped = !skipped;
+      if (skipped) {
+        if (running) frameId = window.requestAnimationFrame(animate);
+        return;
+      }
+    }
     const elapsed = time * 0.001;
     let left = Infinity;
     let right = -Infinity;
@@ -242,17 +258,28 @@ export function mountKeepsakeScene(
   };
 
   // The loop only runs while the box is near the viewport and the tab is visible; an offscreen
-  // WebGL loop would otherwise starve the scroll engine on phones.
+  // WebGL loop would otherwise starve the scroll engine on phones. Its first frame also waits for the shaders, compiled
+  // ahead of it off the main thread where the browser can: drawn cold, that frame stalled the scroll for a few frames
+  // just as the box came into view.
   let running = false;
+  let wanted = false;
+  let compiled = false;
   const start = () => {
-    if (running) return;
+    wanted = true;
+    if (running || !compiled) return;
     running = true;
     frameId = window.requestAnimationFrame(animate);
   };
   const stop = () => {
+    wanted = false;
     running = false;
     window.cancelAnimationFrame(frameId);
   };
+  const compiling = typeof renderer.compileAsync === "function" ? renderer.compileAsync(scene, camera) : Promise.resolve();
+  void compiling.catch(() => undefined).then(() => {
+    compiled = true;
+    if (wanted) start();
+  });
   const nearViewport = typeof IntersectionObserver === "undefined"
     ? null
     : new IntersectionObserver((entries) => (entries.some((entry) => entry.isIntersecting) ? start() : stop()), { rootMargin: "25% 0px" });
@@ -274,6 +301,7 @@ export function mountKeepsakeScene(
     stop();
     nearViewport?.disconnect();
     document.removeEventListener("visibilitychange", onVisibilityChange);
+    window.removeEventListener("scroll", onScroll);
     window.clearTimeout(unsupportedTimer);
     resizeObserver.disconnect();
     renderer.domElement.removeEventListener("pointermove", onPointerMove);

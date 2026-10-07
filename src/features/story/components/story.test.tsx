@@ -146,9 +146,20 @@ describe("Story scrollytelling rebuild", () => {
       <StoryScrollytelling parts={storyParts} reducedMotion soundEnabled={false} />,
     );
 
-    expect(screen.getAllByTestId("mobile-chapter-journey")).toHaveLength(2);
+    expect(screen.getAllByTestId("mobile-chapter-journey")).toHaveLength(storyParts.length);
     expect(container.querySelector(".story-scrollytelling-desktop")).not.toBeInTheDocument();
     expect(container.querySelector(".sticky-memory-stage")).not.toBeInTheDocument();
+  });
+
+  it("keeps the punctuation after a highlighted phrase in the box of its last word", () => {
+    const chapter = storyScrollItems.find((item) => item.id === "chua-mot-cot")!;
+    const { container } = render(<StoryStep chapter={chapter} index={0} isActive soundEnabled={false} />);
+
+    const mark = container.querySelector(".story-ink-mark") as HTMLElement;
+    const words = mark.querySelectorAll(".story-word");
+    expect(words[words.length - 1]).toHaveTextContent(/^nguyện,$/);
+    expect(mark.style.getPropertyValue("--ink-tail")).toBe("0.3em");
+    expect(mark.parentElement).toHaveTextContent("và cùng ước nguyện, toàn là những lần đầu");
   });
 
   it("reveals secret notes from story steps", async () => {

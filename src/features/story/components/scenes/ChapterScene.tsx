@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { StoryScrollItem } from "../../data/story";
 import { ConnectionThread } from "../ConnectionThread";
 import { DisconnectedScene } from "./DisconnectedScene";
@@ -6,6 +7,7 @@ import { ParallelScene } from "./ParallelScene";
 import { ReconnectingScene } from "./ReconnectingScene";
 import { StayingScene } from "./StayingScene";
 import { TogetherScene } from "./TogetherScene";
+import { PartThreeScene } from "./PartThreeScene";
 
 interface ChapterSceneProps {
   chapter: StoryScrollItem;
@@ -13,7 +15,7 @@ interface ChapterSceneProps {
   reducedMotion: boolean;
 }
 
-export function ChapterScene({ chapter, isActive, reducedMotion }: ChapterSceneProps) {
+export const ChapterScene = memo(function ChapterScene({ chapter, isActive, reducedMotion }: ChapterSceneProps) {
   const renderScene = () => {
     switch (chapter.threadState) {
       case "meeting":
@@ -32,6 +34,22 @@ export function ChapterScene({ chapter, isActive, reducedMotion }: ChapterSceneP
       case "cafe":
       case "sunset":
         return <TogetherScene chapter={chapter} isActive={isActive} />;
+      case "homestay":
+      case "apps":
+      case "office":
+      case "museum":
+      case "pagoda":
+      case "rain":
+      case "karaoke":
+      case "clinic":
+      case "lakeside":
+      case "notebook":
+      case "acoustic":
+      case "planner":
+      case "lantern":
+      case "bento":
+      case "birthday":
+        return <PartThreeScene chapter={chapter} isActive={isActive} />;
       default:
         return null;
     }
@@ -47,4 +65,4 @@ export function ChapterScene({ chapter, isActive, reducedMotion }: ChapterSceneP
       {renderScene()}
     </div>
   );
-}
+});

@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { memo, type CSSProperties } from "react";
 import { Cloud, Floret, Lantern } from "./StoryArt";
 
 /**
@@ -149,7 +149,7 @@ function place({ top, left, right, size, tilt = 0 }: Piece, unit: "px" | "vw", e
   return style as CSSProperties;
 }
 
-export function PartTwoDepth() {
+export const PartTwoDepth = memo(function PartTwoDepth() {
   return (
     <>
       <div className="depth-field" aria-hidden="true">
@@ -237,4 +237,4 @@ export function PartTwoDepth() {
       </div>
     </>
   );
-}
+});

@@ -2,22 +2,31 @@ import * as THREE from "three";
 import { disposePlantMaterial } from "../three/bouquet/plantMaterial";
 import { finish, type BuildSteps } from "./flowers/common";
 import { buildHydrangeaBouquet } from "./flowers/hydrangea";
+import { buildLilyBouquet } from "./flowers/lily";
 import { buildSunflowerBouquet } from "./flowers/sunflower";
-import { IVORY_WRAP, KRAFT_WRAP, buildWrap } from "./flowers/wrap";
+import { CHAMPAGNE_WRAP, IVORY_WRAP, KRAFT_WRAP, buildWrap, type WrapPalette } from "./flowers/wrap";
 
-export type IntroFlowerVariant = "sunflower" | "hydrangea";
+/** One keepsake for each part of the story: sunflowers for Phần I, hydrangeas for Phần II, red lilies for Phần III. */
+export type IntroFlowerVariant = "sunflower" | "hydrangea" | "lily";
+
+/** How each keepsake is made: its flowers, and the paper they are wrapped in. */
+const recipes: Record<IntroFlowerVariant, { build: (bouquet: THREE.Group) => BuildSteps; wrap: WrapPalette }> = {
+  sunflower: { build: buildSunflowerBouquet, wrap: KRAFT_WRAP },
+  hydrangea: { build: buildHydrangeaBouquet, wrap: IVORY_WRAP },
+  lily: { build: buildLilyBouquet, wrap: CHAMPAGNE_WRAP },
+};
 
 /**
  * One specimen, a slice at a time: the bouquet group (the part that sways and turns) inside a root the stage places on
- * its plinth. The stage builds the bouquet not on show this way, in the gaps between frames.
+ * its plinth. The stage builds the bouquets not on show this way, in the gaps between frames.
  */
 export function* introFlowerSteps(variant: IntroFlowerVariant): BuildSteps<THREE.Group> {
   const root = new THREE.Group();
   root.name = `intro-${variant}`;
   const bouquet = new THREE.Group();
   bouquet.name = "bouquet";
-  yield* variant === "sunflower" ? buildSunflowerBouquet(bouquet) : buildHydrangeaBouquet(bouquet);
-  yield* buildWrap(bouquet, variant === "sunflower" ? KRAFT_WRAP : IVORY_WRAP);
+  yield* recipes[variant].build(bouquet);
+  yield* buildWrap(bouquet, recipes[variant].wrap);
   root.add(bouquet);
   return root;
 }

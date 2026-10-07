@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { StoryPart, StoryPartId, StoryScrollItem } from "../data/story";
-import { createStoryScrollItems } from "../data/story";
+import { createStoryScrollItems, partClassNames } from "../data/story";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import { useActiveStoryStep } from "../hooks/useActiveStoryStep";
 import { useMediaQuery } from "../../../shared/hooks/useMediaQuery";
@@ -80,7 +80,7 @@ export function StoryScrollytelling({
   }, [activeItem, onActiveItemChange]);
 
   return (
-    <div className="story-sequence" id="story" ref={scope} aria-label="Hai phần của câu chuyện">
+    <div className="story-sequence" id="story" ref={scope} aria-label="Các phần của câu chuyện">
       <StoryPartNavigation
         activePartId={navigationPartId}
         currentPagePartId={parts[0]?.id ?? "before-meeting"}
@@ -94,7 +94,7 @@ export function StoryScrollytelling({
         const partActiveItem = partItems[activePartIndex] ?? partItems[0];
 
         return (
-          <div className={`story-part story-part-${part.number}`} key={part.id}>
+          <div className={`story-part ${partClassNames[part.id]}`} key={part.id}>
             {partIndex === 0 && !startWithTransition ? (
               <header className="story-part-heading" id={`part-${part.id}`} data-memory-reveal>
                 <span>{part.eyebrow}</span>
@@ -107,7 +107,7 @@ export function StoryScrollytelling({
             )}
 
             <section className="story-scrollytelling" aria-label={`${part.eyebrow}: ${part.title}`} data-idle-zone>
-              {isMobile || (reducedMotion && part.id === "together-offline") ? (
+              {isMobile || (reducedMotion && part.number > 1) ? (
                 <MobileChapterJourney
                   items={partItems}
                   activeId={activeId}

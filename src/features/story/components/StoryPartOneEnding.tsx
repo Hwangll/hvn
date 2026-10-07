@@ -1,10 +1,11 @@
+import { memo } from "react";
 import { ArrowRight } from "lucide-react";
 import { partOneEndingCopy } from "../data/story";
 import { BlurText } from "../../../shared/components/motion/BlurText";
 import { BlossomSprig } from "../../../shared/components/visuals/BlossomSprig";
 import { PolaroidPhoto } from "../../../shared/components/visuals/PolaroidPhoto";
 
-export function StoryPartOneEnding() {
+export const StoryPartOneEnding = memo(function StoryPartOneEnding() {
   return (
     <section className="story-ending part-one-ending" aria-labelledby="part-one-ending-title" data-idle-zone>
       <div className="ending-copy" data-memory-reveal>
@@ -27,4 +28,4 @@ export function StoryPartOneEnding() {
       />
     </section>
   );
-}
+});

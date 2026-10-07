@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { describe, expect, it, vi } from "vitest";
 import { createIntroFlower, disposeIntroFlower, type IntroFlowerVariant } from "./introFlowers";
 
-describe.each<IntroFlowerVariant>(["sunflower", "hydrangea"])("%s cabinet specimen", (variant) => {
+describe.each<IntroFlowerVariant>(["sunflower", "hydrangea", "lily"])("%s cabinet specimen", (variant) => {
   it("fits the cabinet, with the bouquet as the one group that sways and turns", () => {
     const root = createIntroFlower(variant);
     const bouquet = root.getObjectByName("bouquet")!;
@@ -98,6 +98,60 @@ describe("sunflower bouquet", () => {
     });
     expect(drawables.length).toBeLessThanOrEqual(16);
     for (const name of ["sunflower-discs", "sunflower-bracts", "sunflower-leaves", "sunflower-stems", "babys-breath", "wrap-front", "wrap-collar", "wrap-bow", "wrap-tag"]) {
+      expect(root.getObjectByName(name), name).toBeDefined();
+    }
+    disposeIntroFlower(root);
+  });
+});
+
+describe("lily bouquet", () => {
+  it("opens six-tepalled blooms that each sway as one while their tepals shiver on their own", () => {
+    const root = createIntroFlower("lily");
+    const tepals = root.getObjectByName("lily-tepals") as THREE.Mesh;
+    const anchor = tepals.geometry.getAttribute("plantAnchor");
+    const blooms = new Map<string, Set<number>>();
+    for (let index = 0; index < anchor.count; index += 1) {
+      const bloom = [anchor.getX(index), anchor.getY(index), anchor.getZ(index)].map((value) => value.toFixed(3)).join(",");
+      if (!blooms.has(bloom)) blooms.set(bloom, new Set());
+      blooms.get(bloom)!.add(anchor.getW(index));
+    }
+    expect(blooms.size).toBeGreaterThanOrEqual(5);
+    expect(blooms.size).toBeLessThanOrEqual(7);
+    for (const seeds of blooms.values()) expect(seeds.size).toBe(6);
+    expect((tepals.material as THREE.MeshPhysicalMaterial).defines).toMatchObject({ USE_PLANT_ANCHOR: "", PLANT_RIGID: "" });
+    // Six anthers and a three-lobed stigma to every bloom, instanced, each carried by its bloom's anchor.
+    const tips = root.getObjectByName("lily-anthers") as THREE.InstancedMesh;
+    expect(tips.count).toBe(blooms.size * 9);
+    expect(tips.geometry.getAttribute("plantAnchor")).toBeInstanceOf(THREE.InstancedBufferAttribute);
+    disposeIntroFlower(root);
+  });
+
+  it("colours every tepal red past its warmer throat: never orange, never pink", () => {
+    const root = createIntroFlower("lily");
+    const tepals = root.getObjectByName("lily-tepals") as THREE.Mesh;
+    const color = tepals.geometry.getAttribute("color");
+    const uv = tepals.geometry.getAttribute("uv");
+    let checked = 0;
+    for (let index = 0; index < color.count; index += 1) {
+      if (uv.getY(index) < 0.4) continue;
+      const [r, g, b] = [color.getX(index), color.getY(index), color.getZ(index)];
+      // Green stays under blue (crimson, not orange) and the red is nearly pure (not pink).
+      expect(b).toBeGreaterThan(g);
+      expect((r - b) / r).toBeGreaterThan(0.85);
+      checked += 1;
+    }
+    expect(checked).toBeGreaterThan(1000);
+    disposeIntroFlower(root);
+  });
+
+  it("merges blooms, buds, foliage and wrap into a handful of draw calls", () => {
+    const root = createIntroFlower("lily");
+    const drawables: THREE.Object3D[] = [];
+    root.traverse((child) => {
+      if (child instanceof THREE.Mesh || child instanceof THREE.Line) drawables.push(child);
+    });
+    expect(drawables.length).toBeLessThanOrEqual(16);
+    for (const name of ["lily-tepals", "lily-stamens", "lily-anthers", "lily-buds", "lily-leaves", "lily-stems", "wrap-front", "wrap-collar", "wrap-bow", "wrap-tag"]) {
       expect(root.getObjectByName(name), name).toBeDefined();
     }
     disposeIntroFlower(root);

@@ -146,6 +146,8 @@
   .story-page-part-one .sky-cloud:nth-child(n + 2) { display: none; }
   .story-page-part-one .sky-cloud { scale: 0.65; transform-origin: 0 0; filter: none; }
   .story-page-part-one .sky-birds .flock:nth-child(n + 2) { display: none; }
+  /* The ribbons' radial gradients are soft enough on their own; a 48px blur over each was a full pass every frame. */
+  .story-page-part-one .blush-aurora { filter: none; opacity: 0.5; }
 }
 @media (max-width: 1100px) {
   main.story-experience.story-page-part-one > .depth-front { display: none; }
@@ -181,6 +183,15 @@
   .story-page-part-one .sky-rays { animation: rays-turn 150s linear infinite; }
 }
 
+/* Phones keep the motion that reads at a glance (the sky's clouds and birds crossing, the clouds and the butterfly
+   weaving between the photos) and let the small loops rest: on this page they add up, each kept a layer of its own,
+   and the billowing clouds were redrawn puff by puff. The sun only sinks with the scroll (below). */
+@media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .story-page-part-one :is(.depth-butterfly, .depth-sprig, .depth-blossom.is-turning, .depth-cloud, .sky-sun, .sky-rays) { animation: none; }
+  .story-page-part-one .is-billowing :is(.art-cloud-body, .art-cloud-shade) > * { animation: none; }
+  .story-page-part-one .sky-cloud { animation: cloud-cross var(--loop) linear var(--offset) infinite; }
+}
+
 /* ---------- Motion that follows the scroll ---------- */
 .story-page-part-one .sky-clouds-far { --sky: -8vh; }
 .story-page-part-one .sky-clouds-mid { --sky: -18vh; }
@@ -210,6 +221,9 @@
     }
     .story-page-part-one .blush-aurora-one { --sky: -26vh; }
     .story-page-part-one .blush-aurora-two { --sky: 18vh; animation-duration: 34s, auto; animation-delay: -14s, 0s; }
+  }
+  @media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+    .story-page-part-one :is(.sky-sun, .sky-rays) { animation: sky-path linear both; animation-timeline: scroll(root); }
   }
 }
 

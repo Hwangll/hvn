@@ -818,12 +818,15 @@
   font-weight: 850;
 }
 
+/* A strip that scrolls sideways only: left to overflow-y: auto, the tilted thumbs give it a few pixels to scroll down,
+   and an upward swipe that starts on it moves the strip instead of the page. */
 .photo-filmstrip {
   display: grid;
   grid-auto-columns: minmax(8rem, 44%);
   grid-auto-flow: column;
   gap: var(--space-sm);
-  overflow-x: auto;
+  overflow: auto hidden;
+  overscroll-behavior-x: contain;
   padding: 0.3rem 0.2rem 0.7rem;
   scroll-snap-type: x proximity;
 }
@@ -1035,6 +1038,12 @@
     opacity: 0.9;
   }
 
+  /* The scroll already draws a scene's thread a frame at a time (usePartTwoScroll); easing each of those steps again
+     kept the thread repainting for most of a second after every one. */
+  .mobile-scene-canvas .thread-path {
+    transition: opacity 0.45s var(--ease-out);
+  }
+
   .story-step-layout,
   .story-step.zigzag-right .story-step-layout {
     grid-template-columns: 1fr;
@@ -1079,7 +1088,7 @@
     transition-duration: 0.01ms !important;
   }
 
-  .memory-scene *,
+  .memory-scene *:not(svg *),
   .parallel-scene.is-active .lane-node,
   .parallel-scene.is-active .sync-node-a,
   .parallel-scene.is-active .sync-node-b,
@@ -1088,6 +1097,12 @@
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  /* Inside a drawing, shapes keep the transforms and opacities they are drawn with (flags strung along a line, a
+     lily's six tepals turned round its middle); only their motion stops. */
+  .memory-scene svg * {
+    animation: none !important;
   }
 
   .meeting-scene.is-active .meeting-photo,

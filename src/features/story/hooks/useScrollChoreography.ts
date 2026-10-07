@@ -34,8 +34,11 @@ function centreOf(element: Element): [number, number] {
  *
  * Everything moves `transform`, `opacity` or a filter that is dropped once settled; where another system already owns
  * an element's transform (CSS animations, the pointer's tilt), the move goes through registered custom properties read
- * by the individual `rotate`/`scale`/`translate` properties instead (scroll-life.css). Readers who prefer reduced motion
- * get none of it, and the GSAP context puts every inline style back when the layout or the preference changes.
+ * by the individual `rotate`/`scale`/`translate` properties instead (scroll-life.css). A phone gets the same entrances
+ * kept flat: the title rises word by word, the keepsake photos turn upright as they rise without developing, and the
+ * box comes up without tipping, so nothing is turned in 3D or refiltered on every frame of a touch scroll. Readers who
+ * prefer reduced motion get none of it, and the GSAP context puts every inline style back when the layout or the
+ * preference changes.
  */
 export function useScrollChoreography(scope: RefObject<HTMLElement | null>, page: StoryPage, mobile: boolean, reducedMotion: boolean) {
   useGSAP(() => {
@@ -83,7 +86,12 @@ export function useScrollChoreography(scope: RefObject<HTMLElement | null>, page
     /* ---------- Part I's title: letters flip up one by one, then the chapters slide in ---------- */
     all(".story-part-heading").forEach((heading) => {
       const letters = all(".heading-letter", heading);
-      if (letters.length) {
+      const words = all(".heading-word", heading);
+      if (mobile && words.length) {
+        // On a phone the words rise whole: turning each letter in 3D gave every letter a layer of its own.
+        gsap.fromTo(words, { yPercent: 60, opacity: 0 }, { yPercent: 0, opacity: 1, ease: "power3.out", stagger: 0.14,
+          scrollTrigger: { trigger: heading, start: "top 88%", end: "top 46%", scrub: true } });
+      } else if (letters.length) {
         gsap.fromTo(letters,
           { yPercent: 110, rotationX: -80, opacity: 0, transformPerspective: 520, transformOrigin: "50% 100%" },
           { yPercent: 0, rotationX: 0, opacity: 1, ease: "power3.out", stagger: 0.045,
@@ -110,6 +118,12 @@ export function useScrollChoreography(scope: RefObject<HTMLElement | null>, page
       const image = photo.querySelector<HTMLElement>("img");
       const lean = photo.classList.contains("tilt-right") ? 1 : -1;
       const rest = Number(gsap.getProperty(photo, "rotation")) || 0;
+      if (mobile) {
+        // On a phone it only turns upright as it rises: no swing in 3D, no sheet of light, no developing.
+        gsap.fromTo(photo, { rotation: rest + lean * 7, yPercent: 18, scale: 0.9 }, { rotation: rest, yPercent: 0, scale: 1, ease: "power2.out",
+          scrollTrigger: { trigger: photo, start: "top 98%", end: "top 58%", scrub: true } });
+        return;
+      }
       const film = { developed: 0 };
       const arrive = gsap.timeline({ scrollTrigger: { trigger: photo, start: "top 98%", end: "top 46%", scrub: true } });
       arrive.fromTo(photo,
@@ -126,9 +140,11 @@ export function useScrollChoreography(scope: RefObject<HTMLElement | null>, page
     const stage = root.querySelector<HTMLElement>(".keepsake-stage");
     const box = stage?.querySelector<HTMLElement>(".keepsake-canvas");
     if (stage && box) {
-      gsap.fromTo(box,
-        { rotationX: 20, yPercent: 9, scale: 0.88, transformPerspective: 1400, transformOrigin: "50% 100%" },
-        { rotationX: 0, yPercent: 0, scale: 1, ease: "power2.out", scrollTrigger: { trigger: stage, start: "top bottom", end: "top 30%", scrub: true } });
+      // On a phone it comes up flat: tipped back it was a 3D layer the size of the screen the whole way in.
+      const [from, to] = mobile
+        ? [{ yPercent: 6, scale: 0.94 }, { yPercent: 0, scale: 1 }]
+        : [{ rotationX: 20, yPercent: 9, scale: 0.88, transformPerspective: 1400, transformOrigin: "50% 100%" }, { rotationX: 0, yPercent: 0, scale: 1 }];
+      gsap.fromTo(box, from, { ...to, ease: "power2.out", scrollTrigger: { trigger: stage, start: "top bottom", end: "top 30%", scrub: true } });
     }
     const controls = root.querySelector<HTMLElement>(".keepsake-controls");
     if (controls) {

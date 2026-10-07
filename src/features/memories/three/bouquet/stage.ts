@@ -8,13 +8,16 @@ import { StudioLights, createStudioEnvironment, type LightPresetName } from "./l
 import { plantWind } from "./plantMaterial";
 import { BouquetPost } from "./postprocessing";
 
-const PRESET: Record<IntroFlowerVariant, LightPresetName> = { sunflower: "golden", hydrangea: "moonlight" };
-/** The plinths stand far enough apart that only one is ever in frame at rest; switching is a dolly between them. */
-const STATION_X: Record<IntroFlowerVariant, number> = { sunflower: -3.6, hydrangea: 3.6 };
-/** Lacquered dark stone with a fine metal inlay: brass under the sunflowers, silver under the hydrangeas. */
+const PRESET: Record<IntroFlowerVariant, LightPresetName> = { sunflower: "golden", hydrangea: "moonlight", lily: "ember" };
+/** Between neighbouring plinths: far enough apart that only one is ever in frame at rest. */
+const STATION_GAP = 7.2;
+/** The plinths stand in a row in the parts' order; switching is a dolly along it, past any plinth between. */
+const STATION_X: Record<IntroFlowerVariant, number> = { sunflower: -STATION_GAP, hydrangea: 0, lily: STATION_GAP };
+/** Lacquered dark stone with a metal inlay: brass under sunflowers, silver under hydrangeas, rose gold under lilies. */
 const PLINTH: Record<IntroFlowerVariant, { stone: number; inlay: number }> = {
   sunflower: { stone: 0x0d0c0f, inlay: 0xb2925f },
   hydrangea: { stone: 0x0a0f17, inlay: 0x9aa9ba },
+  lily: { stone: 0x140709, inlay: 0xd09a86 },
 };
 /** Bouquet-space height of the plinth's top, where the wrap stands. */
 const PLINTH_TOP = -1.16;
@@ -48,6 +51,8 @@ interface Station {
   bouquet: THREE.Object3D | null;
   shadow: ContactShadow;
   idlePhase: number;
+  /** Its programs are compiled and its textures uploaded, so it can be drawn in passing without a stall. */
+  warmed: boolean;
   disposables: Array<THREE.BufferGeometry | THREE.Material>;
 }
 
@@ -84,7 +89,7 @@ function buildStation(variant: IntroFlowerVariant): Station {
   shadow.group.position.y = PLINTH_TOP + 0.002;
   specimen.add(stone, inlay, shadow.group);
   group.add(specimen);
-  return { variant, group, specimen, root: null, bouquet: null, shadow, idlePhase: 0, disposables: [stoneGeometry, stoneMaterial, inlayGeometry, inlayMaterial] };
+  return { variant, group, specimen, root: null, bouquet: null, shadow, idlePhase: 0, warmed: false, disposables: [stoneGeometry, stoneMaterial, inlayGeometry, inlayMaterial] };
 }
 
 function attachSpecimen(station: Station, root: THREE.Group): void {
@@ -130,9 +135,9 @@ function compileShadowTwins(renderer: THREE.WebGLRenderer, root: THREE.Object3D,
   });
 }
 
-/** Dust hanging in the light: a few dozen soft points spread across both plinths, so a camera move reads as one. */
+/** Dust hanging in the light: a hundred-odd soft points along the row of plinths, so a camera move reads as one. */
 function buildDust(): { points: THREE.Points; speeds: Float32Array; texture: THREE.Texture | null } {
-  const count = 70;
+  const count = 110;
   const positions = new Float32Array(count * 3);
   const speeds = new Float32Array(count);
   for (let index = 0; index < count; index += 1) {
@@ -140,7 +145,7 @@ function buildDust(): { points: THREE.Points; speeds: Float32Array; texture: THR
       const value = Math.sin((index + 1) * 12.9898 + salt * 78.233) * 43758.5453;
       return value - Math.floor(value);
     };
-    positions[index * 3] = -6.5 + random(1) * 13;
+    positions[index * 3] = -STATION_GAP * 1.5 + random(1) * STATION_GAP * 3;
     positions[index * 3 + 1] = -1.1 + random(2) * 3.4;
     positions[index * 3 + 2] = -2.6 + random(3) * 4.4;
     speeds[index] = 0.025 + random(4) * 0.05;
@@ -169,13 +174,15 @@ function buildDust(): { points: THREE.Points; speeds: Float32Array; texture: THR
 }
 
 /**
- * The cabinet both keepsakes stand in: one transparent canvas over the HTML room, both bouquets on their own plinths in
- * one scene, lit for the part on show. Switching parts flies the camera to the other plinth while the light turns from
- * golden hour to moonlight. The visitor can turn and zoom within limits; left alone, the bouquet turns slowly on its own
- * and the view drifts back to its best side. Drawing stops whenever the cabinet is off screen or the tab is hidden.
+ * The cabinet the keepsakes stand in: one transparent canvas over the HTML room, every bouquet on its own plinth in one
+ * scene, lit for the part on show. Switching parts flies the camera along the row to another plinth while the light
+ * turns, from golden hour to moonlight or lantern light. The visitor can turn and zoom within limits; left alone, the
+ * bouquet turns slowly on its own and the view drifts back to its best side. Drawing stops whenever the cabinet is off
+ * screen or the tab is hidden.
  *
- * The bouquet on show is built (or loaded) first and shown as soon as its shaders are ready; the other one follows
- * when the browser is idle, with its shaders compiled and textures uploaded ahead of any flight to it.
+ * The bouquet on show is built (or loaded) first and shown as soon as its shaders are ready; the others follow one
+ * after another, nearest first, when the browser is idle, with their shaders compiled and textures uploaded ahead of
+ * any flight to or past them.
  */
 export function mountBouquetStage(container: HTMLElement, options: BouquetStageOptions): BouquetStage {
   const { reducedMotion } = options;
@@ -194,10 +201,17 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
   scene.environment = environment;
   const camera = new THREE.PerspectiveCamera(31, 1, 0.1, 30);
 
-  const stations: Record<IntroFlowerVariant, Station> = { sunflower: buildStation("sunflower"), hydrangea: buildStation("hydrangea") };
-  Object.values(stations).forEach((station) => scene.add(station.group));
+  const stations: Record<IntroFlowerVariant, Station> = { sunflower: buildStation("sunflower"), hydrangea: buildStation("hydrangea"), lily: buildStation("lily") };
+  const row = Object.values(stations);
+  row.forEach((station) => scene.add(station.group));
   let active = stations[options.variant];
-  let leaving: Station | null = null;
+  // What is drawn: the plinth on show and, while the camera flies, the one it left and any ready along the way.
+  let drawn = new Set<Station>();
+  const show = (next: Set<Station>) => {
+    drawn = next;
+    row.forEach((station) => (station.group.visible = drawn.has(station)));
+  };
+  show(new Set([active]));
   const sources: Record<IntroFlowerVariant, BouquetSource> = { ...bouquetSources, ...options.sources };
 
   const lights = new StudioLights(scene, PRESET[options.variant]);
@@ -247,7 +261,7 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
     camera.updateProjectionMatrix();
     const next = framing(camera.aspect);
     rig.setFraming(next.limits, next.home);
-    Object.values(stations).forEach((station) => station.specimen.scale.setScalar(next.scale));
+    row.forEach((station) => station.specimen.scale.setScalar(next.scale));
     wake();
   }
 
@@ -264,10 +278,7 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
     if (!reducedMotion) plantWind.advance(seconds);
     const wasFlying = rig.flying;
     if (rig.update(seconds)) moving = true;
-    if (wasFlying && !rig.flying && leaving) {
-      leaving.group.visible = false;
-      leaving = null;
-    }
+    if (wasFlying && !rig.flying) show(new Set([active]));
     if (!reducedMotion) {
       // Left alone, the bouquet turns slowly back and forth; a hand on it stops the turn where it is.
       const resting = !rig.dragging && !rig.flying && rig.idleSeconds(now) > 3.5;
@@ -294,10 +305,7 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
     frameCount += 1;
     // Shadows from the breeze need refreshing, but not at full rate: the key's map every other frame, contact every fourth.
     renderer.shadowMap.needsUpdate = frameCount % 2 === 1 || reducedMotion;
-    if (frameCount % 4 === 1 || reducedMotion) {
-      active.shadow.update(renderer, scene);
-      leaving?.shadow.update(renderer, scene);
-    }
+    if (frameCount % 4 === 1 || reducedMotion) drawn.forEach((station) => station.shadow.update(renderer, scene));
     post.focus = camera.position.distanceTo(focusOf(active, focusPoint).setX(rig.target.x));
     post.bloomStrength = lights.bloom;
     post.exposure = lights.exposure;
@@ -440,7 +448,7 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
     });
     return compiling.catch(() => undefined).then(() => new Promise<void>((resolve) => {
       if (disposed) return resolve();
-      station.group.visible = station === active || station === leaving;
+      station.group.visible = drawn.has(station);
       const chores: Array<() => void> = [];
       if (background) {
         // Programs already in use answer at once; only the new ones make the round trip.
@@ -475,15 +483,24 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
   const first = active;
   track(prepare(first.variant).then(() => warm(first, false)).then(() => {
     if (disposed) return;
+    first.warmed = true;
     ready = true;
     last = performance.now();
     render(last);
     options.onReady?.();
     wake();
-    // Once the loader has made way, the other bouquet is built in the background, never more than a slice per frame.
-    const other = first.variant === "sunflower" ? stations.hydrangea : stations.sunflower;
+    // Once the loader has made way, the other bouquets are built in the background one after another, nearest first,
+    // never more than a slice per frame.
+    const others = row.filter((station) => station !== first).sort((a, b) => Math.abs(a.group.position.x - first.group.position.x) - Math.abs(b.group.position.x - first.group.position.x));
     backgroundTimer = window.setTimeout(() => {
-      track(prepare(other.variant, true).then(() => (disposed ? undefined : warm(other, true))));
+      track((async () => {
+        for (const other of others) {
+          await prepare(other.variant, true);
+          if (disposed) return;
+          await warm(other, true);
+          other.warmed = true;
+        }
+      })());
     }, 400);
   }));
 
@@ -491,20 +508,23 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
     setVariant(variant) {
       const next = stations[variant];
       if (next === active || disposed) return;
-      // Asked for before the idle hour came: build it now (a bouquet built in code is there before the next frame).
-      if (!next.root) track(prepare(variant));
-      const previous = active;
+      // Asked for before the idle hour came: build it now (a bouquet built in code is there before the next frame), and
+      // compile it while the camera is on its way.
+      if (!next.root) {
+        track(prepare(variant).then(() => (disposed ? undefined : warm(next, false))).then(() => {
+          next.warmed = true;
+        }));
+      }
       active = next;
-      next.group.visible = true;
       lights.setPreset(PRESET[variant], reducedMotion);
       lights.setFocus(focusOf(next), reducedMotion);
       if (reducedMotion) {
         rig.jumpTo(lookAt(next));
-        previous.group.visible = false;
-        leaving = null;
+        show(new Set([next]));
       } else {
-        leaving = previous;
-        rig.flyTo(lookAt(next));
+        // A plinth further along takes a little longer to reach.
+        rig.flyTo(lookAt(next), 1.2 + 0.6 * (Math.abs(next.group.position.x - rig.target.x) / STATION_GAP));
+        show(new Set([...drawn, next, ...row.filter((station) => station.warmed)]));
       }
       frameCount = 0;
       wake();
@@ -525,7 +545,7 @@ export function mountBouquetStage(container: HTMLElement, options: BouquetStageO
       canvas.remove();
       void work.then(() => {
         post.dispose();
-        Object.values(stations).forEach((station) => {
+        row.forEach((station) => {
           station.shadow.dispose();
           station.disposables.forEach((item) => item.dispose());
           if (station.root) disposeIntroFlower(station.root);

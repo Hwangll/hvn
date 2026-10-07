@@ -1,10 +1,11 @@
+import { memo } from "react";
 import { HeartHandshake, Sparkles } from "lucide-react";
 import { moodSetupPhotos } from "../../story/data/story";
 import { BlurText } from "../../../shared/components/motion/BlurText";
 import { StoryPicture } from "../../../shared/components/visuals/StoryPicture";
 import { Cloud } from "../../story/components/StoryArt";
 
-export function MoodSetup() {
+export const MoodSetup = memo(function MoodSetup() {
   return (
     <section className="mood-setup" aria-labelledby="mood-setup-title">
       <div className="mood-setup-copy" data-memory-reveal>
@@ -36,4 +37,4 @@ export function MoodSetup() {
       </div>
     </section>
   );
-}
+});

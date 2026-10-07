@@ -31,7 +31,16 @@ export function useActiveStoryStep({ stepIds, disabled, layoutKey, onStepEnter }
         onStepEnter?.(nextId);
       });
 
-    const resize = () => scroller.resize();
+    // Photos load in bursts while the reader scrolls; one re-measure on the next frame covers each burst, where one per
+    // photo made the scroller read every step's box again and again in the middle of the scroll.
+    let frame = 0;
+    const resize = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        scroller.resize();
+      });
+    };
     let active = true;
     window.addEventListener("resize", resize);
     document.addEventListener("load", resize, true);
@@ -43,6 +52,7 @@ export function useActiveStoryStep({ stepIds, disabled, layoutKey, onStepEnter }
 
     return () => {
       active = false;
+      window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
       document.removeEventListener("load", resize, true);
       scroller.destroy();

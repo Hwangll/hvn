@@ -1,4 +1,5 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { memo, useRef, type CSSProperties } from "react";
+import { usePointerGlow } from "../hooks/usePointerGlow";
 import { Cloud } from "./StoryArt";
 
 /** Night clouds crossing the first sky, slower the further away; `offset` starts each one part-way across. */
@@ -25,33 +26,10 @@ interface PartTwoAtmosphereProps {
  * drifting across; they fade with it when the chapters move indoors and under water.
  * A soft pointer glow follows the cursor on desktop, like a torch moving across a dark page.
  */
-export function PartTwoAtmosphere({ reducedMotion = false }: PartTwoAtmosphereProps) {
+export const PartTwoAtmosphere = memo(function PartTwoAtmosphere({ reducedMotion = false }: PartTwoAtmosphereProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root || reducedMotion || typeof window === "undefined") return undefined;
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return undefined;
-    let frame = 0;
-    let x = window.innerWidth * 0.5;
-    let y = window.innerHeight * 0.4;
-    const paint = () => {
-      frame = 0;
-      root.style.setProperty("--gx", `${x.toFixed(0)}px`);
-      root.style.setProperty("--gy", `${y.toFixed(0)}px`);
-    };
-    const onMove = (event: PointerEvent) => {
-      x = event.clientX;
-      y = event.clientY;
-      if (!frame) frame = window.requestAnimationFrame(paint);
-    };
-    paint();
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.cancelAnimationFrame(frame);
-    };
-  }, [reducedMotion]);
+  usePointerGlow(rootRef, reducedMotion);
 
   return (
     <div className="part-two-atmosphere" aria-hidden="true" ref={rootRef}>
@@ -116,4 +94,4 @@ export function PartTwoAtmosphere({ reducedMotion = false }: PartTwoAtmospherePr
       <div className="offline-reading-shade" />
     </div>
   );
-}
+});

@@ -1,9 +1,12 @@
 /**
- * The wind of the scroll: petals by day (Part I), glints and hydrangea florets by night (Part II), blowing past the
+ * The wind of the scroll: petals by day (Part I), glints and hydrangea florets by night (Part II), gold glints, red
+ * petals and little hearts in Part III's red room, blowing past the
  * reader while the page moves, more and faster the faster it goes, then drifting and settling once it stops. A page
  * moving down pushes the air up past the reader, so they come in at the edge the page is heading for and stream the
  * other way; the nearer ones (bigger and softer) travel faster than the page and the farther ones slower, so the wind
- * has depth of its own. The endings throw a handful into the air (`burst`).
+ * has depth of its own. The endings throw a handful into the air (`burst`). On a phone the air only stirs when something
+ * is thrown into it: a stream redrawn on every frame of a touch scroll cost the scroll more than it showed on a small
+ * screen.
  *
  * Everything is drawn on one fixed canvas from a few sprites drawn once; there are never more than a few dozen in the
  * air, and the caller stops asking for frames when it is clear.
@@ -11,7 +14,7 @@
 
 import { wakeScrollVelocity } from "../../../shared/motion/scrollVelocity";
 
-export type WindVariant = "day" | "night";
+export type WindVariant = "day" | "night" | "ember";
 
 export interface WindParticle {
   x: number;
@@ -55,11 +58,15 @@ interface Profile {
 const profiles: Record<WindVariant, { desktop: Profile; mobile: Profile }> = {
   day: {
     desktop: { density: 0.022, cap: 96, fall: 44, size: [12, 30], coupling: 0.95 },
-    mobile: { density: 0.011, cap: 32, fall: 38, size: [10, 22], coupling: 0.9 },
+    mobile: { density: 0, cap: 32, fall: 38, size: [10, 22], coupling: 0.9 },
   },
   night: {
     desktop: { density: 0.018, cap: 84, fall: -16, size: [10, 26], coupling: 0.9 },
-    mobile: { density: 0.009, cap: 30, fall: -14, size: [8, 19], coupling: 0.85 },
+    mobile: { density: 0, cap: 30, fall: -14, size: [8, 19], coupling: 0.85 },
+  },
+  ember: {
+    desktop: { density: 0.018, cap: 84, fall: 22, size: [10, 26], coupling: 0.92 },
+    mobile: { density: 0, cap: 30, fall: 18, size: [8, 19], coupling: 0.88 },
   },
 };
 
@@ -234,6 +241,30 @@ function sparkle(context: CanvasRenderingContext2D) {
   context.fill();
 }
 
+/** A small heart, lit from the upper left like the petals. */
+function heart([edge, body]: [string, string]) {
+  return (context: CanvasRenderingContext2D) => {
+    const shape = new Path2D();
+    shape.moveTo(0, 17);
+    shape.bezierCurveTo(-24, 2, -15, -21, 0, -9);
+    shape.bezierCurveTo(15, -21, 24, 2, 0, 17);
+    shape.closePath();
+    const fill = context.createLinearGradient(0, 17, 0, -17);
+    fill.addColorStop(0, edge);
+    fill.addColorStop(1, body);
+    context.fillStyle = fill;
+    context.fill(shape);
+    context.save();
+    context.clip(shape);
+    const light = context.createRadialGradient(-7, -8, 1, -7, -8, 13);
+    light.addColorStop(0, "rgba(255, 255, 255, 0.6)");
+    light.addColorStop(1, "rgba(255, 255, 255, 0)");
+    context.fillStyle = light;
+    context.fillRect(-SPRITE / 2, -SPRITE / 2, SPRITE, SPRITE);
+    context.restore();
+  };
+}
+
 /** One hydrangea floret: four rounded sepals round a pale eye. */
 function floret([outer, inner]: [string, string]) {
   return (context: CanvasRenderingContext2D) => {
@@ -264,6 +295,15 @@ function spritesFor(variant: WindVariant): Sprite[] {
       sprite(petal(["#ff8a73", "#ffbfa9", "#ffeadf"]), true, 2),
       sprite(petal(["#ffb3c6", "#ffe3eb", "#ffffff"]), true, 2),
       sprite(blossom, true, 0.8),
+    ];
+  }
+  if (variant === "ember") {
+    return [
+      sprite(glint("rgba(243, 199, 126, 0.55)"), false, 3, 0.45),
+      sprite(glint("rgba(242, 137, 154, 0.5)"), false, 2, 0.45),
+      sprite(petal(["#9e1630", "#d6364f", "#f7a0ac"]), true, 2),
+      sprite(petal(["#e47f98", "#f8c3ce", "#fff1f4"]), true, 1.4),
+      sprite(heart(["#b5203b", "#f06a7f"]), true, 0.9),
     ];
   }
   return [

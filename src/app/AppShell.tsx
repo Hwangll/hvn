@@ -9,7 +9,7 @@ import { ReadingProgress } from "../shared/components/ReadingProgress";
 import { MemoryIntro } from "../features/intro/components/MemoryIntro";
 import { MemoryTransitionOverlay } from "../features/intro/components/MemoryTransitionOverlay";
 import { StoryExperience } from "../features/story/components/StoryExperience";
-import type { StoryPage } from "./storyPage";
+import { pageScopes, type StoryPage } from "./storyPage";
 
 export type ExperienceState = "intro" | "focusing" | "transitioning" | "story-reveal" | "story-ready";
 
@@ -20,7 +20,8 @@ interface AppShellProps {
 }
 
 export function AppShell({ page = "part-one" }: AppShellProps) {
-  const isPartTwoPage = page === "part-two";
+  // Parts II and III live on pages of their own, reached from the story itself, so they skip the memory room.
+  const isLaterPartPage = page !== "part-one";
   const prefersReducedMotion = useReducedMotion();
   const { playCue, soundEnabled, toggleSound } = useSoundToggle();
   const [isIntroSeen, setIsIntroSeen] = useState(() => {
@@ -28,14 +29,14 @@ export function AppShell({ page = "part-one" }: AppShellProps) {
       return false;
     }
 
-    return isPartTwoPage || window.sessionStorage.getItem(INTRO_SEEN_KEY) === "true";
+    return isLaterPartPage || window.sessionStorage.getItem(INTRO_SEEN_KEY) === "true";
   });
   const [experienceState, setExperienceState] = useState<ExperienceState>(() => {
     if (typeof window === "undefined") {
       return "intro";
     }
 
-    return isPartTwoPage || window.sessionStorage.getItem(INTRO_SEEN_KEY) === "true" ? "story-ready" : "intro";
+    return isLaterPartPage || window.sessionStorage.getItem(INTRO_SEEN_KEY) === "true" ? "story-ready" : "intro";
   });
   const transitionTimerIds = useRef<number[]>([]);
   const introVisible = experienceState === "intro" || experienceState === "focusing" || (experienceState === "transitioning" && !isIntroSeen);
@@ -43,13 +44,13 @@ export function AppShell({ page = "part-one" }: AppShellProps) {
 
   useLenisScroll(prefersReducedMotion);
   const shellRef = useRef<HTMLDivElement | null>(null);
-  usePointerDelight(shellRef, isPartTwoPage, prefersReducedMotion);
+  usePointerDelight(shellRef, page, prefersReducedMotion);
 
   // The browser's own chrome follows the room: dark while the memory room is open, rose paper once the story shows.
   useEffect(() => {
-    if (isPartTwoPage) return;
+    if (isLaterPartPage) return;
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", introVisible ? "#16141f" : "#fff4f6");
-  }, [introVisible, isPartTwoPage]);
+  }, [introVisible, isLaterPartPage]);
 
   useEffect(() => {
     const shouldLock = experienceState === "intro" || experienceState === "focusing" || experienceState === "transitioning";
@@ -103,7 +104,7 @@ export function AppShell({ page = "part-one" }: AppShellProps) {
     scheduleTransition(
       () => {
         window.sessionStorage.removeItem(INTRO_SEEN_KEY);
-        if (isPartTwoPage) {
+        if (isLaterPartPage) {
           window.location.assign("/");
           return;
         }
@@ -114,13 +115,13 @@ export function AppShell({ page = "part-one" }: AppShellProps) {
       },
       prefersReducedMotion ? 200 : 920,
     );
-  }, [clearTransitionTimers, isPartTwoPage, prefersReducedMotion, scheduleTransition]);
+  }, [clearTransitionTimers, isLaterPartPage, prefersReducedMotion, scheduleTransition]);
 
   return (
-    <div className={`app-shell experience-${experienceState} ${isPartTwoPage ? "app-part-two" : "app-part-one"}`} ref={shellRef}>
-      {!isPartTwoPage ? <AmbientPetals /> : null}
+    <div className={`app-shell experience-${experienceState} ${pageScopes[page].app}`} ref={shellRef}>
+      {!isLaterPartPage ? <AmbientPetals /> : null}
       {/* A hairline of reading progress with a heart rolling at its tip; CSS drives both from the page's own scroll. */}
-      {storyVisible ? <ReadingProgress variant={isPartTwoPage ? "night" : "day"} /> : null}
+      {storyVisible ? <ReadingProgress variant={page === "part-one" ? "day" : page === "part-two" ? "night" : "ember"} /> : null}
       <SoundToggle enabled={soundEnabled} onToggle={toggleSound} />
       {introVisible ? <MemoryIntro onEnterStory={runToStory} phase={experienceState} reducedMotion={prefersReducedMotion} /> : null}
       {storyVisible ? (

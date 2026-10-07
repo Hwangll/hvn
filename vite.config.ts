@@ -32,14 +32,22 @@ function preloadCriticalFonts(): Plugin {
 }
 
 /**
- * Both pages load the same stylesheets in the same order, but half the rules are scoped to one page through the
- * classes only that page ever renders (`.story-part-2`, `.story-page-part-two`, `.app-part-two` and their Part I
- * twins). Part II imports its copies with `?page=two`, so each page gets its own CSS file, and this drops the
- * selectors that can only match on the other page. Nothing else moves, so the cascade of what remains is unchanged.
+ * The pages load the same stylesheets in the same order, but half the rules are scoped to one page through the
+ * classes only that page ever renders (`.story-part-2`, `.story-page-part-two`, `.app-part-two` and their Part I and
+ * Part III twins). Parts II and III import their copies with `?page=two` and `?page=three`, so each page gets its own
+ * CSS file, and this drops the selectors that can only match on another page. Part III's page also wears Part II's
+ * classes (it goes on with Part II's diary, see pageScopes in src/app/storyPage.ts), so it keeps Part II's rules.
+ * Nothing else moves, so the cascade of what remains is unchanged.
  */
-const otherPageScope = {
-  partOne: /\.(?:story-part-2|story-page-part-two|app-part-two)(?![\w-])/,
-  partTwo: /\.(?:story-part-1|story-page-part-one|app-part-one)(?![\w-])/,
+const pageScope = {
+  one: /\.(?:story-part-1|story-page-part-one|app-part-one)(?![\w-])/,
+  two: /\.(?:story-part-2|story-page-part-two|app-part-two)(?![\w-])/,
+  three: /\.(?:story-part-3|story-page-part-three|app-part-three)(?![\w-])/,
+};
+const otherPageScopes = {
+  one: [pageScope.two, pageScope.three],
+  two: [pageScope.one, pageScope.three],
+  three: [pageScope.one],
 };
 
 /** A page class inside :not(), :is() or :where() does not tie a selector to that page, so those groups are ignored. */
@@ -82,11 +90,15 @@ function pageScopedCss(): Plugin {
     apply: "build",
     transform(code, id) {
       if (!/\/src\/styles\/[^/]+\.css(?:\?|$)/.test(id)) return null;
-      const drop = /[?&]page=two\b/.test(id) ? otherPageScope.partTwo : otherPageScope.partOne;
+      const page = /[?&]page=(two|three)\b/.exec(id)?.[1] as "two" | "three" | undefined;
+      const drop = otherPageScopes[page ?? "one"];
       const root = postcss.parse(code);
       root.walkRules((rule) => {
         if (rule.parent?.type === "atrule" && /keyframes$/i.test((rule.parent as { name: string }).name)) return;
-        const kept = rule.selectors.filter((selector) => !drop.test(withoutNeutralGroups(selector)));
+        const kept = rule.selectors.filter((selector) => {
+          const scoped = withoutNeutralGroups(selector);
+          return !drop.some((scope) => scope.test(scoped));
+        });
         if (kept.length === rule.selectors.length) return;
         if (kept.length) rule.selectors = kept;
         else rule.remove();
@@ -130,6 +142,7 @@ export default defineConfig({
       input: {
         main: "index.html",
         partTwo: "part-2/index.html",
+        partThree: "part-3/index.html",
       },
       output: {
         assetFileNames: ({ names }) => (names.some((name) => decoderFiles.includes(name)) ? "decoders/[name][extname]" : "assets/[name]-[hash][extname]"),

@@ -1,5 +1,6 @@
-/* The opening room: a dark exhibition of two keepsakes. The room's light follows the part in hand —
-   dusk gold for Phần I, blue hour for Phần II — and every layer crossfades rather than jumping. */
+/* The opening room: a dark exhibition of three keepsakes. The room's light follows the part in hand —
+   dusk gold for Phần I, blue hour for Phần II, lantern red for Phần III — and every layer crossfades rather than
+   jumping. */
 .memory-intro {
   --room-bg: #16141f;
   --room-bg-deep: #0d0c14;
@@ -38,6 +39,17 @@
   --room-line: #b8ccdb26;
   --room-card: #10213a;
 }
+.memory-intro.is-part-three-selected {
+  --room-bg: #16090f;
+  --room-bg-deep: #0b0408;
+  --room-paper: #fbefe6;
+  --room-muted: #dcc2b8;
+  --room-faint: #ab8a80;
+  --room-accent: #ff6f7f;
+  --room-glow: #ff5a6e;
+  --room-line: #f3c77e26;
+  --room-card: #2a0c17;
+}
 .memory-intro ::selection { color: var(--room-bg); background: var(--room-accent); }
 
 /* ---------- Atmosphere ---------- */
@@ -60,16 +72,27 @@
     radial-gradient(ellipse at 80% 14%, #12305a66, transparent 46%),
     linear-gradient(180deg, #060e1b, #0a1422 55%, #0c1a2c);
 }
-.memory-intro.is-part-two-selected .memory-sky-one { opacity: 0; }
-.memory-intro.is-part-two-selected .memory-sky-two { opacity: 1; }
+.memory-sky-three {
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 24% 76%, #6a14286e, transparent 55%),
+    radial-gradient(ellipse at 78% 16%, #4a0f2466, transparent 46%),
+    linear-gradient(180deg, #10050b, #16090f 55%, #1e0b14);
+}
+.memory-intro:not(.is-part-one-selected) .memory-sky-one { opacity: 0; }
+.memory-intro.is-part-two-selected .memory-sky-two,
+.memory-intro.is-part-three-selected .memory-sky-three { opacity: 1; }
 .memory-aurora { width: 58vw; opacity: 0.45; }
 .memory-sky-one .memory-aurora-a { top: -24%; left: -14%; background: radial-gradient(ellipse, #5a3550, transparent 70%); }
 .memory-sky-one .memory-aurora-b { bottom: -28%; right: -12%; width: 50vw; background: radial-gradient(ellipse, #6b4a2a, transparent 70%); animation-delay: -14s; animation-duration: 36s; }
 .memory-sky-two .memory-aurora-a { top: -20%; left: -12%; background: radial-gradient(ellipse, #1c4a8a, transparent 70%); }
 .memory-sky-two .memory-aurora-b { bottom: -26%; right: -10%; width: 50vw; background: radial-gradient(ellipse, #0f5c7a, transparent 70%); animation-delay: -12s; animation-duration: 34s; }
+.memory-sky-three .memory-aurora-a { top: -20%; left: -12%; background: radial-gradient(ellipse, #7a1630, transparent 70%); }
+.memory-sky-three .memory-aurora-b { bottom: -26%; right: -10%; width: 50vw; background: radial-gradient(ellipse, #8a3a1c, transparent 70%); animation-delay: -10s; animation-duration: 38s; }
 /* Faded skies pause their drift so only the room in view costs anything. */
+.memory-intro:not(.is-part-one-selected) .memory-sky-one *,
 .memory-intro:not(.is-part-two-selected) .memory-sky-two *,
-.memory-intro.is-part-two-selected .memory-sky-one * { animation-play-state: paused; }
+.memory-intro:not(.is-part-three-selected) .memory-sky-three * { animation-play-state: paused; }
 .memory-floor-glow {
   left: 30%; right: 30%; bottom: 6%; height: 22vh;
   background: radial-gradient(ellipse at 50% 60%, color-mix(in oklch, var(--room-glow) 28%, transparent), transparent 62%);
@@ -137,6 +160,8 @@
   animation: room-word-up 0.85s var(--room-ease) calc(0.1s + var(--i) * 0.07s) both, room-shimmer 7s ease-in-out 1.6s infinite;
 }
 .memory-intro.is-part-two-selected .memory-title-word.is-accent > span { background-image: linear-gradient(100deg, #b2cfdc 0%, #eaf7fb 40%, #8bcbd8 55%, #b2cfdc 72%); }
+/* Red catching the lantern light: the shimmer runs through to gold. */
+.memory-intro.is-part-three-selected .memory-title-word.is-accent > span { background-image: linear-gradient(100deg, #ff5a6e 0%, #ffe3cc 40%, #f3c77e 55%, #ff5a6e 72%); }
 .memory-lead { max-width: 30ch; margin: 0; color: var(--room-muted); font-size: 0.82rem; font-weight: 400; line-height: 1.95; animation: room-rise 0.8s var(--room-ease) 0.45s both; }
 
 /* Artifact: a cone of light, a halo and a reflective floor under the bouquet. */
@@ -188,7 +213,7 @@
 .memory-artifact:hover .memory-halo { animation-play-state: paused; transform: translate(-50%, -50%) scale(1.1); }
 .memory-artifact:hover .memory-light-cone { opacity: 0.8; }
 
-/* CTA panel: a status line, then the two part cards in a swipeable track. */
+/* CTA panel: a status line, then the three part cards in a swipeable track. */
 .memory-cta-panel { display: grid; gap: 1.5rem; width: 100%; padding: 2.5rem 0 0; justify-items: stretch; animation: room-rise 0.9s var(--room-ease) 0.35s both; }
 .memory-status { display: inline-flex; align-items: center; gap: 0.55rem; width: fit-content; color: var(--room-muted); font-size: 0.66rem; font-weight: 400; }
 .memory-status > span { position: relative; width: 6px; height: 6px; border-radius: 50%; background: var(--room-accent); box-shadow: 0 0 0 3px color-mix(in oklch, var(--room-accent) 22%, transparent), 0 0 12px 2px color-mix(in oklch, var(--room-accent) 45%, transparent); transition: background 0.6s var(--room-ease); }
@@ -202,7 +227,7 @@
 .memory-picker-heading { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; color: var(--room-muted); font-size: 0.54rem; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; }
 .memory-picker-heading span { display: inline-flex; align-items: center; gap: 0.45rem; }
 .memory-picker-heading strong { color: var(--room-accent); font-weight: 500; font-variant-numeric: tabular-nums; }
-.memory-picker-viewport { width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: none; scroll-snap-type: inline mandatory; border-radius: 1rem; }
+.memory-picker-viewport { width: 100%; overflow: auto hidden; overscroll-behavior-inline: contain; scrollbar-width: none; scroll-snap-type: inline mandatory; border-radius: 1rem; }
 .memory-picker-viewport::-webkit-scrollbar { display: none; }
 .memory-picker-track { display: flex; width: 100%; }
 .memory-part-card {
@@ -215,6 +240,9 @@
   transition: border-color 0.6s var(--room-ease), box-shadow 0.6s var(--room-ease);
 }
 .memory-part-card-two { --card-accent: #a8ddeb; --card-glow: #8bcbd8; background: radial-gradient(ellipse at 100% 0, #8bcbd830, transparent 55%), linear-gradient(160deg, #12304fe6, #0b1f3ae6); }
+.memory-part-card-three { --card-accent: #ff7a88; --card-glow: #ff5a6e; background: radial-gradient(ellipse at 100% 0, #ff5a6e30, transparent 55%), linear-gradient(160deg, #3a0f1ee6, #220812e6); }
+/* Its longer title breaks after the comma on a phone rather than leaving one word on a line of its own. */
+.memory-part-card-three > div strong { text-wrap: balance; }
 .memory-part-card.is-active { border-color: color-mix(in oklch, var(--card-accent) 45%, transparent); box-shadow: inset 0 1px 0 #ffffff1c, 0 24px 60px -24px color-mix(in oklch, var(--card-glow) 35%, transparent); }
 .memory-part-numeral { position: absolute; right: 0.6rem; top: -0.9rem; font: 500 7.5rem/1 var(--memory-display); letter-spacing: -0.06em; color: transparent; -webkit-text-stroke: 1px color-mix(in oklch, var(--card-accent) 30%, transparent); pointer-events: none; user-select: none; }
 .memory-part-number { width: fit-content; color: var(--card-accent); font-size: 0.56rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; }
@@ -239,6 +267,9 @@
 .memory-primary-cta:hover svg, .memory-secondary-cta:hover svg { transform: translateX(0.3rem); }
 .memory-secondary-cta { color: #06172a; background: #b6dbed; }
 .memory-secondary-cta:hover { background: #d0ebf5; }
+/* Phần III's way in is the part's own red, lit a little gold from above. */
+.memory-part-card-three .memory-secondary-cta { color: #fff6ee; background: linear-gradient(180deg, #ea3048, #c81834); box-shadow: 0 14px 30px -14px #6a0a1ccc, inset 0 1px 0 #ffd2a866; }
+.memory-part-card-three .memory-secondary-cta:hover { background: linear-gradient(180deg, #f43e56, #d42040); box-shadow: 0 18px 36px -14px #ff5a6e8c, inset 0 1px 0 #ffd2a866; }
 .memory-picker-controls { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem; padding-top: 0.8rem; border-top: 1px solid var(--room-line); }
 .memory-picker-controls > button {
   display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--room-line); border-radius: 50%; color: var(--room-paper); background: transparent; cursor: pointer;
@@ -251,16 +282,21 @@
 .memory-picker-dots span.is-active { width: 2.6rem; background: var(--room-accent); box-shadow: 0 0 10px color-mix(in oklch, var(--room-accent) 60%, transparent); }
 .memory-intro :is(a, button):focus-visible { outline: 2px solid var(--room-accent); outline-offset: 4px; }
 
-/* Chrome that sits on the room. */
-.experience-intro .sound-toggle, .experience-focusing .sound-toggle, .experience-transitioning .sound-toggle {
+/* Chrome that sits on the room: dark glass in the room's own inks. Raised above the story's daylight toggle
+   (.app-part-one .sound-toggle, loaded later), which otherwise painted a rose square on the dusk. */
+.app-shell:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle {
   color: var(--room-paper, #f5ecdd); background: #ffffff0f; border-color: #ffffff1f; box-shadow: 0 12px 40px #00000066, inset 0 1px 0 #ffffff12; backdrop-filter: blur(18px) saturate(140%);
 }
+.app-shell:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle :is(svg, small) { color: inherit; }
+.app-shell:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle:hover { background: #ffffff1f; border-color: #ffffff33; }
+.app-shell:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle[aria-pressed="true"] { color: #fffaf2; background: #ffffff2e; border-color: #ffffff47; }
 
-/* Leaving: Phần I dims the room into the story; Phần II blooms blue and hops to its own page. */
+/* Leaving: Phần I dims the room into the story; Phần II blooms blue and Phần III red, each hopping to its own page. */
 .memory-intro.is-focusing .memory-copy, .memory-intro.is-focusing .memory-cta-panel { opacity: 0.3; filter: blur(5px); transform: translateY(0.35rem); }
 .memory-intro.is-focusing .memory-bouquet-frame { transform: scale(1.05); }
 .memory-intro.is-focusing .memory-halo { transform: translate(-50%, -50%) scale(1.25); }
 .memory-leave-veil { position: fixed; inset: 0; z-index: 30; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 46%, #a8ddeb, #0f5c7a 30%, #0a1422 70%); }
+.memory-intro.is-part-three-selected .memory-leave-veil { background: radial-gradient(circle at 50% 46%, #ff8a7a, #a0142e 30%, #16090f 70%); }
 .memory-intro.is-leaving .memory-leave-veil { pointer-events: auto; animation: room-leave-bloom 0.8s var(--room-ease) forwards; }
 .memory-intro.is-leaving .memory-copy, .memory-intro.is-leaving .memory-cta-panel { opacity: 0; filter: blur(6px); }
 .memory-intro.is-leaving .memory-bouquet-frame { transform: scale(1.08); }
@@ -326,5 +362,7 @@
   .memory-intro *, .memory-intro *::before, .memory-intro *::after { animation: none !important; scroll-behavior: auto; transition: none !important; translate: none !important; }
   .memory-title-word > span { opacity: 1; transform: none; }
   .memory-title-word.is-accent > span { background-position: 0 0; }
-  .memory-intro.is-part-two-selected .memory-sky-one, .memory-intro:not(.is-part-two-selected) .memory-sky-two { display: none; }
+  .memory-intro:not(.is-part-one-selected) .memory-sky-one,
+  .memory-intro:not(.is-part-two-selected) .memory-sky-two,
+  .memory-intro:not(.is-part-three-selected) .memory-sky-three { display: none; }
 }

@@ -5,16 +5,18 @@ import { FairyCorners } from "./FairyCorners";
 
 /**
  * The memory room as a fairyland above the clouds, one realm for each part: a sun going down behind the sunflowers for
- * Phần I, a full moon over the hydrangeas for Phần II. Karst towers with pines on their crowns rise out of a sea of
- * clouds, mist winds round them, cranes cross the dusk and sky lanterns drift up into the night, and flowers frame the
- * four corners (FairyCorners). Switching parts sets the sun into the clouds while the moon comes up (memory-fairyland.css).
+ * Phần I, a full moon over the hydrangeas for Phần II, and for Phần III a red-gold harvest moon rising over the lilies
+ * in a crimson sky turning to night, the autumn of the mid-autumn festival. Karst towers with pines on their crowns
+ * rise out of a sea of clouds, mist winds round them, cranes cross the dusk, sky lanterns drift up into the night and
+ * red paper ones into the autumn, and flowers frame the four corners (FairyCorners). Switching parts sets one sun or
+ * moon into the clouds while the next comes up (memory-fairyland.css).
  *
  * Everything here is drawn once: the drift of the clouds, the turning light and the twinkling stars are transform and
  * opacity animations, and the light rays are a small canvas the compositor scales up. Layers marked `data-depth` lean
  * with the pointer (FairyDust moves them), the far ones least.
  */
 
-type RealmName = "dusk" | "night";
+type RealmName = "dusk" | "night" | "ember";
 
 interface Palette {
   peaks: { farTop: string; farMid: string; mist: string; nearTop: string; nearMid: string; rim: string };
@@ -39,7 +41,25 @@ const palettes: Record<RealmName, Palette> = {
     },
     rays: "205, 228, 255",
   },
+  ember: {
+    peaks: { farTop: "#b4484f", farMid: "#741c34", mist: "#ff9a80", nearTop: "#4a1024", nearMid: "#200612", rim: "#ffb070" },
+    clouds: {
+      back: { lit: "#ffd2b0", body: "#d6747c", deep: "#a03a52", shade: "#6a1c36" },
+      front: { lit: "#ffdcc4", body: "#c4626e", deep: "#8c2a44", shade: "#46102a" },
+    },
+    rays: "255, 196, 140",
+  },
 };
+
+/** Each realm's sun or moon, as its class names it, and the seed its rays are drawn from. */
+const celestials: Record<RealmName, { body: string; seed: number }> = {
+  dusk: { body: "is-sun", seed: 3 },
+  night: { body: "is-moon", seed: 9 },
+  ember: { body: "is-harvest", seed: 5 },
+};
+
+/** How many of the stars come out: a few at dusk, more as the autumn sky darkens, all of them at night. */
+const starsOut: Record<RealmName, number> = { dusk: 7, night: 16, ember: 11 };
 
 /* ---------- Shapes, worked out once ---------- */
 
@@ -117,10 +137,9 @@ interface Star {
   size: number;
   life: number;
   delay: number;
-  /** Shown in the dusk sky too, not only at night. */
-  dusk: boolean;
 }
 
+/** The first come out highest, so a sky showing only a few has them where the dusk is darkest. */
 const stars: Star[] = (() => {
   const random = seeded(47);
   return Array.from({ length: 16 }, (_, index) => ({
@@ -129,11 +148,10 @@ const stars: Star[] = (() => {
     size: Math.round(10 + random() * 14),
     life: Math.round(30 + random() * 40) / 10,
     delay: -Math.round(random() * 60) / 10,
-    dusk: index < 7,
   }));
 })();
 
-/** Sky lanterns keep to the gaps between the words, the bouquet and the cards; on a phone, to the screen's edges. */
+/** Lanterns keep to the gaps between the words, the bouquet and the cards; on a phone, to the screen's edges. */
 const lanterns = [
   { x: "33%", narrow: "7%", size: 1.2, life: 48, delay: -8 },
   { x: "36.5%", narrow: "91%", size: 0.85, life: 60, delay: -33 },
@@ -273,28 +291,30 @@ function CloudSea({ layer, palette }: { layer: "back" | "front"; palette: Palett
   );
 }
 
+/** Each realm's sky, by the part it belongs to (see memory-opening.css). */
+const skies: Record<RealmName, string> = { dusk: "memory-sky-one", night: "memory-sky-two", ember: "memory-sky-three" };
+
 function Realm({ name }: { name: RealmName }) {
   const palette = palettes[name];
+  const celestial = celestials[name];
   return (
-    <span className={`memory-sky ${name === "dusk" ? "memory-sky-one" : "memory-sky-two"} realm is-${name}`}>
+    <span className={`memory-sky ${skies[name]} realm is-${name}`}>
       <i className="star-layer star-layer-far" />
       {name === "night" ? <i className="star-layer star-layer-near" /> : null}
       <i className="aurora memory-aurora memory-aurora-a" />
       <i className="aurora memory-aurora memory-aurora-b" />
       <span className="realm-stars" data-depth="3">
-        {stars
-          .filter((star) => name === "night" || star.dusk)
-          .map((star) => (
-            <i
-              className="realm-star"
-              key={`${star.x}-${star.y}`}
-              style={{ "--x": star.x, "--y": star.y, "--size": `${star.size}px`, "--life": `${star.life}s`, "--delay": `${star.delay}s` } as CSSProperties}
-            />
-          ))}
+        {stars.slice(0, starsOut[name]).map((star) => (
+          <i
+            className="realm-star"
+            key={`${star.x}-${star.y}`}
+            style={{ "--x": star.x, "--y": star.y, "--size": `${star.size}px`, "--life": `${star.life}s`, "--delay": `${star.delay}s` } as CSSProperties}
+          />
+        ))}
       </span>
       <span className="realm-celestial-anchor" data-depth="4">
-        <span className={`realm-celestial ${name === "dusk" ? "is-sun" : "is-moon"}`}>
-          <Rays tint={palette.rays} seed={name === "dusk" ? 3 : 9} />
+        <span className={`realm-celestial ${celestial.body}`}>
+          <Rays tint={palette.rays} seed={celestial.seed} />
           <i className="realm-halo" />
           {name === "night" ? <i className="realm-ring" /> : null}
           <i className="realm-disc" />
@@ -311,7 +331,7 @@ function Realm({ name }: { name: RealmName }) {
       ) : null}
       <Peaks side="left" palette={palette.peaks} />
       <Peaks side="right" palette={palette.peaks} />
-      {name === "night"
+      {name !== "dusk"
         ? lanterns.map((lantern) => (
             <span
               className="realm-lantern"
@@ -330,12 +350,13 @@ function Realm({ name }: { name: RealmName }) {
   );
 }
 
-/** Both realms, crossfaded by the part in hand (see memory-opening.css). */
+/** Every realm, crossfaded by the part in hand (see memory-opening.css). */
 export function FairyRealm() {
   return (
     <>
       <Realm name="dusk" />
       <Realm name="night" />
+      <Realm name="ember" />
     </>
   );
 }

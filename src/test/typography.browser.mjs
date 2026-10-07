@@ -50,6 +50,11 @@ try {
     await page.waitForSelector('.title-word');
     await page.evaluate(() => document.fonts.ready);
     await assertAnimatedWordsFit('.title-word', `Part II titles at ${viewport.width}px`);
+
+    await page.goto(`${baseUrl}/part-3/`);
+    await page.waitForSelector('.title-word');
+    await page.evaluate(() => document.fonts.ready);
+    await assertAnimatedWordsFit('.title-word', `Part III titles at ${viewport.width}px`);
   }
 
   console.log('PASS: animated Vietnamese title words fit their clipping boxes at desktop and mobile widths');

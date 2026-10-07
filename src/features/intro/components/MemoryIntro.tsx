@@ -1,11 +1,13 @@
-import { ArrowLeft, ArrowRight, BookOpen, HeartHandshake, MoveHorizontal } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Flame, HeartHandshake, MoveHorizontal, type LucideIcon } from "lucide-react";
 import { Fragment, lazy, Suspense, type CSSProperties, useCallback, useMemo, useRef, useState } from "react";
 import { BouquetLoader } from "../../memories/components/BouquetLoader";
+import type { IntroFlowerVariant } from "../../memories/model/introFlowers";
 import { Meteors } from "../../../shared/components/motion/Meteors";
-import { createStoryScrollItems, storyParts } from "../../story/data/story";
+import { createStoryScrollItems, partHrefs, storyParts } from "../../story/data/story";
 import { usePointerParallax } from "../../../shared/hooks/usePointerParallax";
 import type { ExperienceState } from "../../../app/AppShell";
 import { useRealmAnchor } from "../hooks/useRealmAnchor";
+import type { FairyVariant } from "../utils/fairyDust";
 import { FairyDust } from "./FairyDust";
 import { FairyRealm } from "./FairyRealm";
 
@@ -19,7 +21,15 @@ interface MemoryIntroProps {
   reducedMotion: boolean;
 }
 
-type PartIndex = 0 | 1;
+type PartIndex = 0 | 1 | 2;
+
+const PARTS: PartIndex[] = [0, 1, 2];
+/** The nearest part to a position along the picker, in cards. */
+const partAt = (position: number): PartIndex => PARTS[Math.min(PARTS.length - 1, Math.max(0, Math.round(position)))];
+/** Each part's name in the room's classes: `is-part-two-selected`, `memory-part-card-two`. */
+const partNames: Record<PartIndex, string> = { 0: "one", 1: "two", 2: "three" };
+/** Phần I opens in this page; the others live on pages of their own. */
+const partHref = (part: PartIndex) => partHrefs[storyParts[part].id];
 
 /** The words of each keepsake title, with the italic accent marked so they can rise one after another. */
 const heroCopy: Record<PartIndex, { kicker: string; title: string; accentFrom: number; accentTo: number; breakBefore?: number; lead: string }> = {
@@ -39,9 +49,37 @@ const heroCopy: Record<PartIndex, { kicker: string; title: string; accentFrom: n
     breakBefore: 2,
     lead: "Một bó cẩm tú cầu xanh, cho phần câu chuyện khi hai người thật sự đứng cạnh nhau.",
   },
+  2: {
+    kicker: "KỶ VẬT 03 / HOA LY ĐỎ",
+    // "lần đầu" holds together, so the last line never ends on one short word.
+    title: "Sắc đỏ của những lần đầu",
+    accentFrom: 0,
+    accentTo: 2,
+    breakBefore: 2,
+    lead: "Một bó ly đỏ, cho mùa thu yêu quá nhanh, quá nguy hiểm, và toàn là những lần đầu với nhau.",
+  },
 };
 
-const PART_TWO_URL = "/part-2/";
+/** Each part's keepsake in the cabinet, the realm it stands in above the clouds, and its plinth's label. */
+const keepsakes: Record<PartIndex, { flower: IntroFlowerVariant; realm: FairyVariant; lot: string; label: string; touch: string }> = {
+  0: { flower: "sunflower", realm: "dusk", lot: "LOT 01", label: "HƯỚNG DƯƠNG · 2023-2026", touch: "Chạm vào bó hoa để mở câu chuyện" },
+  1: { flower: "hydrangea", realm: "night", lot: "LOT 02", label: "CẨM TÚ CẦU · PHẦN II", touch: "Chạm vào cẩm tú cầu để mở Phần II" },
+  2: { flower: "lily", realm: "ember", lot: "LOT 03", label: "HOA LY ĐỎ · PHẦN III", touch: "Chạm vào hoa ly để mở Phần III" },
+};
+
+/** The picker's cards, one per part. */
+const partCards: Record<PartIndex, { numeral: string; Icon: LucideIcon; title: string; note: string; action: string }> = {
+  0: { numeral: "I", Icon: BookOpen, title: "Trước khi gặp nhau", note: "Những lần gặp, bỏ lỡ và tìm thấy nhau.", action: "Khám phá câu chuyện" },
+  1: { numeral: "II", Icon: HeartHandshake, title: "Thật sự đứng cạnh nhau", note: "Những buổi gặp, cuộc hẹn và một ngày thật chậm.", action: "Đi thẳng tới Phần II" },
+  2: { numeral: "III", Icon: Flame, title: "Quá nhanh, quá nguy hiểm", note: "Một mùa thu toàn những lần đầu với nhau.", action: "Đi thẳng tới Phần III" },
+};
+
+/** A part with a handful of stops lists every one; a longer part lists its chapters instead. */
+const MAX_LISTED_STOPS = 8;
+const partStops = storyParts.map((part) => {
+  const items = createStoryScrollItems([part]);
+  return items.length <= MAX_LISTED_STOPS ? items.map((item) => item.shortTitle) : part.chapters.map((chapter) => chapter.shortTitle);
+});
 
 export function MemoryIntro({ onEnterStory, phase, reducedMotion }: MemoryIntroProps) {
   const [activePart, setActivePart] = useState<PartIndex>(0);
@@ -52,20 +90,21 @@ export function MemoryIntro({ onEnterStory, phase, reducedMotion }: MemoryIntroP
   usePointerParallax(stageRef, !reducedMotion && !isFocusing);
   useRealmAnchor(roomRef);
 
-  // Part II lives on its own page; a short blue bloom covers the hop so it lands on the same dark ground.
-  const leaveToPartTwo = useCallback(() => {
+  // Parts II and III live on pages of their own; a short bloom in the part's colour covers the hop so it lands on the
+  // same dark ground.
+  const leaveTo = useCallback((href: string) => {
     if (leaving) return;
     if (reducedMotion) {
-      window.location.assign(PART_TWO_URL);
+      window.location.assign(href);
       return;
     }
     setLeaving(true);
-    window.setTimeout(() => window.location.assign(PART_TWO_URL), 780);
+    window.setTimeout(() => window.location.assign(href), 780);
   }, [leaving, reducedMotion]);
 
   const className = [
     "memory-intro",
-    activePart === 1 ? "is-part-two-selected" : "is-part-one-selected",
+    `is-part-${partNames[activePart]}-selected`,
     isFocusing ? "is-focusing" : "",
     leaving ? "is-leaving" : "",
   ].join(" ");
@@ -87,14 +126,14 @@ export function MemoryIntro({ onEnterStory, phase, reducedMotion }: MemoryIntroP
 
       <div className="memory-intro-stage" ref={stageRef}>
         <HeroCopy activePart={activePart} />
-        <MemoryArtifact activePart={activePart} onEnterStory={onEnterStory} onEnterPartTwo={leaveToPartTwo} reducedMotion={reducedMotion} />
-        <MemoryCallToAction activePart={activePart} onPartChange={setActivePart} onEnterStory={onEnterStory} onEnterPartTwo={leaveToPartTwo} reducedMotion={reducedMotion} />
+        <MemoryArtifact activePart={activePart} onEnterStory={onEnterStory} onLeaveTo={leaveTo} reducedMotion={reducedMotion} />
+        <MemoryCallToAction activePart={activePart} onPartChange={setActivePart} onEnterStory={onEnterStory} onLeaveTo={leaveTo} reducedMotion={reducedMotion} />
       </div>
       <footer className="memory-room-footer">
-        <span>Hai người. Hai phần. Một câu chuyện.</span>
+        <span>Hai người. Ba phần. Một câu chuyện.</span>
         <span>Được giữ lại bằng tất cả dịu dàng <span aria-hidden="true">↗</span></span>
       </footer>
-      {reducedMotion ? null : <FairyDust variant={activePart === 1 ? "night" : "dusk"} gathering={isFocusing || leaving} rootRef={roomRef} />}
+      {reducedMotion ? null : <FairyDust variant={keepsakes[activePart].realm} gathering={isFocusing || leaving} rootRef={roomRef} />}
       <span className="memory-leave-veil" aria-hidden="true" />
     </section>
   );
@@ -125,15 +164,15 @@ function HeroCopy({ activePart }: { activePart: PartIndex }) {
   );
 }
 
-function MemoryArtifact({ activePart, onEnterStory, onEnterPartTwo, reducedMotion }: Pick<MemoryIntroProps, "onEnterStory" | "reducedMotion"> & { activePart: PartIndex; onEnterPartTwo: () => void }) {
-  const variant = activePart === 1 ? "hydrangea" : "sunflower";
+function MemoryArtifact({ activePart, onEnterStory, onLeaveTo, reducedMotion }: Pick<MemoryIntroProps, "onEnterStory" | "reducedMotion"> & { activePart: PartIndex; onLeaveTo: (href: string) => void }) {
+  const keepsake = keepsakes[activePart];
 
   return (
     <button
       className="memory-artifact"
       type="button"
-      onClick={activePart === 1 ? onEnterPartTwo : onEnterStory}
-      aria-label={activePart === 1 ? "Chạm vào cẩm tú cầu để mở Phần II" : "Chạm vào bó hoa để mở câu chuyện"}
+      onClick={activePart === 0 ? onEnterStory : () => onLeaveTo(partHref(activePart))}
+      aria-label={keepsake.touch}
     >
       <span className="memory-light-cone" aria-hidden="true" />
       <span className="memory-halo" aria-hidden="true" />
@@ -145,14 +184,14 @@ function MemoryArtifact({ activePart, onEnterStory, onEnterPartTwo, reducedMotio
           <i />
         </span>
         <Suspense fallback={<span className="memory-flower-3d"><BouquetLoader /></span>}>
-          <MemoryFlower3D variant={variant} reducedMotion={reducedMotion} />
+          <MemoryFlower3D variant={keepsake.flower} reducedMotion={reducedMotion} />
         </Suspense>
       </span>
       <span className="memory-plinth" aria-hidden="true">
         <span className="memory-plinth-disc" />
         <span className="memory-plinth-label" key={activePart}>
-          <strong>{activePart === 1 ? "LOT 02" : "LOT 01"}</strong>
-          <span>{activePart === 1 ? "CẨM TÚ CẦU · PHẦN II" : "HƯỚNG DƯƠNG · 2023-2026"}</span>
+          <strong>{keepsake.lot}</strong>
+          <span>{keepsake.label}</span>
           <span>Giá trị không thể quy đổi</span>
         </span>
       </span>
@@ -161,19 +200,15 @@ function MemoryArtifact({ activePart, onEnterStory, onEnterPartTwo, reducedMotio
   );
 }
 
-function MemoryCallToAction({ activePart, onPartChange, onEnterStory, onEnterPartTwo, reducedMotion }: Pick<MemoryIntroProps, "onEnterStory" | "reducedMotion"> & {
+function MemoryCallToAction({ activePart, onPartChange, onEnterStory, onLeaveTo, reducedMotion }: Pick<MemoryIntroProps, "onEnterStory" | "reducedMotion"> & {
   activePart: PartIndex;
   onPartChange: (part: PartIndex) => void;
-  onEnterPartTwo: () => void;
+  onLeaveTo: (href: string) => void;
 }) {
   const pickerRef = useRef<HTMLDivElement | null>(null);
-  const stops = useMemo(
-    () => storyParts.map((part) => createStoryScrollItems([part]).map((item) => item.shortTitle)),
-    [],
-  );
 
   const showPart = (index: number) => {
-    const nextPart: PartIndex = index <= 0 ? 0 : 1;
+    const nextPart = partAt(index);
     const viewport = pickerRef.current;
     if (!viewport?.clientWidth) {
       onPartChange(nextPart);
@@ -194,7 +229,7 @@ function MemoryCallToAction({ activePart, onPartChange, onEnterStory, onEnterPar
       <div className="memory-part-picker" role="region" aria-label="Chọn phần câu chuyện">
         <div className="memory-picker-heading">
           <span><MoveHorizontal aria-hidden="true" size={15} /> Vuốt để đổi phần</span>
-          <strong>0{activePart + 1} / 02</strong>
+          <strong>0{activePart + 1} / 0{PARTS.length}</strong>
         </div>
 
         <div
@@ -202,54 +237,47 @@ function MemoryCallToAction({ activePart, onPartChange, onEnterStory, onEnterPar
           ref={pickerRef}
           onScroll={(event) => {
             const viewport = event.currentTarget;
-            if (viewport.clientWidth > 0) {
-              onPartChange(viewport.scrollLeft / viewport.clientWidth >= 0.5 ? 1 : 0);
-            }
+            if (viewport.clientWidth > 0) onPartChange(partAt(viewport.scrollLeft / viewport.clientWidth));
           }}
         >
           <div className="memory-picker-track">
-            <article className={`memory-part-card memory-part-card-one ${activePart === 0 ? "is-active" : ""}`} data-spotlight>
-              <span className="memory-part-numeral" aria-hidden="true">I</span>
-              <span className="memory-part-number">PHẦN I</span>
-              <BookOpen aria-hidden="true" size={20} />
-              <div>
-                <strong>Trước khi gặp nhau</strong>
-                <small>Những lần gặp, bỏ lỡ và tìm thấy nhau.</small>
-              </div>
-              <ol className="memory-part-stops" aria-hidden="true">
-                {stops[0].map((stop, index) => <li key={stop} style={{ "--i": index } as CSSProperties}>{stop}</li>)}
-              </ol>
-              <button className="memory-primary-cta has-shimmer" type="button" data-magnetic onClick={onEnterStory}>
-                Khám phá câu chuyện
-                <ArrowRight aria-hidden="true" size={17} />
-              </button>
-            </article>
-
-            <article className={`memory-part-card memory-part-card-two ${activePart === 1 ? "is-active" : ""}`} data-spotlight>
-              <span className="memory-part-numeral" aria-hidden="true">II</span>
-              <span className="memory-part-number">PHẦN II</span>
-              <HeartHandshake aria-hidden="true" size={20} />
-              <div>
-                <strong>Thật sự đứng cạnh nhau</strong>
-                <small>Những buổi gặp, cuộc hẹn và một ngày thật chậm.</small>
-              </div>
-              <ol className="memory-part-stops" aria-hidden="true">
-                {stops[1].map((stop, index) => <li key={stop} style={{ "--i": index } as CSSProperties}>{stop}</li>)}
-              </ol>
-              <a
-                className="memory-secondary-cta"
-                data-magnetic
-                href={PART_TWO_URL}
-                onClick={(event) => {
-                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
-                  event.preventDefault();
-                  onEnterPartTwo();
-                }}
-              >
-                Đi thẳng tới Phần II
-                <ArrowRight aria-hidden="true" size={17} />
-              </a>
-            </article>
+            {PARTS.map((part) => {
+              const { numeral, Icon, title, note, action } = partCards[part];
+              return (
+                <article className={`memory-part-card memory-part-card-${partNames[part]} ${activePart === part ? "is-active" : ""}`} data-spotlight key={part}>
+                  <span className="memory-part-numeral" aria-hidden="true">{numeral}</span>
+                  <span className="memory-part-number">PHẦN {numeral}</span>
+                  <Icon aria-hidden="true" size={20} />
+                  <div>
+                    <strong>{title}</strong>
+                    <small>{note}</small>
+                  </div>
+                  <ol className="memory-part-stops" aria-hidden="true">
+                    {partStops[part].map((stop, index) => <li key={`${index}-${stop}`} style={{ "--i": index } as CSSProperties}>{stop}</li>)}
+                  </ol>
+                  {part === 0 ? (
+                    <button className="memory-primary-cta has-shimmer" type="button" data-magnetic onClick={onEnterStory}>
+                      {action}
+                      <ArrowRight aria-hidden="true" size={17} />
+                    </button>
+                  ) : (
+                    <a
+                      className="memory-secondary-cta"
+                      data-magnetic
+                      href={partHref(part)}
+                      onClick={(event) => {
+                        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+                        event.preventDefault();
+                        onLeaveTo(partHref(part));
+                      }}
+                    >
+                      {action}
+                      <ArrowRight aria-hidden="true" size={17} />
+                    </a>
+                  )}
+                </article>
+              );
+            })}
           </div>
         </div>
 
@@ -258,10 +286,9 @@ function MemoryCallToAction({ activePart, onPartChange, onEnterStory, onEnterPar
             <ArrowLeft aria-hidden="true" size={15} />
           </button>
           <div className="memory-picker-dots" aria-hidden="true">
-            <span className={activePart === 0 ? "is-active" : ""} />
-            <span className={activePart === 1 ? "is-active" : ""} />
+            {PARTS.map((part) => <span className={activePart === part ? "is-active" : ""} key={part} />)}
           </div>
-          <button type="button" aria-label="Xem phần tiếp theo" disabled={activePart === 1} onClick={() => showPart(activePart + 1)}>
+          <button type="button" aria-label="Xem phần tiếp theo" disabled={activePart === PARTS.length - 1} onClick={() => showPart(activePart + 1)}>
             <ArrowRight aria-hidden="true" size={15} />
           </button>
         </div>

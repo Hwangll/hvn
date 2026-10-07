@@ -108,6 +108,10 @@
 @media (prefers-reduced-motion: no-preference) {
   .keepsake-memory-card::after { animation: beam-orbit 6s linear infinite; }
 }
+/* The beam's turning gradient repaints the whole card on every frame; a phone keeps the card's own edge instead. */
+@media (max-width: 900px) {
+  .keepsake-memory-card::after { display: none; }
+}
 @keyframes beam-orbit { to { --beam-angle: 360deg; } }
 
 /* ---------- Gliding chapter marker (PartOneChapterIndex) ---------- */

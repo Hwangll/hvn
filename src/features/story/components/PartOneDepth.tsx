@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactElement } from "react";
+import { memo, type CSSProperties, type ReactElement } from "react";
 import { Blossom, Butterfly, Cloud, Sprig, type ButterflyTheme } from "./StoryArt";
 
 /**
@@ -250,7 +250,7 @@ function fly(flight: Flight, unit: "px" | "vw", index: number) {
   });
 }
 
-export function PartOneDepth() {
+export const PartOneDepth = memo(function PartOneDepth() {
   return (
     <>
       <div className="depth-field" aria-hidden="true">
@@ -344,4 +344,4 @@ export function PartOneDepth() {
       </div>
     </>
   );
-}
+});

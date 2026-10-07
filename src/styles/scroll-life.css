@@ -105,9 +105,26 @@ main.story-experience > .scroll-ribbon {
   background: linear-gradient(105deg, transparent 42%, #ffffffd9 50%, transparent 58%);
   translate: var(--sheen, -130%) 0;
 }
+/* A phone's photos settle without the sheet of light (useScrollChoreography), so its blend layer goes too. */
+@media (max-width: 900px) { .story-part-1 .story-step-keepsake::after { display: none; } }
 
 /* ---------- The endings' photo drops in and rocks to rest (the float animation keeps `transform`) ---------- */
 :where(.story-ending) .polaroid { rotate: calc(var(--swing) * 1deg); scale: calc(1 + var(--drop) * 0.16); }
 
 /* ---------- Part II's great numeral swells past the reader as the title page leaves ---------- */
 .story-part-2 .part-transition-numeral { scale: calc(1 + var(--numeral-zoom) * 0.42); translate: 0 calc(var(--numeral-zoom) * -8vh); }
+
+/* ---------- Phones: tinted glass instead of frosted ---------- */
+/* Frosted glass blurs whatever passes behind it again on every frame of the scroll, and on a phone everything behind
+   it is moving: the buttons and panels that float over the story take a denser tint of their own colour instead. */
+@media (max-width: 900px) {
+  .app-shell .sound-toggle,
+  main.story-experience :is(.story-part-navigation, .scroll-hint, .booth-sticker, .mobile-scene-canvas, .keepsake-playground,
+    .keepsake-selected, .keepsake-memory-card, .keepsake-controls button, .story-secret-note button) { backdrop-filter: none; }
+  .app-part-one:not(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle:not([aria-pressed="true"], :hover),
+  .story-page-part-one :is(.story-part-navigation, .scroll-hint, .keepsake-selected) { background: #fffafcf0; }
+  .story-page-part-one :is(.keepsake-playground, .mobile-scene-canvas) { background: linear-gradient(160deg, #fffafcf5, #fff1f5e6); }
+  .app-part-two .sound-toggle { background: #0c192ae0; }
+  .story-page-part-two .story-part-navigation { background: #0c192af0; }
+  .story-page-part-two .keepsake-selected { background: #102946e6; }
+}

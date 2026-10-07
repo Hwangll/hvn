@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
-import { Fragment, useState, type CSSProperties } from "react";
-import type { StoryScrollItem } from "../data/story";
+import { Fragment, memo, useState, type CSSProperties } from "react";
+import { romanNumeral, type StoryScrollItem } from "../data/story";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import { MemoryPhoto } from "./atoms/MemoryPhoto";
 import { PhotoGallery } from "./PhotoGallery";
@@ -19,24 +19,45 @@ const stepHeights = ["92vh", "100vh", "88vh", "105vh", "95vh"];
 /**
  * Splits a paragraph into word spans so the scroll paint can surface it word by word (`--i` / `--words`).
  * Text wrapped in `==double equals==` becomes a highlighted phrase drawn in the chapter accent.
+ *
+ * Punctuation written straight after a phrase (`==…==,`) rides in the box of the phrase's last word: every word is a
+ * box of its own, and a line may break between any two boxes, so on its own the comma could start the next line.
  */
 function renderProse(paragraph: string) {
+  const segments: Array<{ text: string; marked: boolean; tail?: string }> = [];
+  for (const part of paragraph.split(/(==.+?==)/g)) {
+    if (!part) continue;
+    if (part.startsWith("==") && part.endsWith("==")) {
+      segments.push({ text: part.slice(2, -2), marked: true });
+      continue;
+    }
+    const previous = segments.at(-1);
+    const tail = previous?.marked ? part.match(/^[^\s\p{L}\p{N}]+/u)?.[0] : undefined;
+    if (previous && tail) previous.tail = tail;
+    if (part.length > (tail?.length ?? 0)) segments.push({ text: tail ? part.slice(tail.length) : part, marked: false });
+  }
+
   let wordIndex = 0;
-  const nodes = paragraph.split(/(==.+?==)/g).filter(Boolean).map((segment, segmentIndex) => {
-    const marked = segment.startsWith("==") && segment.endsWith("==");
+  const nodes = segments.map((segment, segmentIndex) => {
     const start = wordIndex;
-    const words = (marked ? segment.slice(2, -2) : segment).split(/(\s+)/).map((token, tokenIndex) => {
+    const tokens = segment.text.split(/(\s+)/);
+    let lastWord = tokens.length - 1;
+    while (lastWord > 0 && !/\S/.test(tokens[lastWord])) lastWord -= 1;
+    const words = tokens.map((token, tokenIndex) => {
       if (!token) return null;
       if (/^\s+$/.test(token)) return token;
       return (
         <span key={tokenIndex} className="story-word" style={{ "--i": wordIndex++ } as CSSProperties}>
           {token}
+          {tokenIndex === lastWord && segment.tail ? <span className="story-ink-tail">{segment.tail}</span> : null}
         </span>
       );
     });
-    // The marker stroke knows its first word and its length, so it can draw as one continuous line across wraps.
-    return marked
-      ? <mark key={segmentIndex} className="story-ink-mark" style={{ "--mi": start, "--mn": wordIndex - start } as CSSProperties}>{words}</mark>
+    // The marker stroke knows its first word and its length, so it can draw as one continuous line across wraps; it
+    // stops about where a carried tail of punctuation begins (`--ink-tail`, roughly 0.3em a mark).
+    const markStyle = { "--mi": start, "--mn": wordIndex - start, "--ink-tail": segment.tail ? `${segment.tail.length * 0.3}em` : undefined };
+    return segment.marked
+      ? <mark key={segmentIndex} className="story-ink-mark" style={markStyle as CSSProperties}>{words}</mark>
       : <Fragment key={segmentIndex}>{words}</Fragment>;
   });
   return { nodes, words: wordIndex };
@@ -57,7 +78,7 @@ function renderTitle(title: string) {
   return { nodes, words: wordIndex };
 }
 
-export function StoryStep({ chapter, index, isActive, playCue, variant = "desktop" }: StoryStepProps) {
+export const StoryStep = memo(function StoryStep({ chapter, index, isActive, playCue, variant = "desktop" }: StoryStepProps) {
   const [secretOpen, setSecretOpen] = useState(false);
   const zigzag = index % 2 === 0 ? "left" : "right";
 
@@ -89,7 +110,7 @@ export function StoryStep({ chapter, index, isActive, playCue, variant = "deskto
               {String(chapter.chapterIndex).padStart(2, "0")}{chapter.sceneIndex ? <small>.{chapter.sceneIndex}</small> : null}
             </span>
             <p className="story-step-eyebrow" data-step-reveal>
-              PHẦN {chapter.partNumber === 1 ? "I" : "II"} · CHƯƠNG {String(chapter.chapterIndex).padStart(2, "0")}
+              PHẦN {romanNumeral(chapter.partNumber)} · CHƯƠNG {String(chapter.chapterIndex).padStart(2, "0")}
               {chapter.sceneIndex ? ` · CẢNH ${String(chapter.sceneIndex).padStart(2, "0")}` : ""}
             </p>
             {chapter.sceneIndex ? <p className="story-step-day-title" data-step-reveal>{chapter.chapterTitle.toUpperCase()}</p> : null}
@@ -109,6 +130,21 @@ export function StoryStep({ chapter, index, isActive, playCue, variant = "deskto
               );
             })}
           </div>
+
+          {/* Where she left a page for him, his own words, on paper of their own. */}
+          {chapter.reply ? (
+            <figure className="story-step-reply">
+              <figcaption data-step-reveal>{chapter.reply.label}</figcaption>
+              {chapter.reply.paragraphs.map((paragraph) => {
+                const prose = renderProse(paragraph);
+                return (
+                  <p key={paragraph} data-step-reveal="words" style={{ "--words": prose.words } as CSSProperties}>
+                    {prose.nodes}
+                  </p>
+                );
+              })}
+            </figure>
+          ) : null}
 
           <blockquote className="story-step-quote" data-step-reveal>
             <Sparkles aria-hidden="true" size={16} />
@@ -159,4 +195,4 @@ export function StoryStep({ chapter, index, isActive, playCue, variant = "deskto
       </div>
     </article>
   );
-}
+});

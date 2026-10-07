@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef } from "react";
+import { Fragment, memo, useEffect, useRef } from "react";
 import { onScrollVelocity, wakeScrollVelocity } from "../../../shared/motion/scrollVelocity";
 import { nextRibbonOffset } from "../utils/scrollInertia";
 
@@ -41,7 +41,7 @@ function Band({ words, side }: { words: readonly string[]; side: "front" | "back
  * last scrolled, the band behind running the other way. The ribbon takes no room of its own: it straddles the edge
  * between the sections, over their padding. It only moves while on screen, and stands still for reduced motion.
  */
-export function ScrollRibbon({ front, back, tone, placement, reducedMotion }: ScrollRibbonProps) {
+export const ScrollRibbon = memo(function ScrollRibbon({ front, back, tone, placement, reducedMotion }: ScrollRibbonProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -101,4 +101,4 @@ export function ScrollRibbon({ front, back, tone, placement, reducedMotion }: Sc
       <Band words={front} side="front" />
     </div>
   );
-}
+});

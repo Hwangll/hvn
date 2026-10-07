@@ -1,17 +1,21 @@
 import { useId } from "react";
-import { corolla, discPath, leafPath, limbPath, placer, puffPath, seedDots, seeded, type Point, type Puff } from "../utils/realmShapes";
+import { corolla, discPath, leafPath, limbPath, placer, puffPath, seedDots, seeded, smoothPath, type Place, type Point, type Puff } from "../utils/realmShapes";
 
 /**
- * Flowers in the four corners of each realm, framing the room: a flowering bough with wisteria hanging from it at the top
- * corners (cherry blossom at dusk, moon-white blossom at night), and a bed of flowers on the clouds at the bottom ones
- * (sunflowers, cosmos and baby's breath at dusk; hydrangeas, lavender and baby's breath at night). The right-hand pieces
- * are the left ones turned round and grown from another seed.
+ * Flowers in the four corners of each realm, framing the room: a flowering bough with wisteria hanging from it at the
+ * top corners (cherry blossom at dusk, moon-white blossom at night), and a bed of flowers on the clouds at the bottom
+ * ones (sunflowers, cosmos and baby's breath at dusk; hydrangeas, lavender and baby's breath at night). The autumn
+ * realm has red lilies in all four: arching stems with nodding Turk's-cap lilies hanging from them like lanterns at the
+ * top, and a bed of open lilies and buds at the bottom. The right-hand pieces are the left ones turned round and grown
+ * from another seed.
  *
  * Each piece is one SVG of a dozen or so paths, every petal of a colour in the same path, drawn once; the whole piece
  * sways on its corner as one layer (memory-fairyland.css) and leans with the pointer, nearest of all (`data-depth`).
  */
 
-type RealmName = "dusk" | "night";
+type RealmName = "dusk" | "night" | "ember";
+/** The realms framed by a flowering bough above and a bed of their part's flowers below. */
+type BoughRealm = Exclude<RealmName, "ember">;
 type Side = "left" | "right";
 
 interface Layer {
@@ -103,7 +107,7 @@ function raceme(random: () => number, x: number, y: number, length: number, lean
   return florets;
 }
 
-function boughArt(realm: RealmName, seed: number): Artwork {
+function boughArt(realm: BoughRealm, seed: number): Artwork {
   const random = seeded(seed);
   const tone = boughTones[realm];
   const limbs = [{ spine: BOUGH, from: 26, to: 4 }, ...TWIGS];
@@ -215,7 +219,7 @@ const HYDRANGEAS = [
   { x: 62, y: 320, rx: 62, ry: 50, stem: [{ x: 56, y: GROUND }, { x: 60, y: 400 }, { x: 62, y: 364 }] },
 ];
 
-const LEAVES: Record<RealmName, Array<[number, number, number, number, number]>> = {
+const LEAVES: Record<BoughRealm, Array<[number, number, number, number, number]>> = {
   dusk: [[154, 336, -2.55, 78, 42], [160, 300, -0.55, 68, 36], [282, 368, -0.45, 60, 30], [56, 378, -2.65, 54, 28], [232, 404, -0.95, 72, 34], [110, 412, -2.2, 66, 30]],
   night: [[150, 336, -2.45, 84, 46], [196, 348, -0.6, 78, 42], [302, 384, -0.5, 66, 34], [70, 384, -2.7, 62, 32], [250, 410, -1, 70, 34]],
 };
@@ -225,7 +229,7 @@ const bedTones = {
   night: { glow: "#a9c4ff", grass: ["#3d6a66", "#14282c"], stem: "#1f3c3c", leaf: "#1d3c4b", rib: "#3f6f7c", breath: "#eaf2ff", breathStem: "#3c5c5c" },
 };
 
-function bedArt(realm: RealmName, seed: number): Artwork {
+function bedArt(realm: BoughRealm, seed: number): Artwork {
   const random = seeded(seed);
   const tone = bedTones[realm];
   let leaves = "";
@@ -358,17 +362,265 @@ function bedArt(realm: RealmName, seed: number): Artwork {
   };
 }
 
+/* ---------- Red lilies for the autumn realm ---------- */
+
+const lilyTones = {
+  glow: "#ffa070",
+  stem: "#3a4a1e",
+  leaf: "#3f5a24",
+  rib: "#7c9a3c",
+  sepal: "#c4162e",
+  petal: "#e0263f",
+  edge: "#8e0a22",
+  streak: "#ff8a78",
+  throat: "#ffb26a",
+  freckle: "#4a0410",
+  filament: "#f3c77e",
+  anther: "#8a3412",
+  bud: "#b8203a",
+  budFoot: "#56762c",
+  grass: ["#5e5226", "#1e100c"],
+  breath: "#fff0e0",
+  breathStem: "#6a6a3a",
+};
+
+/**
+ * One tepal of a nodding lily from (x, y), swept out along `angle` (0 straight down, positive toward +x) and rolled
+ * back up at its tip, the way a Turk's-cap lily's tepals curl: a smooth outline round a bending spine.
+ */
+function recurvedTepal(x: number, y: number, angle: number, length: number, width: number, curl: number): string {
+  const turn = angle >= 0 ? 1 : -1;
+  const steps = 8;
+  const spine: Point[] = [{ x, y }];
+  let heading = angle;
+  for (let step = 1; step <= steps; step += 1) {
+    heading = angle + turn * curl * Math.pow(step / steps, 1.6);
+    const last = spine[step - 1];
+    spine.push({ x: last.x + Math.sin(heading) * (length / steps), y: last.y + Math.cos(heading) * (length / steps) });
+  }
+  const left: Point[] = [];
+  const right: Point[] = [];
+  spine.forEach((point, index) => {
+    const before = spine[Math.max(0, index - 1)];
+    const after = spine[Math.min(steps, index + 1)];
+    const span = Math.hypot(after.x - before.x, after.y - before.y) || 1;
+    const half = width * 0.5 * Math.sin(Math.PI * Math.pow(index / steps, 0.7));
+    left.push({ x: point.x - ((after.y - before.y) / span) * half, y: point.y + ((after.x - before.x) / span) * half });
+    right.push({ x: point.x + ((after.y - before.y) / span) * half, y: point.y - ((after.x - before.x) / span) * half });
+  });
+  return smoothPath([...left, ...right.reverse().slice(1, -1)], true);
+}
+
+interface LilyPaths {
+  back: string;
+  front: string;
+  streaks: string;
+  freckles: string;
+  filaments: string;
+  anthers: string;
+}
+
+const emptyLily = (): LilyPaths => ({ back: "", front: "", streaks: "", freckles: "", filaments: "", anthers: "" });
+
+/** A Turk's-cap lily hanging from (x, y): six tepals rolled back over its shoulders and the stamens dangling below. */
+function nodding(paths: LilyPaths, random: () => number, x: number, y: number, size: number, tilt: number): void {
+  const angles = [-2.05, -1.25, -0.42, 0.42, 1.25, 2.05];
+  angles.forEach((angle, index) => {
+    const outer = index === 0 || index === 5;
+    const length = size * (outer ? 0.9 : index === 2 || index === 3 ? 0.78 : 1) * (0.92 + random() * 0.16);
+    const tepal = recurvedTepal(x, y, angle * 0.8 + tilt + (random() - 0.5) * 0.15, length, size * 0.34, (outer ? 1.4 : 2.1) + random() * 0.4);
+    // The two pointing straight down hang nearest, over the others.
+    if (index === 2 || index === 3) paths.front += tepal;
+    else paths.back += tepal;
+    paths.streaks += recurvedTepal(x, y, angle * 0.8 + tilt, length * 0.7, size * 0.05, 1.6);
+    for (let freckle = 0; freckle < 3; freckle += 1) {
+      const reach = size * (0.14 + random() * 0.22);
+      const along = angle * 0.8 + tilt + (random() - 0.5) * 0.3;
+      paths.freckles += discPath(placer(x + Math.sin(along) * reach, y + Math.cos(along) * reach, along, 0.6), 0.9 + random() * 0.8);
+    }
+  });
+  for (let stamen = 0; stamen < 6; stamen += 1) {
+    const spread = (stamen / 5 - 0.5) * 0.7 + tilt * 0.5 + (random() - 0.5) * 0.08;
+    const reach = size * (0.95 + random() * 0.2);
+    const end = { x: x + Math.sin(spread) * reach, y: y + Math.cos(spread) * reach };
+    paths.filaments += `M${x.toFixed(1)} ${y.toFixed(1)}Q${(x + Math.sin(spread) * reach * 0.4).toFixed(1)} ${(y + reach * 0.6).toFixed(1)} ${end.x.toFixed(1)} ${end.y.toFixed(1)}`;
+    paths.anthers += discPath(placer(end.x, end.y + 1.5, Math.PI / 2 + (random() - 0.5) * 0.6, 0.45), size * 0.075);
+  }
+}
+
+/** An open lily seen from in front and a little below: three sepals, three broader petals, stamens fanning out. */
+function upright(paths: LilyPaths, random: () => number, place: Place, size: number): void {
+  const start = random() * Math.PI;
+  paths.back += corolla(place, 3, size, size * 0.42, "pointed", start);
+  paths.front += corolla(place, 3, size * 0.94, size * 0.56, "pointed", start + Math.PI / 3);
+  paths.streaks += corolla(place, 6, size * 0.72, size * 0.07, "pointed", start);
+  paths.streaks += corolla(place, 6, size * 0.32, size * 0.28, "round", start);
+  for (let freckle = 0; freckle < 16; freckle += 1) {
+    const angle = start + Math.floor(random() * 6) * (Math.PI / 3) + (random() - 0.5) * 0.4;
+    const reach = size * (0.16 + random() * 0.3);
+    paths.freckles += discPath((along, across) => place(Math.cos(angle) * reach + along, Math.sin(angle) * reach + across), 0.8 + random() * 0.9);
+  }
+  for (let stamen = 0; stamen < 6; stamen += 1) {
+    const angle = start + (stamen / 6) * Math.PI * 2 + Math.PI / 6;
+    const reach = size * (0.55 + random() * 0.12);
+    const [ex, ey] = place(Math.cos(angle) * reach, Math.sin(angle) * reach);
+    const [cx, cy] = place(0, 0);
+    paths.filaments += `M${cx.toFixed(1)} ${cy.toFixed(1)}L${ex.toFixed(1)} ${ey.toFixed(1)}`;
+    paths.anthers += discPath(placer(ex, ey, angle + Math.PI / 2, 0.5), size * 0.07);
+  }
+}
+
+/** A closed bud, a slender club from (x, y) along `angle` (0 straight up): green at its foot, red toward the tip. */
+function bud(x: number, y: number, angle: number, length: number): { body: string; foot: string } {
+  const place = placer(x, y, angle - Math.PI / 2);
+  return {
+    body: petalPathAlong(place, length, length * 0.24),
+    foot: petalPathAlong(place, length * 0.42, length * 0.2),
+  };
+}
+
+/** A pointed club along the +along axis of `place`, widest two thirds of the way up. */
+function petalPathAlong(place: Place, length: number, width: number): string {
+  const p = (along: number, across: number) => place(along, across).map((value) => value.toFixed(1)).join(" ");
+  const w = width / 2;
+  return `M${p(0, 0)}C${p(length * 0.15, w * 0.9)} ${p(length * 0.7, w * 1.25)} ${p(length, 0)}C${p(length * 0.7, -w * 1.25)} ${p(length * 0.15, -w * 0.9)} ${p(0, 0)}Z`;
+}
+
+/** Lily stems arching in from the corner, nodding lilies and buds hanging from them, narrow leaves all along. */
+function lilyBoughArt(seed: number): Artwork {
+  const random = seeded(seed);
+  const tone = lilyTones;
+  const stems: Point[][] = [
+    [{ x: -24, y: 16 }, { x: 60, y: 30 }, { x: 140, y: 54 }, { x: 214, y: 86 }, { x: 278, y: 118 }, { x: 330, y: 146 }, { x: 368, y: 172 }],
+    [{ x: 120, y: -24 }, { x: 186, y: 14 }, { x: 258, y: 40 }, { x: 336, y: 58 }, { x: 414, y: 68 }, { x: 486, y: 70 }, { x: 540, y: 66 }],
+  ];
+  const wood = stems.map((spine, index) => limbPath(spine, index ? 6 : 8, 2)).join("");
+  const hangs: Array<{ from: Point; drop: number; size: number; tilt: number }> = [
+    { from: { x: 96, y: 40 }, drop: 46, size: 50, tilt: 0.1 },
+    { from: { x: 244, y: 99 }, drop: 40, size: 44, tilt: -0.12 },
+    { from: { x: 368, y: 172 }, drop: 24, size: 36, tilt: 0.2 },
+    { from: { x: 300, y: 49 }, drop: 50, size: 40, tilt: 0.08 },
+    { from: { x: 470, y: 70 }, drop: 34, size: 32, tilt: -0.15 },
+  ];
+  const lily = emptyLily();
+  let pedicels = "";
+  for (const hang of hangs) {
+    const flower = { x: hang.from.x + hang.drop * 0.25, y: hang.from.y + hang.drop };
+    pedicels += limbPath([hang.from, { x: hang.from.x + hang.drop * 0.3, y: hang.from.y + hang.drop * 0.35 }, flower], 3, 2);
+    nodding(lily, random, flower.x, flower.y, hang.size, hang.tilt);
+  }
+  let buds = "";
+  let feet = "";
+  for (const [x, y, length] of [[180, 72, 34], [420, 66, 30], [540, 66, 26]]) {
+    const hanging = bud(x, y, Math.PI + (random() - 0.5) * 0.5, length);
+    buds += hanging.body;
+    feet += hanging.foot;
+  }
+  let leaves = "";
+  let ribs = "";
+  stems.forEach((spine) => {
+    for (let index = 1; index < spine.length; index += 1) {
+      for (const side of [-1, 1]) {
+        const at = spine[index - 1];
+        const next = spine[index];
+        const heading = Math.atan2(next.y - at.y, next.x - at.x);
+        const leaf = leafPath(at.x + (next.x - at.x) * 0.5, at.y + (next.y - at.y) * 0.5, heading + side * (0.7 + random() * 0.35), 30 + random() * 16, 6 + random() * 2);
+        leaves += leaf.blade;
+        ribs += leaf.rib;
+      }
+    }
+  });
+  return {
+    gradients: [],
+    layers: [
+      { d: puffPath(hangs.map((hang) => ({ x: hang.from.x, y: hang.from.y + hang.drop, r: hang.size * 1.3 }))), fill: tone.glow, opacity: 0.26, blur: 16 },
+      { d: wood + pedicels, fill: tone.stem },
+      { d: leaves, fill: tone.leaf },
+      { d: ribs, stroke: tone.rib, strokeWidth: 0.8, opacity: 0.6 },
+      { d: buds, fill: tone.bud },
+      { d: feet, fill: tone.budFoot },
+      { d: lily.back, fill: tone.sepal, stroke: tone.edge, strokeWidth: 0.6 },
+      { d: lily.filaments, stroke: tone.filament, strokeWidth: 1, opacity: 0.85 },
+      { d: lily.anthers, fill: tone.anther },
+      { d: lily.front, fill: tone.petal, stroke: tone.edge, strokeWidth: 0.6 },
+      { d: lily.streaks, fill: tone.streak, opacity: 0.4 },
+      { d: lily.freckles, fill: tone.freckle, opacity: 0.85 },
+    ],
+  };
+}
+
+const UPRIGHT_LILIES = [
+  { x: 170, y: 196, size: 70, turn: 0.3, squash: 0.78, stem: [{ x: 150, y: GROUND }, { x: 156, y: 360 }, { x: 164, y: 290 }, { x: 170, y: 214 }], thick: 9 },
+  { x: 318, y: 268, size: 52, turn: 0.75, squash: 0.62, stem: [{ x: 278, y: GROUND }, { x: 290, y: 372 }, { x: 306, y: 318 }, { x: 316, y: 282 }], thick: 7 },
+  { x: 66, y: 296, size: 46, turn: -0.3, squash: 0.7, stem: [{ x: 52, y: GROUND }, { x: 56, y: 380 }, { x: 64, y: 310 }], thick: 7 },
+];
+
+/** A bed of red lilies on the clouds: three open blooms on leafy stems, buds standing between them, baby's breath. */
+function lilyBedArt(seed: number): Artwork {
+  const random = seeded(seed);
+  const tone = lilyTones;
+  const lily = emptyLily();
+  for (const flower of UPRIGHT_LILIES) upright(lily, random, placer(flower.x, flower.y, flower.turn, flower.squash), flower.size);
+  let stems = UPRIGHT_LILIES.map((flower) => limbPath(flower.stem, flower.thick, flower.thick * 0.55)).join("");
+  let buds = "";
+  let feet = "";
+  for (const [x, y, lean, length] of [[244, 214, 0.18, 46], [404, 262, -0.12, 40], [118, 250, -0.22, 38], [470, 300, 0.1, 34]]) {
+    stems += limbPath([{ x: x - lean * 40, y: GROUND }, { x: x - lean * 18, y: (y + GROUND) / 2 }, { x, y }], 5, 3);
+    const upward = bud(x, y, lean, length);
+    buds += upward.body;
+    feet += upward.foot;
+  }
+  let leaves = "";
+  let ribs = "";
+  for (const flower of UPRIGHT_LILIES) {
+    for (let index = 0; index < flower.stem.length - 1; index += 1) {
+      const at = flower.stem[index];
+      const next = flower.stem[index + 1];
+      for (const side of [-1, 1]) {
+        const heading = Math.atan2(next.y - at.y, next.x - at.x);
+        const leaf = leafPath(at.x + (next.x - at.x) * 0.6, at.y + (next.y - at.y) * 0.6, heading + side * (0.55 + random() * 0.3), 44 + random() * 18, 9 + random() * 3);
+        leaves += leaf.blade;
+        ribs += leaf.rib;
+      }
+    }
+  }
+  const breath = babysBreath(random, { x: 470, y: GROUND }, { x: [400, 585], y: [230, 330] });
+  return {
+    gradients: [{ key: "grass", from: 230, to: GROUND, stops: [[0, tone.grass[0]], [1, tone.grass[1]]] }],
+    layers: [
+      { d: puffPath([{ x: 190, y: 240, r: 150 }, { x: 340, y: 300, r: 100 }]), fill: tone.glow, opacity: 0.3, blur: 30 },
+      { d: grass(random), fill: "@grass" },
+      { d: stems, fill: tone.stem },
+      { d: leaves, fill: tone.leaf },
+      { d: ribs, stroke: tone.rib, strokeWidth: 1, opacity: 0.6 },
+      { d: breath.stems, stroke: tone.breathStem, strokeWidth: 1.1 },
+      { d: puffPath(breath.florets), fill: tone.breath, opacity: 0.9 },
+      { d: buds, fill: tone.bud },
+      { d: feet, fill: tone.budFoot },
+      { d: lily.back, fill: tone.sepal, stroke: tone.edge, strokeWidth: 0.6 },
+      { d: lily.front, fill: tone.petal, stroke: tone.edge, strokeWidth: 0.6 },
+      { d: lily.streaks, fill: tone.streak, opacity: 0.4 },
+      { d: lily.freckles, fill: tone.freckle, opacity: 0.85 },
+      { d: lily.filaments, stroke: tone.filament, strokeWidth: 1.2, opacity: 0.9 },
+      { d: lily.anthers, fill: tone.anther },
+    ],
+  };
+}
+
 /* ---------- Pieces ---------- */
 
 const artworks = new Map<string, Artwork>();
+
+const realmSeeds: Record<RealmName, number> = { dusk: 0, night: 17, ember: 34 };
 
 /** Each piece is worked out the first time it is drawn, then kept. */
 function artwork(kind: "bough" | "bed", realm: RealmName, side: Side): Artwork {
   const key = `${kind}-${realm}-${side}`;
   let art = artworks.get(key);
   if (!art) {
-    const seed = (kind === "bough" ? 101 : 211) + (realm === "dusk" ? 0 : 17) + (side === "left" ? 0 : 5);
-    art = kind === "bough" ? boughArt(realm, seed) : bedArt(realm, seed);
+    const seed = (kind === "bough" ? 101 : 211) + realmSeeds[realm] + (side === "left" ? 0 : 5);
+    if (realm === "ember") art = kind === "bough" ? lilyBoughArt(seed) : lilyBedArt(seed);
+    else art = kind === "bough" ? boughArt(realm, seed) : bedArt(realm, seed);
     artworks.set(key, art);
   }
   return art;

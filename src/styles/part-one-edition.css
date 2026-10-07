@@ -297,7 +297,7 @@ html:has(.app-part-one), body:has(.app-part-one) { background: #fff4f6; }
   color: var(--rose-ink); font-weight: 500; padding: 0 0.1em; margin: 0 -0.1em; border-radius: 0.12em;
   box-decoration-break: slice; -webkit-box-decoration-break: slice;
   background-image: linear-gradient(color-mix(in oklch, var(--ink-accent, #ff9fb8) 40%, transparent), color-mix(in oklch, var(--ink-accent, #ff9fb8) 40%, transparent));
-  background-repeat: no-repeat; background-size: calc(var(--m) * 100%) 0.52em; background-position: 0 88%;
+  background-repeat: no-repeat; background-size: calc(var(--m) * (100% - var(--ink-tail, 0em))) 0.52em; background-position: 0 88%;
 }
 .story-part-1 .story-ink-mark .story-word { padding: 0; margin: 0; border-radius: 0; background: none; }
 
@@ -343,6 +343,10 @@ html:has(.app-part-one), body:has(.app-part-one) { background: #fff4f6; }
   .story-page-part-one .mobile-chapter-meta { color: var(--rose-faint); }
   .story-page-part-one .mobile-scene-canvas { border: 1px solid var(--rose-border); background: linear-gradient(160deg, #fffafcd9, #fff1f5b3); box-shadow: 0 24px 60px -20px #6b1f3a40, inset 0 1px 0 #ffffffcc; }
   .story-page-part-one .part-one-ending { padding-inline: 1.5rem; }
+  /* Touch readers get a paragraph-level fade with every word held in place, as in Part II: a transform on each word made
+     every one of them a piece the browser sorted through again on every frame of the scroll. The ink still dries. */
+  .story-part-1 .story-word { opacity: 1; transform: none; }
+  .story-part-1 .story-step-body p[data-step-reveal="words"] { opacity: calc(0.72 + var(--reveal, 1) * 0.28) !important; }
 }
 
 /* ---------- 11. Reduced motion ---------- */

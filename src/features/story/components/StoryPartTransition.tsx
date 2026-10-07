@@ -1,7 +1,7 @@
 import { ArrowDown } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { StoryPart } from "../data/story";
-import { createStoryScrollItems, partTransitionCopy } from "../data/story";
+import { createStoryScrollItems, partTransitionCopy, romanNumeral, type PartTransitionCopy } from "../data/story";
 import { Cloud } from "./StoryArt";
 
 interface StoryPartTransitionProps {
@@ -13,8 +13,11 @@ interface StoryPartTransitionProps {
 export function StoryPartTransition({ onInView, part }: StoryPartTransitionProps) {
   const transitionRef = useRef<HTMLElement | null>(null);
   const [revealed, setRevealed] = useState(false);
-  const words = useMemo(() => partTransitionCopy.title.split(" "), []);
-  const accentCount = useMemo(() => partTransitionCopy.accent.split(" ").length, []);
+  const copy: PartTransitionCopy = part.id === "before-meeting"
+    ? { lead: [], eyebrow: part.eyebrow, title: part.title, accent: "" }
+    : partTransitionCopy[part.id];
+  const words = useMemo(() => copy.title.split(" "), [copy.title]);
+  const accentCount = useMemo(() => (copy.accent ? copy.accent.split(" ").length : 0), [copy.accent]);
   const stops = useMemo(() => createStoryScrollItems([part]).map((item) => ({ id: item.id, label: item.shortTitle })), [part]);
 
   useEffect(() => {
@@ -51,7 +54,7 @@ export function StoryPartTransition({ onInView, part }: StoryPartTransitionProps
         <i className="aurora aurora-three" />
         <i className="part-transition-horizon" />
       </div>
-      <span className="part-transition-numeral" aria-hidden="true">{part.number === 2 ? "II" : "I"}</span>
+      <span className="part-transition-numeral" aria-hidden="true">{romanNumeral(part.number)}</span>
       {/* Night clouds drift between the great numeral and the title; fireflies wander in front of both. */}
       <span className="story-weaver transition-weaver-cloud is-one" aria-hidden="true"><Cloud variant={0} /></span>
       <span className="story-weaver transition-weaver-cloud is-two" aria-hidden="true"><Cloud variant={2} /></span>
@@ -63,12 +66,12 @@ export function StoryPartTransition({ onInView, part }: StoryPartTransitionProps
         <circle className="descent-knot" cx="60" cy="230" r="3.5" />
       </svg>
       <div className="part-transition-copy">
-        {partTransitionCopy.lead.map((paragraph, index) => (
+        {copy.lead.map((paragraph, index) => (
           <p key={paragraph} style={{ "--i": index } as CSSProperties}>{paragraph}</p>
         ))}
       </div>
       <div className="part-transition-title">
-        <span className="part-transition-eyebrow"><i /> {partTransitionCopy.eyebrow} <i /></span>
+        <span className="part-transition-eyebrow"><i /> {copy.eyebrow} <i /></span>
         <h2 id={`${part.id}-transition-title`}>
           {words.map((word, index) => (
             // The space lives between the clipped word boxes, so the accessible name keeps its word breaks.

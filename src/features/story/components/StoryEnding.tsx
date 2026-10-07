@@ -1,5 +1,5 @@
-import { RotateCcw } from "lucide-react";
-import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react";
+import { ArrowRight, RotateCcw } from "lucide-react";
+import { Fragment, memo, useEffect, useRef, useState, type CSSProperties } from "react";
 import { endingCopy, partThreeCopy } from "../data/story";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
 import { splitParagraphs } from "../../../shared/utils/format";
@@ -27,7 +27,7 @@ interface StoryEndingProps {
   separatePartPages?: boolean;
 }
 
-export function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separatePartPages = false }: StoryEndingProps) {
+export const StoryEnding = memo(function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separatePartPages = false }: StoryEndingProps) {
   const replay = (targetId: "part-before-meeting" | "our-dates") => {
     playCue?.("replay");
     document.getElementById(targetId)?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
@@ -38,8 +38,10 @@ export function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separateP
     onReturnToIntro();
   };
 
-  // Part III is a sealed envelope, so the heading tells the reader which state they are looking at.
+  // Part III came as a sealed envelope, so the heading tells the reader which state they are looking at; once it is open
+  // the envelope leads on to Part III's own page.
   const partThreeOpen = useHasPassed(partThreeCopy.opensAt);
+  const nextPart = partThreeOpen ? partThreeCopy.link : undefined;
   const title = partThreeOpen ? partThreeCopy.openTitle : partThreeCopy.sealedTitle;
   // A trailing ellipsis keeps its three dots as separate glyphs so they can breathe one after another.
   const trailingDots = title.match(/(\.{3}|…)$/)?.[0];
@@ -99,19 +101,25 @@ export function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separateP
           ))}
           {trailingDots ? <span className="ending-ellipsis" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span> : null}
         </h2>
-        <SealedEnvelope />
+        <SealedEnvelope copy={partThreeCopy} />
         {splitParagraphs(endingCopy.body).map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
         <JourneyMap />
         <div className="ending-actions">
+          {nextPart ? (
+            <a className="replay-button next-part-link story-page-link has-shimmer" href={nextPart.href} data-magnetic onClick={() => playCue?.("select")}>
+              <span>{nextPart.label}</span>
+              <ArrowRight aria-hidden="true" size={18} />
+            </a>
+          ) : null}
           {separatePartPages ? (
-            <a className="replay-button story-page-link has-shimmer" href="/" data-magnetic onClick={() => playCue?.("replay")}>
+            <a className={`replay-button story-page-link ${nextPart ? "is-quiet" : "has-shimmer"}`} href="/" data-magnetic onClick={() => playCue?.("replay")}>
               <RotateCcw aria-hidden="true" size={18} />
               <span>{endingCopy.replayAllCta}</span>
             </a>
           ) : (
-            <button className="replay-button has-shimmer" type="button" data-magnetic onClick={() => replay("part-before-meeting")}>
+            <button className={`replay-button ${nextPart ? "is-quiet" : "has-shimmer"}`} type="button" data-magnetic onClick={() => replay("part-before-meeting")}>
               <RotateCcw aria-hidden="true" size={18} />
               <span>{endingCopy.replayAllCta}</span>
             </button>
@@ -127,4 +135,4 @@ export function StoryEnding({ onReturnToIntro, playCue, reducedMotion, separateP
       <PolaroidPhoto src={endingCopy.image} alt="Hai người đứng cạnh nhau trước ô kính thủy cung, tấm ảnh đôi khép lại câu chuyện" caption={endingCopy.footnote} tilt="right" />
     </section>
   );
-}
+});

@@ -6,7 +6,9 @@
    costs one compositor animation. A piece's --at is where on the page (in %) it sits as it crosses the middle of the
    screen. Where scroll timelines are missing, useDepthParallaxFallback moves the planes from script with the same
    numbers and marks the page [data-scroll-fallback]. Pieces that move by themselves are idle zones and rest off screen;
-   readers who prefer reduced motion get every layer standing still. */
+   readers who prefer reduced motion get every layer standing still, and so do phones: there each sliding plane was a
+   page-long layer redrawn all the way down while it went by, and in a narrow screen's slim margins the depth hardly
+   reads, so the planes ride the page with the story and every piece sits where its --at puts it. */
 
 /* ---------- Planes ---------- */
 main.story-experience > :is(.depth-field, .depth-front) { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
@@ -26,7 +28,7 @@ main.story-experience > .depth-front { z-index: 3; }
    higher (or lower): (1 - k) of the way to its spot, plus k of half a screen. */
 [data-scroll-fallback] .depth-plane .depth-item { top: calc((1 - var(--k)) * var(--at) * 1% + var(--k) * 50vh); }
 @supports (animation-timeline: scroll()) {
-  @media (prefers-reduced-motion: no-preference) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
     .depth-plane { animation: depth-plane linear both; animation-timeline: scroll(root); }
     .depth-plane .depth-item { top: calc((1 - var(--k)) * var(--at) * 1% + var(--k) * 50vh); }
   }
@@ -58,6 +60,10 @@ main.story-experience > .dream-veil { position: fixed; inset: 0; z-index: 4; ove
 }
 @media (prefers-reduced-motion: reduce) {
   .dream-veil :is(.dream-dust, .dream-leak, .flock) { display: none; }
+}
+/* A phone keeps the haze and a few motes: on a narrow screen the drifting orb and the light leak swept across the words. */
+@media (max-width: 900px) {
+  .dream-veil :is(.dream-orb, .dream-leak) { display: none; }
 }
 
 /* ---------- Keyframes ---------- */

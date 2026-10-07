@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
-import { createStoryScrollItems, scrollRibbonCopy, storyParts, type StoryScrollItem } from "../data/story";
+import { createStoryScrollItems, scrollRibbonCopy, storyParts, type StoryPartId, type StoryScrollItem } from "../data/story";
 import type { SoundCue } from "../../../shared/hooks/useSoundToggle";
-import type { StoryPage } from "../../../app/storyPage";
+import { pageScopes, type StoryPage } from "../../../app/storyPage";
 import { StoryScrollytelling } from "./StoryScrollytelling";
 import { StoryConnectionPath } from "./StoryConnectionPath";
 import { StoryEnding } from "./StoryEnding";
@@ -11,6 +11,9 @@ import { PartTwoAtmosphere } from "./PartTwoAtmosphere";
 import { PartOneAtmosphere } from "./PartOneAtmosphere";
 import { PartOneDepth } from "./PartOneDepth";
 import { PartTwoDepth } from "./PartTwoDepth";
+import { PartThreeAtmosphere } from "./PartThreeAtmosphere";
+import { PartThreeDepth } from "./PartThreeDepth";
+import { StoryPartThreeEnding } from "./StoryPartThreeEnding";
 import { DreamVeil } from "./DreamVeil";
 import { ScrollRibbon } from "./ScrollRibbon";
 import { ScrollWind } from "./ScrollWind";
@@ -24,6 +27,15 @@ import { StoryPartOneEnding } from "./StoryPartOneEnding";
 // The box's copy and controls render with the page; its three.js scene loads itself once the box is near.
 import { KeepsakePlayground } from "../../memories/components/KeepsakePlayground";
 
+const pagePartIds: Record<StoryPage, StoryPartId> = {
+  "part-one": "before-meeting",
+  "part-two": "together-offline",
+  "part-three": "too-fast",
+};
+
+/** The air of each page: petals by day, glints by night, embers in Part III's red room. */
+const pageVariants = { "part-one": "day", "part-two": "night", "part-three": "ember" } as const;
+
 interface StoryExperienceProps {
   onReturnToIntro: () => void;
   page: StoryPage;
@@ -36,17 +48,19 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
   const mobile = useMediaQuery("(max-width: 900px)");
   const revealScope = useMemoryReveals(reducedMotion, mobile);
   useIdleZones(revealScope);
-  useDepthParallaxFallback(revealScope, !reducedMotion);
+  // On a phone the layered backgrounds hold still (depth-field.css), so there is nothing for the fallback to move either.
+  useDepthParallaxFallback(revealScope, !reducedMotion && !mobile);
   // Touch scrolling carries its own momentum; the layers' lag is for the wheel and trackpad, and phones keep the frames.
   useDepthInertia(revealScope, !reducedMotion && !mobile);
   useScrollChoreography(revealScope, page, mobile, reducedMotion);
-  const pageParts = useMemo(
-    () => storyParts.filter((part) => part.id === (page === "part-two" ? "together-offline" : "before-meeting")),
-    [page],
-  );
+  const pageParts = useMemo(() => storyParts.filter((part) => part.id === pagePartIds[page]), [page]);
   const pageItems = useMemo(() => createStoryScrollItems(pageParts), [pageParts]);
+  const moods = useMemo(() => pageParts[0]?.chapters.map((chapter) => chapter.mood) ?? [], [pageParts]);
   /** The page's chapters by name, for the ribbon that runs past once they have all been read. */
   const chapterNames = useMemo(() => pageItems.map((item) => item.shortTitle.toLocaleLowerCase("vi")), [pageItems]);
+  // Reaching a new chapter re-renders this page. Its scenery (the depth, the skies, the ribbons, the hero and the endings)
+  // is memoized and has nothing that changes with it, so only the chapters and the keepsake box render again: on a phone,
+  // rebuilding everything at every new chapter was a hitch in the middle of the scroll.
   const [visitedStoryIds, setVisitedStoryIds] = useState<ReadonlySet<string>>(
     () => new Set(pageItems[0] ? [pageItems[0].id] : []),
   );
@@ -70,13 +84,15 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
   );
 
   return (
-    <main className={`story-experience story-page-${page}`} id="top" ref={revealScope}>
-      {page === "part-two"
-        ? <PartTwoAtmosphere reducedMotion={reducedMotion} />
-        : <PartOneAtmosphere moods={pageParts[0]?.chapters.map((chapter) => chapter.mood) ?? []} reducedMotion={reducedMotion} />}
-      {page === "part-one" ? <PartOneDepth /> : <PartTwoDepth />}
-      {/* Part I's page-length thread; Part II carries its own thread motif on the title page and the ending. */}
-      {page === "part-one" ? <StoryConnectionPath reducedMotion={reducedMotion} /> : null}
+    <main className={`story-experience ${pageScopes[page].main}`} id="top" ref={revealScope}>
+      {page === "part-one" ? <PartOneAtmosphere moods={moods} reducedMotion={reducedMotion} /> : null}
+      {page === "part-two" ? <PartTwoAtmosphere reducedMotion={reducedMotion} /> : null}
+      {page === "part-three" ? <PartThreeAtmosphere reducedMotion={reducedMotion} /> : null}
+      {page === "part-one" ? <PartOneDepth /> : page === "part-two" ? <PartTwoDepth /> : <PartThreeDepth />}
+      {/* Part I's page-length thread, in the margins beside the chapters. A phone has no margins: there it would cross the
+          words, and redrawing it as it unwinds would cost every frame of the scroll. Parts II and III carry their own
+          thread motif on the title page and the ending. */}
+      {page === "part-one" && !mobile ? <StoryConnectionPath reducedMotion={reducedMotion} /> : null}
       {page === "part-one" ? (
         <>
           <StoryIntro reducedMotion={reducedMotion} />
@@ -91,7 +107,7 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
         onActiveItemChange={handleActiveItemChange}
         playCue={playCue}
         reducedMotion={reducedMotion}
-        startWithTransition={page === "part-two"}
+        startWithTransition={page !== "part-one"}
         soundEnabled={soundEnabled}
         visitedStoryIds={visitedStoryIds}
       />
@@ -102,17 +118,22 @@ export function StoryExperience({ onReturnToIntro, page, playCue, reducedMotion,
           <ScrollRibbon tone="night" placement="closing" {...scrollRibbonCopy.partTwoClosing} reducedMotion={reducedMotion} />
         </>
       ) : null}
+      {page === "part-three" ? (
+        <>
+          <ScrollRibbon tone="night" placement="stops" front={chapterNames} back={scrollRibbonCopy.partThreeStops.back} reducedMotion={reducedMotion} />
+          <StoryPartThreeEnding onReturnToIntro={onReturnToIntro} playCue={playCue} />
+        </>
+      ) : null}
       {page === "part-one" ? (
         <>
           <ScrollRibbon tone="rose" placement="recap" front={chapterNames} back={scrollRibbonCopy.partOneRecap.back} reducedMotion={reducedMotion} />
           <StoryPartOneEnding />
         </>
-      ) : (
-        <StoryEnding onReturnToIntro={onReturnToIntro} playCue={playCue} reducedMotion={reducedMotion} separatePartPages />
-      )}
-      <DreamVeil variant={page === "part-two" ? "night" : "day"} />
-      {/* Petals by day, glints by night, blowing past the reader while the page scrolls. */}
-      {reducedMotion ? null : <ScrollWind variant={page === "part-two" ? "night" : "day"} mobile={mobile} />}
+      ) : null}
+      {page === "part-two" ? <StoryEnding onReturnToIntro={onReturnToIntro} playCue={playCue} reducedMotion={reducedMotion} separatePartPages /> : null}
+      <DreamVeil variant={pageVariants[page]} />
+      {/* Petals by day, glints by night, embers in the red room, blowing past the reader while the page scrolls. */}
+      {reducedMotion ? null : <ScrollWind variant={pageVariants[page]} mobile={mobile} />}
     </main>
   );
 }

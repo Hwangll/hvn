@@ -50,7 +50,7 @@ export interface BladeColors {
  * The midline of a part that bends back along its length, integrated in small steps so it keeps its length however far
  * it curls. Returns, for a share of the length (0..1), the height and depth of the midline and the angle of the bend.
  */
-function bentMidline(length: number, curl: number, curlPower: number): (share: number) => [number, number, number] {
+export function bentMidline(length: number, curl: number, curlPower: number): (share: number) => [number, number, number] {
   const steps = 48;
   const centre = new Float32Array((steps + 1) * 3);
   const ds = length / steps;

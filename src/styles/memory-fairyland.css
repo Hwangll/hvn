@@ -1,17 +1,19 @@
 /* The memory room as a fairyland above the clouds (FairyRealm.tsx, FairyDust.tsx). It relights memory-opening.css:
-   Phần I stands in a dusk realm with the sun going down behind the sunflowers, Phần II in a moonlit one. Everything
-   that moves on its own here is a transform or opacity animation on a layer drawn once; the pointer lean (`translate`)
-   is written by FairyDust. */
+   Phần I stands in a dusk realm with the sun going down behind the sunflowers, Phần II in a moonlit one, Phần III in a
+   crimson autumn turning to night under a red-gold harvest moon. Everything that moves on its own here is a transform or
+   opacity animation on a layer drawn once; the pointer lean (`translate`) is written by FairyDust. */
 
 /* ---------- Realms ---------- */
 .memory-atmosphere { animation: realm-dawn 1.6s ease-out backwards; }
 .memory-sky.realm { --horizon: 71%; overflow: hidden; transition: opacity 1.5s var(--room-ease), visibility 0s linear 1.5s; }
-/* The realm not in hand is hidden once it has faded, so the compositor neither draws its layers nor keeps them, and the
-   night is not even painted until Phần II is first chosen. */
+/* The realms not in hand are hidden once they have faded, so the compositor neither draws their layers nor keeps them,
+   and the night and the autumn are not even painted until their parts are first chosen. */
+.memory-intro:not(.is-part-one-selected) .memory-sky-one.realm,
 .memory-intro:not(.is-part-two-selected) .memory-sky-two.realm,
-.memory-intro.is-part-two-selected .memory-sky-one.realm { visibility: hidden; }
-.memory-intro:not(.is-part-two-selected) .memory-sky-one.realm,
-.memory-intro.is-part-two-selected .memory-sky-two.realm { transition: opacity 1.5s var(--room-ease), visibility 0s; }
+.memory-intro:not(.is-part-three-selected) .memory-sky-three.realm { visibility: hidden; }
+.memory-intro.is-part-one-selected .memory-sky-one.realm,
+.memory-intro.is-part-two-selected .memory-sky-two.realm,
+.memory-intro.is-part-three-selected .memory-sky-three.realm { transition: opacity 1.5s var(--room-ease), visibility 0s; }
 .memory-sky-one.realm {
   background:
     radial-gradient(ellipse 62% 40% at var(--realm-x, 50%) var(--realm-y, 50%), #ffc28e70, transparent 72%),
@@ -22,12 +24,21 @@
     radial-gradient(ellipse 54% 38% at var(--realm-x, 50%) var(--realm-y, 44%), #95bcff45, transparent 72%),
     linear-gradient(180deg, #040814 0%, #091630 26%, #11305a 48%, #245083 62%, #5683b4 75%, #9dbfe2 90%);
 }
+/* Night coming down over a crimson autumn: wine overhead, embers along the clouds. */
+.memory-sky-three.realm {
+  background:
+    radial-gradient(ellipse 60% 42% at var(--realm-x, 50%) var(--realm-y, 48%), #ffa86a5e, transparent 72%),
+    linear-gradient(180deg, #0c040a 0%, #1c0714 20%, #360a1c 37%, #5e1026 52%, #921e30 63%, #c8403a 74%, #f08a4e 86%, #ffc27a 96%);
+}
 .memory-sky.realm .star-layer { mask-image: linear-gradient(#000 0 34%, transparent 62%); }
 .memory-sky-one.realm .star-layer-far { opacity: 0.4; }
 .memory-sky-one.realm .memory-aurora-a { top: -22%; left: -12%; width: 60vw; opacity: 0.55; background: radial-gradient(ellipse, #8a3f92, transparent 70%); }
 .memory-sky-one.realm .memory-aurora-b { top: -16%; right: -14%; bottom: auto; width: 54vw; opacity: 0.42; background: radial-gradient(ellipse, #c8507c, transparent 70%); }
 .memory-sky-two.realm .memory-aurora-a { top: -22%; left: -12%; opacity: 0.6; background: radial-gradient(ellipse, #2b62b8, transparent 70%); }
 .memory-sky-two.realm .memory-aurora-b { top: -14%; right: -12%; bottom: auto; width: 52vw; opacity: 0.5; background: radial-gradient(ellipse, #3a8fb0, transparent 70%); }
+.memory-sky-three.realm .star-layer-far { opacity: 0.55; }
+.memory-sky-three.realm .memory-aurora-a { top: -22%; left: -12%; width: 60vw; opacity: 0.55; background: radial-gradient(ellipse, #8a1834, transparent 70%); }
+.memory-sky-three.realm .memory-aurora-b { top: -16%; right: -14%; bottom: auto; width: 54vw; opacity: 0.45; background: radial-gradient(ellipse, #b0402c, transparent 70%); }
 /* Drifting glows are soft by their gradients alone: a blur on a moving layer is run again by the compositor every frame. */
 .memory-sky.realm .aurora { filter: none; }
 /* Shooting stars belong to the night. */
@@ -42,6 +53,11 @@
   background:
     radial-gradient(ellipse 62% 70% at 50% 46%, transparent 52%, #02060f8c 100%),
     linear-gradient(180deg, transparent 72%, #02060f70 100%);
+}
+.memory-intro.is-part-three-selected .memory-vignette {
+  background:
+    radial-gradient(ellipse 62% 70% at 50% 46%, transparent 52%, #0c03088c 100%),
+    linear-gradient(180deg, transparent 72%, #0c030870 100%);
 }
 
 /* Stars that catch the light and turn, four points each. */
@@ -59,6 +75,7 @@
   animation: realm-twinkle var(--life) ease-in-out var(--delay) infinite;
 }
 .is-night .realm-star { --tint: #d9ebff; }
+.is-ember .realm-star { --tint: #ffdcc8; }
 
 /* The sun or the moon, sitting behind the bouquet (useRealmAnchor measures where that is). */
 .realm-celestial-anchor { position: absolute; left: var(--realm-x, 50%); top: var(--realm-y, 48%); width: 0; height: 0; }
@@ -97,9 +114,28 @@
 }
 .is-moon .realm-ring { --d: calc(var(--disc) * 2.35); border: 1.5px solid #d8e9ff38; box-shadow: 0 0 22px 3px #b8d4ff26, inset 0 0 22px 3px #b8d4ff1f; }
 .is-moon .realm-rays { --d: calc(var(--disc) * 5.2); opacity: 0.34; animation: realm-turn 210s linear infinite reverse; }
-/* Changing parts: the sun goes down into the clouds while the moon comes up out of them, and back. */
-.memory-intro.is-part-two-selected .realm-celestial.is-sun { transform: translateY(30vh) scale(0.9); }
-.memory-intro.is-part-two-selected .realm-celestial.is-moon { transform: none; }
+/* The harvest moon of the mid-autumn festival: low, large and red-gold, the lilies standing against it. */
+.realm-celestial.is-harvest { --disc: clamp(150px, 22vmin, 250px); top: -4vh; transform: translateY(30vh) scale(0.9); }
+.is-harvest .realm-disc {
+  --d: var(--disc);
+  background:
+    radial-gradient(ellipse 24% 17% at 61% 37%, #d0784a5c, transparent 72%),
+    radial-gradient(ellipse 19% 14% at 37% 60%, #c8703f52, transparent 72%),
+    radial-gradient(ellipse 13% 11% at 67% 68%, #c06a3a47, transparent 72%),
+    radial-gradient(ellipse 10% 8% at 32% 34%, #c8784a3d, transparent 72%),
+    radial-gradient(circle at 42% 38%, #fff4dc 0%, #ffdca0 36%, #ffb46c 70%, #f27a4a 100%);
+  box-shadow: 0 0 40px 10px #ffa0627a, 0 0 140px 48px #e0483a47;
+}
+.is-harvest .realm-halo {
+  --d: calc(var(--disc) * 3.8);
+  background: radial-gradient(circle, #ffc0868c 0%, #ff8a5a40 26%, #e0403a18 48%, transparent 70%);
+  animation: realm-breathe 10s ease-in-out infinite alternate;
+}
+.is-harvest .realm-rays { --d: calc(var(--disc) * 5.4); opacity: 0.38; animation: realm-turn 180s linear infinite; }
+/* Changing parts: the sun or moon left behind goes down into the clouds while the next comes up out of them. */
+.memory-intro:not(.is-part-one-selected) .realm-celestial.is-sun { transform: translateY(30vh) scale(0.9); }
+.memory-intro.is-part-two-selected .realm-celestial.is-moon,
+.memory-intro.is-part-three-selected .realm-celestial.is-harvest { transform: none; }
 
 /* Karst towers with pines on their crowns, standing in the cloud sea. */
 .realm-peaks { position: absolute; bottom: calc(100% - var(--horizon) - 9%); width: min(50vw, 900px); aspect-ratio: 640 / 420; will-change: transform; }
@@ -119,6 +155,7 @@
 }
 .is-dusk .realm-mist { --mist: #ffc6b84d; }
 .is-night .realm-mist { --mist: #b9d4ff38; }
+.is-ember .realm-mist { --mist: #ff9a8a45; }
 .realm-clouds { position: absolute; left: -6vw; right: -6vw; will-change: transform; }
 .realm-clouds.is-back { top: calc(var(--horizon) - 5%); height: 30%; }
 .realm-clouds.is-front { top: calc(var(--horizon) + 9%); height: 34%; }
@@ -126,7 +163,7 @@
 .realm-clouds.is-back .realm-clouds-drift { animation: realm-drift 64s ease-in-out infinite alternate; }
 .realm-clouds.is-front .realm-clouds-drift { animation: realm-drift 46s ease-in-out -20s infinite alternate-reverse; }
 
-/* Cranes crossing the dusk, sky lanterns rising out of the night clouds. */
+/* Cranes crossing the dusk, sky lanterns rising out of the night clouds and red paper ones out of the autumn's. */
 .realm-cranes { position: absolute; top: 15%; left: 0; width: 12rem; height: 4.5rem; opacity: 0; animation: realm-cranes 52s linear -9s infinite; }
 /* Each crane beats its wings on its own HTML box; scaling the <svg> itself would repaint it every frame. */
 .realm-crane { position: absolute; width: 1.75rem; color: #ffe8d4; opacity: 0.8; animation: bird-beat var(--beat, 1s) ease-in-out infinite alternate; }
@@ -140,6 +177,10 @@
 .realm-lantern .art-lantern-rib { fill: none; stroke: #e8945a; stroke-width: 1.2; opacity: 0.7; }
 .realm-lantern .art-lantern-rim { fill: none; stroke: #c26a36; stroke-width: 2; stroke-linecap: round; }
 .realm-lantern .art-lantern-flame { fill: #fff4c8; }
+.is-ember .realm-lantern::before { background: radial-gradient(circle, #ff8a5a66, #e0403a24 40%, transparent 66%); }
+.is-ember .realm-lantern .art-lantern-paper { fill: #e0263f; }
+.is-ember .realm-lantern .art-lantern-rib { stroke: #ffb46a; opacity: 0.8; }
+.is-ember .realm-lantern .art-lantern-rim { stroke: #f3c77e; }
 
 /* Flowers in the corners (FairyCorners.tsx): boughs hanging from the top ones, beds on the clouds at the bottom. Each
    sways on its own corner as one layer. */
@@ -175,6 +216,7 @@
   transition: background 1s var(--room-ease);
 }
 .memory-intro.is-part-two-selected .memory-artifact::after { background: radial-gradient(ellipse at 50% 46%, #06132ba6 0%, #06132b5c 40%, transparent 70%); }
+.memory-intro.is-part-three-selected .memory-artifact::after { background: radial-gradient(ellipse at 50% 46%, #1e0610a6 0%, #1e06105c 40%, transparent 70%); }
 .memory-intro .memory-artifact-hint { position: relative; z-index: 2; color: var(--room-paper); text-shadow: 0 1px 10px #0a0614cc; }
 
 /* The title glows a little, like everything else up here, and its accent wears a star. */
@@ -196,6 +238,7 @@
   box-shadow: inset 0 1px 0 #ffffff1f, 0 30px 70px -30px #000000b3, 0 0 70px -24px color-mix(in oklch, var(--card-glow) 34%, transparent);
 }
 .memory-intro .memory-part-card-two { background: radial-gradient(ellipse at 100% 0, #8bcbd838, transparent 55%), linear-gradient(160deg, #12304fb8, #0b1f3ac4); }
+.memory-intro .memory-part-card-three { background: radial-gradient(ellipse at 100% 0, #ff5a6e38, transparent 55%), linear-gradient(160deg, #3a0f1eb8, #220812c4); }
 
 /* ---------- Fairy dust (FairyDust.tsx) ---------- */
 .fairy-dust { position: fixed; inset: 0; z-index: 2; width: 100%; height: 100%; pointer-events: none; animation: realm-dawn 1.4s ease-out 0.5s backwards; }
@@ -251,6 +294,7 @@
   .realm-clouds.is-front { top: calc(var(--horizon) + 6%); height: 26%; }
   .realm-celestial.is-sun { --disc: 46vw; }
   .realm-celestial.is-moon { --disc: 36vw; top: -5vh; }
+  .realm-celestial.is-harvest { --disc: 42vw; top: -3vh; }
   .realm-cranes { top: 9%; }
   .realm-crane { width: 1.35rem; }
   .realm-lantern:nth-child(n + 4 of .realm-lantern) { display: none; }
@@ -260,6 +304,7 @@
   /* The part cards scroll up over the clouds here, so the bright tops fade to night lower down. */
   .memory-intro .memory-vignette { background: radial-gradient(ellipse 80% 60% at 50% 42%, transparent 55%, #0806127a 100%), linear-gradient(180deg, transparent 78%, #0a061499 100%); }
   .memory-intro.is-part-two-selected .memory-vignette { background: radial-gradient(ellipse 80% 60% at 50% 42%, transparent 55%, #02060f80 100%), linear-gradient(180deg, transparent 78%, #02060fa3 100%); }
+  .memory-intro.is-part-three-selected .memory-vignette { background: radial-gradient(ellipse 80% 60% at 50% 42%, transparent 55%, #0c030880 100%), linear-gradient(180deg, transparent 78%, #0c0308a3 100%); }
 }
 
 /* Phones keep the realm's motion to what reads at that size: the light, the clouds, the sky lanterns and the dust. With
@@ -271,11 +316,32 @@
   .realm-peaks, .realm-clouds, .realm-corner { will-change: auto; }
   .memory-intro .memory-part-card { backdrop-filter: none; background: radial-gradient(ellipse at 100% 0, color-mix(in oklch, var(--card-glow) 24%, transparent), transparent 55%), linear-gradient(160deg, #2a2238f2, #1a1626f7); }
   .memory-intro .memory-part-card-two { background: radial-gradient(ellipse at 100% 0, #8bcbd838, transparent 55%), linear-gradient(160deg, #12304ff2, #0b1f3af7); }
+  .memory-intro .memory-part-card-three { background: radial-gradient(ellipse at 100% 0, #ff5a6e38, transparent 55%), linear-gradient(160deg, #3a0f1ef2, #220812f7); }
+  .app-shell:is(.experience-intro, .experience-focusing, .experience-transitioning) .sound-toggle { backdrop-filter: none; background: #120e1ccc; }
 }
+
+/* On a phone the room scrolls under its fixed sky. As it does, the boughs hanging from the top corners lift away and the
+   flower beds at the bottom sink into the clouds, rather than lying over the masthead, the cards and the footer; the
+   sun or the moon rises with the bouquet, so it stays right behind it (--room-travel, how far the room scrolls, comes
+   from useRealmAnchor). All of it runs on the room's own scroll timeline. */
+@supports (animation-timeline: scroll()) {
+  @media (max-width: 640px), (pointer: coarse) {
+    .memory-intro { scroll-timeline: --room block; }
+    .realm-corner.is-top { animation: realm-lift linear both; animation-timeline: --room; animation-range: 0 32vh; }
+    .realm-corner.is-bottom { animation: realm-sink linear both; animation-timeline: --room; animation-range: 0 44vh; }
+    .realm-celestial-anchor {
+      animation: realm-rise 2.8s var(--room-ease) 0.1s backwards, realm-follow linear both;
+      animation-timeline: auto, --room;
+    }
+  }
+}
+@keyframes realm-lift { to { translate: 0 -60%; opacity: 0; } }
+@keyframes realm-sink { to { translate: 0 55%; opacity: 0; } }
+@keyframes realm-follow { to { translate: 0 calc(var(--room-travel, 0px) * -1); } }
 
 @media (prefers-reduced-motion: reduce) {
   .memory-atmosphere { animation: none; }
   .realm-cranes, .realm-lantern { display: none; }
-  .realm-celestial.is-moon { transform: none; }
-  .memory-intro.is-part-two-selected .realm-celestial.is-sun { transform: none; }
+  .realm-celestial.is-moon, .realm-celestial.is-harvest { transform: none; }
+  .memory-intro:not(.is-part-one-selected) .realm-celestial.is-sun { transform: none; }
 }

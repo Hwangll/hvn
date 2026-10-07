@@ -11,4 +11,5 @@ export type BouquetSource = { source: "procedural" } | { source: "glb"; url: str
 export const bouquetSources: Record<IntroFlowerVariant, BouquetSource> = {
   sunflower: { source: "procedural" },
   hydrangea: { source: "procedural" },
+  lily: { source: "procedural" },
 };

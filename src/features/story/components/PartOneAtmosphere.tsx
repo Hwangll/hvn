@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { memo, useEffect, useRef, type CSSProperties } from "react";
 import type { StoryMood } from "../data/story";
 import { Bird, Cloud } from "./StoryArt";
 
@@ -40,7 +40,7 @@ interface PartOneAtmosphereProps {
  * turning rays that sinks a little as the story goes on, and three rows of clouds drifting across at three speeds.
  * A soft glow follows the pointer on desktop.
  */
-export function PartOneAtmosphere({ moods, reducedMotion = false }: PartOneAtmosphereProps) {
+export const PartOneAtmosphere = memo(function PartOneAtmosphere({ moods, reducedMotion = false }: PartOneAtmosphereProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -117,4 +117,4 @@ export function PartOneAtmosphere({ moods, reducedMotion = false }: PartOneAtmos
       <div className="offline-pointer-glow" />
     </div>
   );
-}
+});

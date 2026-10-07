@@ -446,7 +446,10 @@ export function usePartTwoScroll(scope: RefObject<HTMLDivElement | null>, mobile
       reveals.forEach((sets) => sets.forEach((set) => set.y(0)));
       // A refresh can jump the position; never read that jump as scroll speed.
       lastTime = 0;
-      revealTops = revealElements.map((elements) => elements.map((element) => element.getBoundingClientRect().top + window.scrollY - trigger.start));
+      // Past the part's end the engine no longer paints, so copy too near the end to reach the reading line before then
+      // (a short last paragraph with nothing after it) counts as a little higher, and is whole by the time the part ends.
+      const latestTop = travel + viewport * 0.92 - viewport * (mobile ? 0.18 : 0.26) * 1.1;
+      revealTops = revealElements.map((elements) => elements.map((element) => Math.min(element.getBoundingClientRect().top + window.scrollY - trigger.start, latestTop)));
       boundaries = starts.slice(1).map((start) => start - viewport * partTwoMotion.entrance);
       paintedAt = [];
       threadShown = threads.map((paths) => paths.length > 0 && getComputedStyle(paths[0]).visibility !== "hidden");

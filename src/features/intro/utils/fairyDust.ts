@@ -1,14 +1,14 @@
 /**
  * Fairy dust over the memory room (FairyDust.tsx): lights that wander and pulse like fireflies, a few that circle the
- * bouquet, petals falling through the realm (sunflower and cherry at dusk, hydrangea florets at night), sparks rising off
- * the plinth, a butterfly or two of light and a trail of glitter behind the pointer. Opening the story draws everything
- * into the bouquet.
+ * bouquet, petals falling through the realm (sunflower and cherry at dusk, hydrangea florets at night, red lily tepals
+ * among the embers of the lantern-lit autumn), sparks rising off the plinth, a butterfly or two of light and a trail of
+ * glitter behind the pointer. Opening the story draws everything into the bouquet.
  *
  * It is all one canvas over the room, painted from a few sprites drawn once; glows add up where they cross, the way light
  * does. There are a few dozen things in the air on a computer and half that on a phone.
  */
 
-export type FairyVariant = "dusk" | "night";
+export type FairyVariant = "dusk" | "night" | "ember";
 
 export interface FairyProfile {
   wisps: number;
@@ -178,6 +178,34 @@ function floret([outer, inner]: [string, string]) {
   };
 }
 
+/** Where the freckles fall on a lily's tepal: x, y and radius, crowding toward its foot. */
+const LILY_FRECKLES: Array<[number, number, number]> = [[-2.6, 18, 0.9], [2.2, 15, 1], [-3.4, 11, 0.8], [3.6, 9, 0.9], [-1.8, 6, 0.7], [1.6, 21, 0.7], [4.2, 14, 0.6], [-4.4, 15, 0.6]];
+
+/** A lily's tepal: narrow at the foot, widest below the middle and drawn to a point, a pale furrow down its middle. */
+function lilyPetal([base, body, tip]: [string, string, string]) {
+  return (context: CanvasRenderingContext2D) => {
+    const shape = new Path2D("M0 28C-6 21-9.5 5-7-11C-5-22-2-27 0-30C2-27 5-22 7-11C9.5 5 6 21 0 28Z");
+    const fill = context.createLinearGradient(0, 28, 0, -30);
+    fill.addColorStop(0, base);
+    fill.addColorStop(0.35, body);
+    fill.addColorStop(1, tip);
+    context.fillStyle = fill;
+    context.fill(shape);
+    context.strokeStyle = "rgba(255, 196, 140, 0.4)";
+    context.lineWidth = 1;
+    context.beginPath();
+    context.moveTo(0, 25);
+    context.quadraticCurveTo(-0.8, 0, 0, -24);
+    context.stroke();
+    context.fillStyle = "rgba(60, 0, 12, 0.75)";
+    for (const [x, y, r] of LILY_FRECKLES) {
+      context.beginPath();
+      context.ellipse(x, y, r, r * 1.5, 0, 0, TAU);
+      context.fill();
+    }
+  };
+}
+
 /** One wing of a butterfly of light, its root at the sprite's centre: an upper and a lower lobe. */
 function wing([edge, body, root]: [string, string, string], rgb: string) {
   return (context: CanvasRenderingContext2D) => {
@@ -226,6 +254,19 @@ function spritesFor(variant: FairyVariant): Sprites {
       ],
       wing: paint(wing(["#fff5dc", "#ffc96e", "#ff9a48"], "255, 186, 104")),
       wingGlow: paint(glow("255, 190, 110")),
+    };
+  }
+  if (variant === "ember") {
+    return {
+      glows: ["255, 150, 104", "255, 198, 120", "255, 108, 118", "255, 228, 190"].map((rgb) => paint(glow(rgb))),
+      sparkle: paint(sparkle("255, 206, 150")),
+      petals: [
+        petal(lilyPetal(["#ff8a4a", "#d8162e", "#8e0a22"])),
+        petal(lilyPetal(["#ff9a5a", "#e8283a", "#a50f26"])),
+        petal(lilyPetal(["#f0703a", "#b80f2a", "#6e0718"])),
+      ],
+      wing: paint(wing(["#fff0dc", "#ff9a6a", "#e0263f"], "255, 140, 110")),
+      wingGlow: paint(glow("255, 150, 110")),
     };
   }
   return {
@@ -321,7 +362,7 @@ export function createFairyDust(canvas: HTMLCanvasElement, initial: FairyVariant
   const context = canvas.getContext("2d");
   if (!context) return null;
   const profile = fairyProfile(mobile);
-  const sprites: Record<FairyVariant, Sprites | null> = { dusk: null, night: null };
+  const sprites: Record<FairyVariant, Sprites | null> = { dusk: null, night: null, ember: null };
   const spritesOf = (variant: FairyVariant) => (sprites[variant] ??= spritesFor(variant));
   const motes: Mote[] = [];
   let variant = initial;
@@ -391,7 +432,7 @@ export function createFairyDust(canvas: HTMLCanvasElement, initial: FairyVariant
         x: random(-40, width + 40),
         y: random(-height * 0.3, height),
         vy: random(18, 34) * depth,
-        size: (variant === "dusk" ? random(14, 22) : random(12, 19)) * depth,
+        size: (variant === "night" ? random(12, 19) : random(14, 22)) * depth,
         alpha: depth > 1.15 ? random(0.55, 0.75) : random(0.75, 0.95),
         depth,
         rx: random(14, 42),

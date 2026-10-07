@@ -9,18 +9,35 @@ import { StickyMemoryStage } from "./StickyMemoryStage";
 import { StoryStep } from "./StoryStep";
 
 const partTwoItems = storyScrollItems.filter((item) => item.partId === "together-offline");
+const partThreeItems = storyScrollItems.filter((item) => item.partId === "too-fast");
 
-describe("two-part story expansion", () => {
+describe("story expansion across the parts", () => {
   it("organizes the real-life continuation as three chapters with three scenes in the final chapter", () => {
-    expect(storyParts).toHaveLength(2);
-    expect(storyParts[0].id).toBe("before-meeting");
-    expect(storyParts[1].id).toBe("together-offline");
+    expect(storyParts.map((part) => part.id)).toEqual(["before-meeting", "together-offline", "too-fast"]);
     expect(storyParts[1].chapters).toHaveLength(3);
     expect(storyParts[1].chapters[2].scenes?.map((scene) => scene.id)).toEqual([
       "aquarium",
       "cafe",
       "sunset",
     ]);
+  });
+
+  it("tells Part III in six chapters: the day at Ba Đình, the rough week of the sore leg and the birthday month in stops", () => {
+    const partThree = storyParts[2];
+    expect(partThree.number).toBe(3);
+    expect(partThree.chapters.map((chapter) => chapter.id)).toEqual([
+      "first-homestay",
+      "loving-more",
+      "hoang-mai-afternoon",
+      "ba-dinh-day",
+      "rough-patch",
+      "birthday-month",
+    ]);
+    expect(partThree.chapters[3].scenes?.map((scene) => scene.id)).toEqual(["lang-bac", "chua-mot-cot", "rain-and-dusk"]);
+    expect(partThree.chapters[4].scenes?.map((scene) => scene.year)).toEqual(["15.09.2026", "16.09.2026", "16.09.2026", "19.09.2026", "19.09.2026"]);
+    expect(partThree.chapters[5].scenes?.map((scene) => scene.year)).toEqual(["23.09.2026", "24.09.2026", "26.09.2026", "01.10.2026"]);
+    expect(partThreeItems).toHaveLength(15);
+    expect(partThreeItems.every((item) => item.partNumber === 3)).toBe(true);
   });
 
   it("creates unique stable scroll IDs across parts, chapters, and scenes", () => {
@@ -38,6 +55,21 @@ describe("two-part story expansion", () => {
       "aquarium",
       "cafe",
       "sunset",
+      "first-homestay",
+      "loving-more",
+      "hoang-mai-afternoon",
+      "lang-bac",
+      "chua-mot-cot",
+      "rain-and-dusk",
+      "rainy-karaoke",
+      "clinic-day",
+      "van-quan-rain",
+      "tiny-cafe",
+      "cuc-cu-night",
+      "birthday-plans",
+      "mid-autumn",
+      "phung-khoang",
+      "hoang-birthday",
     ]);
   });
 
@@ -60,6 +92,28 @@ describe("two-part story expansion", () => {
     expect(screen.getByTestId("scene-aquarium")).toBeInTheDocument();
     expect(screen.getByTestId("scene-sunset")).toBeInTheDocument();
     expect(screen.queryByText("18:07")).not.toBeInTheDocument();
+  });
+
+  it("shows every Part III visual in reading order with reduced motion on desktop", () => {
+    const { container } = render(<StoryScrollytelling parts={[storyParts[2]]} reducedMotion soundEnabled={false} />);
+    expect(container.querySelector(".sticky-memory-stage")).not.toBeInTheDocument();
+    expect(container.querySelectorAll(".mobile-chapter-block")).toHaveLength(15);
+    for (const scene of ["homestay", "apps", "office", "museum", "pagoda", "rain", "karaoke", "clinic", "lakeside", "notebook", "acoustic", "planner", "lantern", "bento", "birthday"]) {
+      expect(screen.getByTestId(`scene-${scene}`)).toBeInTheDocument();
+    }
+    expect(screen.getByRole("heading", { name: "Chiếc home cho buổi tối đầu tiên" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Chùa Một Cột" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Sinh nhật anh iu" })).toBeInTheDocument();
+    // The page she left for him: her "Tadaaaa", then his own words, on the stage and in the reading column.
+    expect(container.querySelector(".p3-his-letter b")).toHaveTextContent("Tadaaaa");
+    expect(container.querySelector(".p3-his-letter p")).toHaveTextContent("ngày tuyệt vời nhất trên đời");
+    expect(container.querySelector(".story-step-reply figcaption")).toHaveTextContent("Phần riêng anh viết");
+    expect(container.querySelector(".story-step-reply")).toHaveTextContent("Lần đầu tiên a có ai đó ở bên cùng tổ chức sinh nhật.");
+    // The message to her father sits in a phone; the print that takes over from the main photo stays a photo.
+    expect(container.querySelector(".part-three-scene-notebook .p3-chat-phone img")).toHaveAttribute("src", "/images/story/part-three/permission-chat.jpg");
+    expect(container.querySelector(".part-three-scene-notebook .p3-photo-second img")).toHaveAttribute("src", "/images/story/part-three/tiny-lego.jpg");
+    expect(container.querySelector(".part-three-scene-bento .p3-photo img")).toHaveAttribute("src", "/images/story/part-three/saku-dinner.jpg");
+    expect(container.querySelectorAll(".p3-lilies .lily-sprite")).toHaveLength(3);
   });
 
   it("keeps gallery and secret-note controls usable in a Part II step", async () => {
@@ -113,13 +167,15 @@ describe("two-part story expansion", () => {
     expect(screen.queryByText(/Thêm ảnh café/)).not.toBeInTheDocument();
   });
 
-  it("provides compact navigation for both story parts", () => {
+  it("provides compact navigation for every story part", () => {
     render(<StoryScrollytelling parts={storyParts} reducedMotion soundEnabled={false} />);
 
     const navigation = screen.getByRole("navigation", { name: "Điều hướng các phần câu chuyện" });
     const links = within(navigation).getAllByRole("link");
+    expect(links).toHaveLength(3);
     expect(links[0]).toHaveAttribute("href", "#part-before-meeting");
     expect(links[1]).toHaveAttribute("href", "/part-2/");
+    expect(links[2]).toHaveAttribute("href", "/part-3/");
   });
 
   it("uses an instant chapter jump so skipped steps are not entered", async () => {
@@ -153,5 +209,40 @@ describe("two-part story expansion", () => {
       "Hoàng hôn",
     ]);
     expect(within(journey).getByRole("link", { name: "Hoàng hôn" })).toHaveAttribute("aria-current", "step");
+  });
+
+  it("turns the Part III sticky panel into a fifteen-stop strip, naming the stop in hand and its chapter", () => {
+    render(
+      <StickyMemoryStage
+        chapter={partThreeItems[1]}
+        chapters={partThreeItems}
+        activeIndex={1}
+        reducedMotion
+      />,
+    );
+
+    const journey = screen.getByRole("navigation", { name: "Hành trình ngoài đời" });
+    expect(within(journey).getAllByRole("link").map((stop) => stop.textContent)).toEqual([
+      "Homestay",
+      "Bi & Bơ",
+      "Hoàng Mai",
+      "Lăng Bác",
+      "Chùa",
+      "Chiều tà",
+      "Đi hát",
+      "Phòng khám",
+      "Văn Quán",
+      "Tiny cf",
+      "Cúc cu",
+      "Lên lịch",
+      "Trung thu",
+      "Phùng Khoang",
+      "Sinh nhật",
+    ]);
+    expect(journey).toHaveClass("is-compact");
+    expect(within(journey).getByRole("link", { name: "Bi & Bơ" })).toHaveAttribute("aria-current", "step");
+    expect(journey.querySelector(".memory-route-heading")).toHaveTextContent("Chương 02 · Bi & Bơ02 / 15");
+    expect(journey.querySelectorAll("li.opens-chapter")).toHaveLength(5);
+    expect(screen.getByText("Thước phim mùa thu")).toBeInTheDocument();
   });
 });

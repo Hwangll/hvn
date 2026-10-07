@@ -8,6 +8,12 @@ import { MemoryJourneyRoute } from "./MemoryJourneyRoute";
 import { ChapterScene } from "./scenes/ChapterScene";
 import { usePointerParallax } from "../../../shared/hooks/usePointerParallax";
 
+/** What the stage is called in the parts written as a diary of days together; Part I's names each chapter's year. */
+const diaryLabels: Partial<Record<StoryScrollItem["partId"], string>> = {
+  "together-offline": "Nhật ký ngoài đời",
+  "too-fast": "Thước phim mùa thu",
+};
+
 interface StickyMemoryStageProps {
   chapter: StoryScrollItem;
   chapters: StoryScrollItem[];
@@ -20,12 +26,14 @@ export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotio
   const stageRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const previousIndexRef = useRef(activeIndex);
-  // Part II layers lean toward the cursor (CSS reads --mx/--my); the scroll engine keeps owning `transform`.
-  usePointerParallax(stageRef, chapter.partId === "together-offline" && !reducedMotion);
+  // Parts II and III hold every scene in one stack that the scroll engine crossfades (usePartTwoScroll).
+  const stacked = chapter.partNumber > 1;
+  // Their layers lean toward the cursor (CSS reads --mx/--my); the scroll engine keeps owning `transform`.
+  usePointerParallax(stageRef, stacked && !reducedMotion);
 
   useLayoutEffect(() => {
     const content = contentRef.current;
-    if (chapter.partId === "together-offline" || !content || reducedMotion || previousIndexRef.current === activeIndex) {
+    if (stacked || !content || reducedMotion || previousIndexRef.current === activeIndex) {
       previousIndexRef.current = activeIndex;
       return undefined;
     }
@@ -42,7 +50,7 @@ export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotio
     // Revert also restores visibility when reduced motion is enabled mid-transition.
     return () => context.revert();
 
-  }, [activeIndex, chapter.partId, reducedMotion]);
+  }, [activeIndex, stacked, reducedMotion]);
 
   return (
     <aside
@@ -51,14 +59,18 @@ export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotio
       style={{ "--chapter-accent": chapter.accent } as CSSProperties}
       aria-label={`Kỷ niệm: ${chapter.title}`}
     >
-      <div className={`memory-canvas memory-canvas-${chapter.partId}`} data-testid="memory-canvas">
+      {/* Part III's canvas also takes Part II's class: it goes on in the same diary (see pageScopes). */}
+      <div
+        className={`memory-canvas memory-canvas-${chapter.partId} ${chapter.partId === "too-fast" ? "memory-canvas-together-offline" : ""}`.trim()}
+        data-testid="memory-canvas"
+      >
         <div className="memory-canvas-texture" aria-hidden="true" />
         <div className="memory-canvas-tape" aria-hidden="true" />
         <header className="memory-canvas-meta">
-          <span>{chapter.partId === "together-offline" ? "Nhật ký ngoài đời" : chapter.year}</span>
+          <span>{diaryLabels[chapter.partId] ?? chapter.year}</span>
           <strong><i aria-hidden="true" />{chapter.shortTitle}</strong>
         </header>
-        {chapter.partId === "together-offline" ? (
+        {stacked ? (
           <div className="memory-canvas-scene offline-scene-stack">
             {chapters.map((item, index) => (
               <div className="offline-scene-panel" data-offline-panel={item.id} key={item.id} style={{ opacity: index === 0 ? 1 : 0 }}>
@@ -72,7 +84,7 @@ export function StickyMemoryStage({ chapter, chapters, activeIndex, reducedMotio
             <ChapterScene chapter={chapter} isActive reducedMotion={reducedMotion} />
           </div>
         )}
-        {chapter.partId === "together-offline" ? (
+        {stacked ? (
           <MemoryJourneyRoute activeId={chapter.id} items={chapters} visitedStoryIds={visitedStoryIds} />
         ) : (
           <div className="diary-stage-navigation">

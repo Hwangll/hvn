@@ -8,6 +8,17 @@ describe("studio lights", () => {
     expect(lightPresets.golden.look.power).toBeGreaterThan(lightPresets.moonlight.look.power);
   });
 
+  it("lights the lilies red-gold, graded between golden hour and moonlight", () => {
+    const { ember, golden, moonlight } = lightPresets;
+    for (const light of [ember.key, ember.rim]) {
+      const color = new THREE.Color(light.color);
+      expect(color.r).toBeGreaterThanOrEqual(color.g);
+      expect(color.g).toBeGreaterThanOrEqual(color.b);
+    }
+    expect(ember.look.saturation).toBeLessThan(golden.look.saturation);
+    expect(ember.look.saturation).toBeGreaterThan(moonlight.look.saturation);
+  });
+
   it("eases the light and its grade into a new preset instead of snapping", () => {
     const lights = new StudioLights(new THREE.Scene(), "golden");
     lights.setPreset("moonlight");

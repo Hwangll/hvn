@@ -28,13 +28,14 @@ describe("Hát Và Nờ app", () => {
     expect(screen.getByRole("button", { name: "Khám phá câu chuyện" })).toBeInTheDocument();
   });
 
-  it("lets readers swipe or tap from the opening room directly to Part II", () => {
+  it("lets readers swipe or tap from the opening room directly to Part II or Part III", () => {
     render(<App />);
 
     expect(screen.getByRole("region", { name: "Chọn phần câu chuyện" })).toBeInTheDocument();
     expect(screen.getByText("Vuốt để đổi phần")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Xem phần tiếp theo" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Đi thẳng tới Phần II/ })).toHaveAttribute("href", "/part-2/");
+    expect(screen.getByRole("link", { name: "Đi thẳng tới Phần II" })).toHaveAttribute("href", "/part-2/");
+    expect(screen.getByRole("link", { name: "Đi thẳng tới Phần III" })).toHaveAttribute("href", "/part-3/");
   });
 
   it("renders every Part I chapter on the main page", () => {

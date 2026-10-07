@@ -1,5 +1,5 @@
 import type { MouseEvent } from "react";
-import type { StoryPart, StoryPartId } from "../data/story";
+import { partHrefs, romanNumeral, type StoryPart, type StoryPartId } from "../data/story";
 import { jumpToStoryTarget } from "../utils/jumpToStoryTarget";
 import { useTuckOnScrollDown } from "../../../shared/hooks/useTuckOnScrollDown";
 
@@ -32,7 +32,7 @@ export function StoryPartNavigation({ activePartId, currentPagePartId, onNavigat
           key={part.id}
           onClick={(event) => navigate(event, part.id)}
         >
-          <span>Phần {part.number === 1 ? "I" : "II"}</span>
+          <span>Phần {romanNumeral(part.number)}</span>
           <small>{part.title}</small>
         </a>
       ))}
@@ -45,5 +45,5 @@ function getPartHref(partId: StoryPartId, currentPagePartId: StoryPartId) {
     return `#part-${partId}`;
   }
 
-  return partId === "together-offline" ? "/part-2/" : "/";
+  return partHrefs[partId];
 }

@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowRight, ChevronDown } from "lucide-react";
-import { Fragment, type CSSProperties } from "react";
+import { Fragment, memo, type CSSProperties } from "react";
 import { jumpToStoryTarget } from "../../story/utils/jumpToStoryTarget";
 import { heroPhotos, introCopy } from "../../story/data/story";
 import { BlossomSprig } from "../../../shared/components/visuals/BlossomSprig";
@@ -10,7 +10,7 @@ interface StoryIntroProps {
   reducedMotion: boolean;
 }
 
-export function StoryIntro({ reducedMotion }: StoryIntroProps) {
+export const StoryIntro = memo(function StoryIntro({ reducedMotion }: StoryIntroProps) {
   const words = introCopy.title.split(" ");
 
   return (
@@ -96,4 +96,4 @@ export function StoryIntro({ reducedMotion }: StoryIntroProps) {
       </div>
     </section>
   );
-}
+});

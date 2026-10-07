@@ -544,6 +544,140 @@ export function roundLeafMaps(): SurfaceMaps {
   });
 }
 
+/**
+ * Lily tepal, u across and v from the throat to the tip. Fine veins run its length (the geometry narrows it at both
+ * ends, so they converge in 3D); the nectary furrow runs paler down the middle of its lower half, sunken in the relief;
+ * and dark freckles crowd toward the throat, raised there into papillae that catch the light.
+ */
+export function lilyTepalMaps(): SurfaceMaps {
+  const random = randomStream(91);
+  const veins = Array.from({ length: 30 }, (_, index) => ({
+    u: (index + 0.5) / 30 + random.signed(0.006),
+    weight: index % 3 === 0 ? 1 : 0.4 + random.next() * 0.4,
+    wobble: random.next() * Math.PI * 2,
+  }));
+  // Thick near the throat and either side of the furrow, thinning out toward the margins and up the tepal.
+  const freckles = Array.from({ length: 120 }, () => {
+    const v = 0.05 + Math.pow(random.next(), 1.5) * 0.5;
+    const side = random.chance(0.5) ? -1 : 1;
+    const u = 0.5 + side * (0.045 + Math.pow(random.next(), 1.3) * 0.36 * (1 - v * 0.5));
+    const size = (1.4 + random.next() * 3.2) * (1.1 - v);
+    return { u, v, size, stretch: 1.3 + random.next(), alpha: 0.6 + random.next() * 0.35 };
+  });
+  const strokeVeins = (context: CanvasRenderingContext2D, width: number, height: number, style: (weight: number) => [string, number]) => {
+    for (const vein of veins) {
+      const [stroke, lineWidth] = style(vein.weight);
+      context.strokeStyle = stroke;
+      context.lineWidth = lineWidth;
+      context.beginPath();
+      for (let step = 0; step <= 24; step += 1) {
+        const v = step / 24;
+        const x = (vein.u + Math.sin(v * 6 + vein.wobble) * 0.004) * width;
+        if (step === 0) context.moveTo(x, (1 - v) * height);
+        else context.lineTo(x, (1 - v) * height);
+      }
+      context.stroke();
+    }
+  };
+  const furrow = (context: CanvasRenderingContext2D, width: number, height: number, color: (alpha: number) => string) => {
+    const fade = context.createLinearGradient(0, height, 0, height * 0.45);
+    fade.addColorStop(0, color(1));
+    fade.addColorStop(1, color(0));
+    context.fillStyle = fade;
+    context.fillRect(width * 0.47, height * 0.45, width * 0.06, height * 0.55);
+  };
+  const dots = (context: CanvasRenderingContext2D, width: number, height: number, paint: (freckle: (typeof freckles)[number]) => string, grow = 1) => {
+    for (const freckle of freckles) {
+      context.fillStyle = paint(freckle);
+      context.beginPath();
+      context.ellipse(freckle.u * width, (1 - freckle.v) * height, freckle.size * grow, freckle.size * freckle.stretch * grow, 0, 0, Math.PI * 2);
+      context.fill();
+    }
+  };
+  return paintPair({
+    width: 256,
+    height: 512,
+    strength: 3,
+    albedo: (context, width, height) => {
+      context.fillStyle = grey(0.94);
+      context.fillRect(0, 0, width, height);
+      for (let cell = 0; cell < 1800; cell += 1) {
+        context.fillStyle = random.chance(0.5) ? "rgba(255,255,255,0.05)" : "rgba(90,0,20,0.05)";
+        context.fillRect(random.next() * width, random.next() * height, 1 + random.next() * 1.5, 4 + random.next() * 8);
+      }
+      strokeVeins(context, width, height, (weight) => [`rgba(80, 0, 18, ${0.06 + weight * 0.1})`, 0.8 + weight * 1.1]);
+      furrow(context, width, height, (alpha) => `rgba(255,248,225,${0.55 * alpha})`);
+      dots(context, width, height, (freckle) => `rgba(42,0,10,${freckle.alpha})`);
+    },
+    relief: (context, width, height) => {
+      context.fillStyle = grey(0.6);
+      context.fillRect(0, 0, width, height);
+      strokeVeins(context, width, height, (weight) => [grey(0.6 - weight * 0.25), 1.2 + weight * 1.2]);
+      furrow(context, width, height, (alpha) => grey(0.25, alpha));
+      // Near the throat the freckles stand proud of the tepal; further up they lie flat.
+      dots(context, width, height, (freckle) => grey(0.95, Math.max(0, 1 - freckle.v * 2.4)), 1.25);
+      soften(context, 1);
+    },
+  });
+}
+
+/**
+ * A lily's narrow leaf (or a sprig of ruscus), u across and v from the stem to the tip: a pale midrib and fainter veins
+ * running side by side its whole length (the blade narrows to its tip, so they meet there in 3D), joined by fine
+ * cross-veins, under the gloss of a waxy face.
+ */
+export function lilyLeafMaps(): SurfaceMaps {
+  const random = randomStream(101);
+  const veins = Array.from({ length: 11 }, (_, index) => ({ u: 0.5 + ((index - 5) / 5) * 0.4 + random.signed(0.01), weight: index === 5 ? 1 : 0.35 + random.next() * 0.2 }));
+  const cross = Array.from({ length: 420 }, () => [random.next(), random.next(), 0.01 + random.next() * 0.03] as const);
+  const strokeVeins = (context: CanvasRenderingContext2D, width: number, height: number, style: (weight: number) => [string, number]) => {
+    for (const vein of veins) {
+      const [stroke, lineWidth] = style(vein.weight);
+      context.strokeStyle = stroke;
+      context.lineWidth = lineWidth;
+      context.beginPath();
+      context.moveTo(vein.u * width, height);
+      context.lineTo(vein.u * width, 0);
+      context.stroke();
+    }
+    const [stroke, lineWidth] = style(0);
+    context.strokeStyle = stroke;
+    context.lineWidth = lineWidth * 0.6;
+    context.beginPath();
+    for (const [u, v, length] of cross) {
+      context.moveTo(u * width, (1 - v) * height);
+      context.lineTo((u + length) * width, (1 - v - length * 0.3) * height);
+    }
+    context.stroke();
+  };
+  return paintPair({
+    width: 256,
+    height: 256,
+    strength: 2.6,
+    albedo: (context, width, height) => {
+      context.fillStyle = grey(0.88);
+      context.fillRect(0, 0, width, height);
+      for (let spot = 0; spot < 60; spot += 1) {
+        const x = random.next() * width;
+        const y = random.next() * height;
+        const r = 6 + random.next() * 22;
+        const glow = context.createRadialGradient(x, y, 0, x, y, r);
+        glow.addColorStop(0, random.chance(0.5) ? "rgba(255,255,230,0.07)" : "rgba(30,50,20,0.07)");
+        glow.addColorStop(1, "rgba(0,0,0,0)");
+        context.fillStyle = glow;
+        context.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+      strokeVeins(context, width, height, (weight) => [`rgba(230,250,200,${0.12 + weight * 0.46})`, 0.8 + weight * 2.4]);
+    },
+    relief: (context, width, height) => {
+      context.fillStyle = grey(0.6);
+      context.fillRect(0, 0, width, height);
+      strokeVeins(context, width, height, (weight) => [grey(0.52 - weight * 0.27), 1 + weight * 2.6]);
+      soften(context, 1.2);
+    },
+  });
+}
+
 /** Stems: fine lengthwise ridges and the stiff hairs of a sunflower stalk, tiled along the tube. */
 export function stemMaps(): SurfaceMaps {
   return paintPair({

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export type LightPresetName = "golden" | "moonlight";
+export type LightPresetName = "golden" | "moonlight" | "ember";
 
 interface LightSpec {
   color: number;
@@ -25,7 +25,8 @@ export interface LightPreset {
 /**
  * Golden hour for the sunflowers: a warm key from the left, far enough round to model every petal, and a low amber sun
  * behind, so the petals glow at the rim. Moonlight for the hydrangeas: a cool key from the right and a cold blue rim
- * from behind the left.
+ * from behind the left. Lantern light for the red lilies: a rose-white key high in front, into the open blooms, and a
+ * red-gold lantern behind the right that sets the tepals glowing through.
  */
 export const lightPresets: Record<LightPresetName, LightPreset> = {
   golden: {
@@ -49,6 +50,17 @@ export const lightPresets: Record<LightPresetName, LightPreset> = {
     dust: 0xa8d4ff,
     // Softer: blue petals saturate easily, and moonlight should feel hushed.
     look: { power: 1.15, saturation: 1.1 },
+  },
+  ember: {
+    key: { color: 0xfff0ec, intensity: 2.7, offset: [-2.8, 3.6, 4.2] },
+    rim: { color: 0xff8a5a, intensity: 3.6, offset: [3, 2, -3.4] },
+    fill: { sky: 0x4a1d28, ground: 0x0e0507, intensity: 0.55 },
+    environment: 0.24,
+    exposure: 1.05,
+    bloom: 0.08,
+    dust: 0xffb48c,
+    // Between the two: crimson needs some punch to stay red in the shadows, and too much would flatten it.
+    look: { power: 1.2, saturation: 1.3 },
   },
 };
 

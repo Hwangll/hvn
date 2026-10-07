@@ -24,8 +24,14 @@ describe("scroll wind spawning", () => {
   });
 
   it("blows the same amount whichever way the page moves", () => {
-    const { density } = windProfile("night", true);
+    const { density } = windProfile("night", false);
     expect(windSpawns(0, -2, 16, density)).toEqual(windSpawns(0, 2, 16, density));
+  });
+
+  it("leaves a phone's air still while the page scrolls: there it only carries what is thrown into it", () => {
+    for (const variant of ["day", "night", "ember"] as const) {
+      expect(windSpawns(0, 3, 16, windProfile(variant, true).density)).toEqual([0, 0]);
+    }
   });
 });
 

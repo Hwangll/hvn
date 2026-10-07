@@ -471,7 +471,7 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   box-decoration-break: slice; -webkit-box-decoration-break: slice;
   background-image: linear-gradient(color-mix(in oklch, var(--ink-accent, #b6c7dd) 34%, transparent), color-mix(in oklch, var(--ink-accent, #b6c7dd) 34%, transparent));
   background-repeat: no-repeat;
-  background-size: calc(var(--m) * 100%) 0.52em;
+  background-size: calc(var(--m) * (100% - var(--ink-tail, 0em))) 0.52em;
   background-position: 0 88%;
 }
 .story-part-2 .story-ink-mark .story-word { padding: 0; margin: 0; border-radius: 0; background: none; }
@@ -1170,6 +1170,12 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .story-page-part-two .keepsake-controls button.is-locked small { opacity: 1; color: #a8c6d7d9; font-size: 0.66rem; }
 .story-page-part-two .keepsake-controls button.is-locked svg { color: #8bcbd8; }
 .story-page-part-two .keepsake-controls button small { font-weight: 500; }
+/* In a phone's two columns a locked keepsake keeps its name on one line and the chapter that unlocks it beneath, as in
+   Part I: side by side, the three pieces squeezed the name onto a line per word. */
+@media (max-width: 620px) {
+  .story-page-part-two .keepsake-controls button.is-locked { display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.45rem; justify-content: start; text-align: left; }
+  .story-page-part-two .keepsake-controls button.is-locked small { grid-column: 2; }
+}
 .story-page-part-two .keepsake-flower { opacity: 0.55; }
 .story-page-part-two .keepsake-flower i { background: #a8ddeb; box-shadow: 0.42rem 0.1rem 0 -0.18rem #dcecf7, 0.2rem 0.42rem 0 -0.18rem #dcecf7; }
 .story-page-part-two .keepsake-flower i::after { background: #fff4cc; }
@@ -1384,6 +1390,9 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 .story-page-part-two .intro-return-button { background: transparent; }
 .story-page-part-two .dates-replay-button:hover,
 .story-page-part-two .intro-return-button:hover { background: #1f4a68; border-color: #8bcbd880; box-shadow: 0 18px 42px #02091640; transform: translateY(-2px); }
+/* Once Part III is open the way on is the bright button; starting over steps back to the quiet ones. */
+.story-page-part-two .replay-button.is-quiet { color: #dcecf7; background: #173a54; border: 1px solid #8bcbd84a; }
+.story-page-part-two .replay-button.is-quiet:hover { color: #eef5ff; background: #1f4a68; border-color: #8bcbd880; box-shadow: 0 18px 42px #02091640; }
 .story-page-part-two .story-ending .polaroid { width: min(100%, 19rem); margin: 0; padding: 0.8rem 0.8rem 1.2rem; background: var(--paper-grain), linear-gradient(165deg, #f7f3eb, #ebe5d8); background-blend-mode: soft-light, normal; border-color: transparent; box-shadow: 0 34px 70px -20px #02091699, 0 0 0 1px #00000014, 0 0 90px 12px #8bcbd81a; animation: polaroid-float 8s ease-in-out infinite alternate; }
 .story-page-part-two .story-ending .polaroid img,
 .story-page-part-two .story-ending .photo-fallback { background: transparent; object-fit: cover; }
@@ -1443,6 +1452,8 @@ html:has(.app-part-two) { scroll-behavior: auto; }
 @media (max-width: 900px) {
   .offline-reading-shade { background: #060d1f33; }
   .aurora { filter: none; opacity: 0.4; }
+  /* Every fourth window flickers: each is a shape inside the skyline's SVG, which is redrawn whole for every frame of it. */
+  .together-scene-in-person.is-active .skyline-windows rect:not(:nth-child(4n)) { animation: none; }
   .part-two-atmosphere::after { mix-blend-mode: normal; opacity: 0.045; }
   /* The toggle sits bottom-right, shrinks to its icon and tucks away while reading down, like the part navigation. */
   .app-part-two .sound-toggle { top: auto; right: 0.75rem; bottom: 0.75rem; width: 2.6rem; min-width: 0; min-height: 2.6rem; padding: 0; border-radius: 50%; background: #0c192a99; justify-content: center; transition: transform 0.42s var(--offline-ease), opacity 0.32s var(--offline-ease), background 0.3s var(--offline-ease); }
@@ -1458,7 +1469,9 @@ html:has(.app-part-two) { scroll-behavior: auto; }
   .story-page-part-two .keepsake-flower-one { top: -0.5rem; left: auto; right: 5%; transform: rotate(-15deg) scale(1.05); }
   .story-page-part-two .ending-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
   .story-page-part-two .ending-actions > :is(button, a) { width: 100%; min-height: 3rem; }
-  .story-page-part-two .ending-actions > .replay-button { grid-column: 1 / -1; }
+  .story-page-part-two .ending-actions > .replay-button:not(.is-quiet) { grid-column: 1 / -1; }
+  /* After the one wide button, an even count would leave the last alone on half a row. */
+  .story-page-part-two .ending-actions > :is(button, a):last-child:nth-child(even) { grid-column: 1 / -1; }
   .story-part-2 .together-scene-in-person .night-scooter { left: 3%; bottom: 17%; }
   .story-part-2 .together-scene-in-person .offline-scene-caption { bottom: 4%; max-width: 24ch; }
   .story-part-2 .together-scene .memory-photo.is-portrait figcaption { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 0.78rem; }

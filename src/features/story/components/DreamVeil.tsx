@@ -1,11 +1,12 @@
-import type { CSSProperties } from "react";
+import { memo, type CSSProperties } from "react";
 import { Bird } from "./StoryArt";
 
 /**
  * The topmost layer of both parts, over the story itself: a little light in the air between the reader and the page, so
  * the whole thing reads as if seen through a dream. Motes rise and fade, two or three soft orbs drift, a light leak
  * sweeps across now and then, the corners mist over; by day a small flock sometimes crosses right in front of the story.
- * It never takes the pointer and is faint enough to read through (colours in part-one-depth.css / part-two-depth.css).
+ * It never takes the pointer and is faint enough to read through (colours in part-one-depth.css, part-two-depth.css and
+ * story-part-three.css).
  */
 
 interface Mote {
@@ -39,7 +40,7 @@ const orbs = [
 /** The flock that passes in front of the story: a few big, slightly soft birds, about once every forty seconds. */
 const frontFlock = { y: "30%", life: 40, delay: -6, span: "15rem", bird: "2.6rem", birds: [[0, 40], [34, 10], [64, 52]] } as const;
 
-export function DreamVeil({ variant }: { variant: "day" | "night" }) {
+export const DreamVeil = memo(function DreamVeil({ variant }: { variant: "day" | "night" | "ember" }) {
   return (
     <div className={`dream-veil is-${variant}`} aria-hidden="true">
       <div className="dream-haze" />
@@ -73,4 +74,4 @@ export function DreamVeil({ variant }: { variant: "day" | "night" }) {
       ) : null}
     </div>
   );
-}
+});

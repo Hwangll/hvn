@@ -4,7 +4,7 @@ import { gridGeometry, merged, mesh, randomStream, smoothstep, valueNoise, type 
 import { paperMaps, tagTexture, type PaperKind, type TagPalette } from "./textures";
 
 /**
- * The florist's wrap, shared by both keepsakes: sheets of paper gathered at a tie and opening above it, a tall collar
+ * The florist's wrap, shared by every keepsake: sheets of paper gathered at a tie and opening above it, a tall collar
  * of darker paper behind the flowers, lower sheets in front; a satin bow with two loops and swallowtail ends; and the
  * couple's tag on a thread. Bouquet space, front toward +Z; angles run from the front (0) toward +x.
  */
@@ -35,6 +35,15 @@ export const IVORY_WRAP: WrapPalette = {
   ribbon: { color: 0x233f6c, sheen: 0x9dc4ff },
   tag: { paper: "#f3f6f9", ink: "#22518c", accent: "rgba(34,81,140,0.5)", caption: "PHẦN II" },
   thread: 0x4f6f96,
+};
+
+/** Lantern light: blush champagne paper in front of burgundy, a deep wine satin bow. */
+export const CHAMPAGNE_WRAP: WrapPalette = {
+  outer: { color: 0xf3e6e4, kind: "matte" },
+  inner: { color: 0x6a1a2a, kind: "matte" },
+  ribbon: { color: 0x5c0f22, sheen: 0xff9aa6 },
+  tag: { paper: "#f8ece2", ink: "#7a1a2c", accent: "rgba(122,26,44,0.5)", caption: "PHẦN III" },
+  thread: 0x8a3a44,
 };
 
 const NECK_Y = -0.8;
@@ -106,7 +115,7 @@ function sheetGeometry(spec: SheetSpec): THREE.BufferGeometry {
   }, [width * 2, (tallest - BASE_Y) * 2]);
 }
 
-/** Golden hour and moonlight share the cut of the sheets; only the paper changes. */
+/** Golden hour, moonlight and lantern light share the cut of the sheets; only the paper changes. */
 const COLLAR: SheetSpec[] = [
   { span: [Math.PI - 1.7, Math.PI + 1.7], top: [-0.05, 0.5, 0], layer: 0, pleats: 5, roll: 0.05, seed: 1 },
   { span: [Math.PI - 1.95, Math.PI - 0.3], top: [-0.1, 0.18, 0.32], layer: 1, pleats: 4, roll: 0.05, seed: 2 },

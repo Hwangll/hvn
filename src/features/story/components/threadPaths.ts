@@ -57,4 +57,65 @@ export const threadPaths: Record<StoryThreadState, ThreadSegment[]> = {
     { id: "sunset-left", d: "M76 104 C132 166 160 244 210 318 C210 386 210 458 210 532", tone: "main" },
     { id: "sunset-right", d: "M344 104 C288 166 260 244 210 318 C210 386 210 458 210 532", tone: "second" },
   ],
+  // Part III: the two threads are one by now, and only part for a moment in each scene before running on together.
+  homestay: [
+    { id: "homestay-left", d: "M96 84 C150 150 168 220 210 270 C210 360 210 440 210 530", tone: "main" },
+    { id: "homestay-right", d: "M324 84 C270 150 252 220 210 270 C210 360 210 440 210 530", tone: "second" },
+  ],
+  apps: [
+    { id: "apps-left", d: "M118 80 C100 170 150 236 196 288 C214 330 210 420 210 528", tone: "main" },
+    { id: "apps-right", d: "M302 80 C320 170 270 236 224 288 C206 330 210 420 210 528", tone: "second" },
+  ],
+  office: [
+    { id: "office-left", d: "M90 96 C140 170 150 236 206 300 C212 380 208 450 210 530", tone: "main" },
+    { id: "office-right", d: "M330 96 C280 170 270 236 214 300 C208 380 212 450 210 530", tone: "second" },
+  ],
+  museum: [
+    { id: "museum-left", d: "M108 76 C122 168 168 226 204 284 C220 340 206 430 210 526", tone: "main" },
+    { id: "museum-right", d: "M312 76 C298 168 252 226 216 284 C200 340 214 430 210 526", tone: "second" },
+  ],
+  pagoda: [
+    { id: "pagoda-left", d: "M86 98 C136 160 156 236 210 306 C210 380 210 452 210 528", tone: "main" },
+    { id: "pagoda-right", d: "M334 98 C284 160 264 236 210 306 C210 380 210 452 210 528", tone: "second" },
+  ],
+  rain: [
+    { id: "rain-left", d: "M80 100 C130 168 162 246 210 320 C210 388 210 460 210 532", tone: "main" },
+    { id: "rain-right", d: "M340 100 C290 168 258 246 210 320 C210 388 210 460 210 532", tone: "second" },
+  ],
+  karaoke: [
+    { id: "karaoke-left", d: "M96 86 C150 164 168 232 206 288 C212 372 208 448 210 528", tone: "main" },
+    { id: "karaoke-right", d: "M324 86 C270 164 252 232 214 288 C208 372 212 448 210 528", tone: "second" },
+  ],
+  clinic: [
+    { id: "clinic-left", d: "M88 86 C140 164 158 232 206 296 C212 372 208 448 210 528", tone: "main" },
+    { id: "clinic-right", d: "M332 86 C280 164 262 232 214 296 C208 372 212 448 210 528", tone: "second" },
+  ],
+  lakeside: [
+    { id: "lakeside-left", d: "M104 86 C156 164 174 232 206 280 C212 372 208 448 210 528", tone: "main" },
+    { id: "lakeside-right", d: "M316 86 C264 164 246 232 214 280 C208 372 212 448 210 528", tone: "second" },
+  ],
+  notebook: [
+    { id: "notebook-left", d: "M82 86 C136 164 154 232 206 302 C212 372 208 448 210 528", tone: "main" },
+    { id: "notebook-right", d: "M338 86 C284 164 266 232 214 302 C208 372 212 448 210 528", tone: "second" },
+  ],
+  acoustic: [
+    { id: "acoustic-left", d: "M98 86 C148 164 166 232 206 292 C212 372 208 448 210 528", tone: "main" },
+    { id: "acoustic-right", d: "M322 86 C272 164 254 232 214 292 C208 372 212 448 210 528", tone: "second" },
+  ],
+  planner: [
+    { id: "planner-left", d: "M86 86 C142 164 160 232 206 298 C212 372 208 448 210 528", tone: "main" },
+    { id: "planner-right", d: "M334 86 C278 164 260 232 214 298 C208 372 212 448 210 528", tone: "second" },
+  ],
+  lantern: [
+    { id: "lantern-left", d: "M106 86 C152 164 170 232 206 284 C212 372 208 448 210 528", tone: "main" },
+    { id: "lantern-right", d: "M314 86 C268 164 250 232 214 284 C208 372 212 448 210 528", tone: "second" },
+  ],
+  bento: [
+    { id: "bento-left", d: "M92 86 C144 164 162 232 206 294 C212 372 208 448 210 528", tone: "main" },
+    { id: "bento-right", d: "M328 86 C276 164 258 232 214 294 C208 372 212 448 210 528", tone: "second" },
+  ],
+  birthday: [
+    { id: "birthday-left", d: "M90 86 C150 164 168 232 206 290 C212 372 208 448 210 528", tone: "main" },
+    { id: "birthday-right", d: "M330 86 C270 164 252 232 214 290 C208 372 212 448 210 528", tone: "second" },
+  ],
 };
